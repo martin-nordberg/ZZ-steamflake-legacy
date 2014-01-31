@@ -1,0 +1,20 @@
+{
+  "name": "Tsemplet",
+  "version": "0.0.1",
+  "description": "Template Engine for Typescript. Compiles templates into strongly typed Typescript code.",
+  "keywords": [
+    "Tsemplet",
+    "Typescript",
+    "template",
+    "template engine"
+  ],
+  "homepage": "TBD",
+  "license": "Apache-2.0",
+  "author": "Martin E. Nordberg III",
+  "main": "./app/tsemplet/main.js",
+  "devDependencies": {
+    "grunt": "~0.4.2",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-typescript": "~0.2.7"
+  }
+}

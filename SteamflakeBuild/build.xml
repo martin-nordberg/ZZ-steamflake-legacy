@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Steamflake ANT Build -->
+<project name="Steamflake"
+         default="all">
+    <description>
+        ANT Build for Steamflake
+    </description>
+
+    <echo>Java Version: ${java.version}</echo>
+    <echo>Java Vendor: ${java.vendor}</echo>
+    <echo>Java Home: ${java.home}</echo>
+    <echo>ANT Version: ${ant.version}</echo>
+
+    <!-- Folders -->
+    <property name="core" value="../SteamflakeCore"/>
+    <property name="core.lib" value="${core}/lib"/>
+    <property name="core.scripts" value="${core}/scripts"/>
+    <property name="core.source" value="${core}/source"/>
+    <property name="core.specs" value="${core}/specs"/>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <!-- All -->
+    <target name="all"
+            description="Compile, test, and document all of Steamflake"
+            depends="all-core">
+    </target>
+
+    <!-- All Steamflake Core -->
+    <target name="all-core"
+            description="Compile, test, and document Steamflake Core"
+            depends="test-core">
+    </target>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <!-- Clean -->
+    <target name="clean">
+        <delete dir="${core.scripts}"/>
+    </target>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <!-- Core -->
+
+    <!-- Check whether Steamflake Core code is up to date -->
+    <target name="check-core-uptodate"
+            description="Check whether the core is up to date">
+
+        <uptodate property="core.uptodate" targetfile="${core.scripts}/SteamflakeCore/source/builddate.txt" >
+            <srcfiles dir="${core.source}" includes="**/*.ts"/>
+            <srcfiles dir="${core.source}" includes="Compile.sh"/>
+        </uptodate>
+
+        <echo>Steamflake Core up to date: ${core.uptodate}</echo>
+
+    </target>
+
+    <!-- Compile Steamflake Core -->
+    <target name="compile-core"
+            description="Compile Steamflake Core"
+            depends="check-core-uptodate"
+            unless="core.uptodate">
+
+        <echo>Compiling Steamflake Core code ...</echo>
+        <exec dir="${core.source}" executable="sh" failonerror="true">
+            <arg value="Compile.sh"/>
+        </exec>
+
+    </target>
+
+    <!-- Check whether Steamflake Core specs are up to date -->
+    <target name="check-core-specs-uptodate"
+            description="Check whether the core specs are up to date"
+            if="core.uptodate">
+
+        <uptodate property="core.specs.uptodate" targetfile="${core.scripts}/SteamflakeCore/specs/builddate.txt" >
+            <srcfiles dir="${core.specs}" includes="**/*.ts"/>
+            <srcfiles dir="${core.specs}" includes="Compile.sh"/>
+        </uptodate>
+
+        <echo>Steamflake Core up to date: ${core.specs.uptodate}</echo>
+
+    </target>
+
+    <!-- Compile Steamflake Core specs -->
+    <target name="compile-core-specs"
+            description="Run Steamflake Core specs"
+            depends="compile-core, check-core-specs-uptodate"
+            unless="core.specs.uptodate">
+
+        <echo>Compiling Core specifications ...</echo>
+        <exec dir="${core.specs}" executable="sh" failonerror="true">
+            <arg value="Compile.sh"/>
+        </exec>
+
+    </target>
+
+    <!-- Run Steamflake Core tests -->
+    <target name="test-core"
+            description="Run Steamflake Core specs"
+            depends="compile-core-specs">
+
+        <echo>Running Core tests ...</echo>
+        <exec dir="${core.specs}" executable="sh" failonerror="true">
+            <arg value="Test.sh"/>
+        </exec>
+
+    </target>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+</project>
