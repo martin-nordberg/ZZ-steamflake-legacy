@@ -43,10 +43,10 @@ export interface IPersistentStoreReader {
     ) : void;
 
     /**
-     * Queries this store for the root package plus its immediate contents.
+     * Queries this store for a root container plus its (application-defined) immediate contents.
      * @param options Callbacks to receive the exception that occurred or the successfully found result.
      */
-    loadRootModelElement<Element extends elements.IContainerElement>(
+    loadRootModelElement<Element extends elements.IRootContainerElement>(
         options : options.IOptionsOneResult<Element>
     ) : void;
 

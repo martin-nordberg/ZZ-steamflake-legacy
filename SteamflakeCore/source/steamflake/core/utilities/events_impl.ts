@@ -1,6 +1,6 @@
 
 /**
- * Module: lzero/utilities/events
+ * Module: steamflake/core/utilities/events
  */
 
 import events = require( './events' );
@@ -152,16 +152,18 @@ class StatefulEvent<EventSource,EventParam>
  */
 export function initialize() {
 
-    events.makeStatelessEvent = function<EventSource>( eventSource : EventSource ) {
-        return new StatelessEvent( eventSource );
+    if ( typeof events.makeStatelessEvent === 'undefined' ) {
+        events.makeStatelessEvent = function<EventSource>( eventSource : EventSource ) {
+            return new StatelessEvent( eventSource );
+        }
     }
 
-    events.makeStatefulEvent = function<EventSource,EventParam>( eventSource : EventSource ) {
-        return new StatefulEvent<EventSource,EventParam>( eventSource );
+    if ( typeof events.makeStatefulEvent === 'undefined' ) {
+        events.makeStatefulEvent = function<EventSource,EventParam>( eventSource : EventSource ) {
+            return new StatefulEvent<EventSource,EventParam>( eventSource );
+        }
     }
 
-    // one time only
-    initialize = function(){};
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

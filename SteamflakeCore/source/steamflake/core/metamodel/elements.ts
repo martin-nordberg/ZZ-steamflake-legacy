@@ -22,8 +22,6 @@ export enum JsonDetailLevel {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export interface IContainerElement {}
-
 /**
  * Top level base class for Steamflake model elements. Represents any model element with a summary and a unique ID.
  * Also provides mechanisms to add extended attributes - boolean, numeric, or string. Defines an API for converting
@@ -31,6 +29,9 @@ export interface IContainerElement {}
  * concrete type name.
  */
 export interface IModelElement {
+
+    /** Whether this model element is a contaienr element. */
+    isContainer : boolean;
 
     /** A short description of this model element. */
     summary : string;
@@ -73,16 +74,6 @@ export interface IModelElement {
      * @param notifyChangeListeners Set to false to turn off change notifications during the update.
      */
     fromJson( jsonObject : any, notifyChangeListeners? : boolean ) : void;
-
-    /**
-     * Whether this model element is a container element.
-     */
-    isContainer() : boolean;
-
-    /**
-     * @returns The parent container of this model element.
-     */
-    parentContainer() : IContainerElement;
 
     /**
      * Updates the attributes of this model element from the given plain (JSON-derived) object.
@@ -152,7 +143,30 @@ export interface IContainerElement
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * Base class representing a relationship between two model elements.
+ * Interface representing a model element container within another model element.
+ */
+export interface IContainedElement<ParentElement extends IContainerElement>
+    extends IModelElement {
+
+    /** The parent container of this model element. */
+    parentContainer : ParentElement;
+
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Marker interface for top-level uncontained containers.
+ */
+export interface IRootContainerElement
+    extends IContainerElement {
+
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Base class representing a relationship between two model elements. TBD: relationship containment.
  */
 export interface IModelRelationship<FromElement,ToElement>
     extends IModelElement {

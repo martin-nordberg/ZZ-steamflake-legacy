@@ -10,8 +10,9 @@ import elements = require( './elements' );
 /**
  * Top level base class for Steamflake model elements. Represents any model element with a summary and a unique ID.
  */
-export class ModelElement
-    implements elements.IModelElement {
+export class ModelElement<ParentElement extends elements.IContainerElement>
+    implements elements.IModelElement,
+               elements.IContainedElement<ParentElement> {
 
     /**
      * Constructs a new code element.
@@ -21,7 +22,7 @@ export class ModelElement
      * @param summary A short description of this code element.
      */
     constructor(
-        parentContainer : elements.IContainerElement,
+        parentContainer : ParentElement,
         typeName: string,
         uuid : string,
         summary : string
@@ -98,14 +99,14 @@ export class ModelElement
     /**
      * Whether this code element is a container element.
      */
-    public isContainer() : boolean {
+    public get isContainer() {
         return false;
     }
 
     /**
      * @returns {IContainerElement} The parent container of this code element.
      */
-    public parentContainer() {
+    public get parentContainer() {
         return this._parentContainer;
     }
 
@@ -165,7 +166,7 @@ export class ModelElement
     }
 
     /** What type of code element this is. */
-    public get typeName() : string {
+    public get typeName() {
         return this._typeName;
     }
 
@@ -174,7 +175,7 @@ export class ModelElement
     }
 
     /** The unique ID of this code element. */
-    public get uuid() : string {
+    public get uuid() {
         return this._uuid;
     }
 
@@ -204,7 +205,7 @@ export class ModelElement
     private _extendedAttributes : any;
 
     /** The parent container of this code element. */
-    private _parentContainer : elements.IContainerElement;
+    private _parentContainer : ParentElement;
 
     /** A short description of this code element. */
     private _summary : string;
@@ -222,8 +223,8 @@ export class ModelElement
 /**
  * High level base class for Steamflake model elements that have names.
  */
-export class NamedElement
-    extends ModelElement
+export class NamedElement<ParentElement extends elements.IContainerElement>
+    extends ModelElement<ParentElement>
     implements elements.INamedElement
 {
 
@@ -236,7 +237,7 @@ export class NamedElement
      * @param summary A short description of this named element.
      */
     constructor(
-        parentContainer: elements.IContainerElement,
+        parentContainer: ParentElement,
         typeName: string,
         uuid: string,
         name: string,
@@ -286,8 +287,8 @@ export class NamedElement
 /**
  * High level base class for named model elements that contain other elements.
  */
-export class NamedContainerElement
-    extends NamedElement
+export class NamedContainerElement<ParentElement extends elements.IContainerElement>
+    extends NamedElement<ParentElement>
     implements elements.IContainerElement, elements.INamedElement
 {
 
@@ -300,7 +301,7 @@ export class NamedContainerElement
      * @param summary A short description of this code element.
      */
     constructor(
-        parentContainer: elements.IContainerElement,
+        parentContainer: ParentElement,
         typeName: string,
         uuid: string,
         name: string,
@@ -324,7 +325,7 @@ export class NamedContainerElement
     /**
      * Whether this code element is a container element.
      */
-    public isContainer() : boolean {
+    public get isContainer() {
         return true;
     }
 
@@ -350,7 +351,7 @@ export class NamedContainerElement
             }
 
             result.childElements = [ ];
-            this._childElements.forEach( function( element:ModelElement ) {
+            this._childElements.forEach( function( element : elements.IModelElement ) {
                 result.childElements.push( element.toJson( childLevel, recursingTypeNames ) );
             } );
         }

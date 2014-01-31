@@ -24,14 +24,6 @@ class NullCommandHistory
 
 }
 
-/**
- * Constructs a new do-nothing command history.
- * @returns {ICommandHistory}
- */
-export function makeNullCommandHistory() : commands.ICommandHistory {
-    return new NullCommandHistory();
-}
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // TBD: general purpose command history
@@ -204,12 +196,12 @@ export class AbstractCommand<T>
 
 export function initialize() {
 
-    commands.makeNullCommandHistory = function() {
-        return new NullCommandHistory();
+    if ( typeof commands.makeNullCommandHistory === 'undefined' ) {
+        commands.makeNullCommandHistory = function() {
+            return new NullCommandHistory();
+        }
     }
 
-    // one time only
-    initialize = function(){}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

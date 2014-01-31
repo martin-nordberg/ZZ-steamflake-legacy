@@ -26,15 +26,15 @@ class NullModelElementRegistry
     /**
      * Adds a model element to this registry.
      */
-    public registerModelElement( swModelElement : elements.IModelElement ) : void {
+    public registerModelElement( modelElement : elements.IModelElement ) : void {
         // do nothing
     }
 
     /**
      * Removes a model element from this registry.
-     * @param swModelElement The model element to remove.
+     * @param modelElement The model element to remove.
      */
-    public unregisterModelElement( swModelElement : elements.IModelElement ) : void {
+    public unregisterModelElement( modelElement : elements.IModelElement ) : void {
         // do nothing
     }
 
@@ -73,22 +73,22 @@ class InMemoryModelElementRegistry
     /**
      * Adds a model element to this registry.
      */
-    public registerModelElement( swModelElement : elements.IModelElement ) : void {
-        var uuid = swModelElement.uuid;
+    public registerModelElement( modelElement : elements.IModelElement ) : void {
+        var uuid = modelElement.uuid;
         var uuidSegments = this.splitUuid( uuid );
         var subregistry = this._registry[ uuidSegments[0] ];
         if ( subregistry === undefined ) {
             subregistry = {};
             this._registry[ uuidSegments[0] ] = subregistry;
         }
-        subregistry[ uuidSegments[1] ] = swModelElement;
+        subregistry[ uuidSegments[1] ] = modelElement;
     }
 
     /**
      * Removes a model element from this registry.
      */
-    public unregisterModelElement( swModelElement : elements.IModelElement ) : void {
-        var uuid = swModelElement.uuid;
+    public unregisterModelElement( modelElement : elements.IModelElement ) : void {
+        var uuid = modelElement.uuid;
         var uuidSegments = this.splitUuid( uuid );
         var subregistry = this._registry[ uuidSegments[0] ];
         if ( subregistry !== undefined ) {
@@ -140,16 +140,16 @@ class ChildRegisteringModelElementRegistry
     /**
      * Adds a model element to this registry. Also registers the elements children if any.
      */
-    public registerModelElement( swModelElement : elements.IModelElement ) : void {
+    public registerModelElement( modelElement : elements.IModelElement ) : void {
         var self = this;
 
-        self._modelElementRegistry.registerModelElement( swModelElement );
+        self._modelElementRegistry.registerModelElement( modelElement );
 
-        if ( swModelElement.isContainer() ) {
-            var swContainer = <elements.IContainerElement>swModelElement;
+        if ( modelElement.isContainer ) {
+            var container = <elements.IContainerElement>modelElement;
 
-            swContainer.childElements.forEach( function( swChildElement : elements.IModelElement ) {
-                self.registerModelElement( swChildElement );
+            container.childElements.forEach( function( childElement : elements.IModelElement ) {
+                self.registerModelElement( childElement );
             } );
         }
     }
@@ -157,8 +157,8 @@ class ChildRegisteringModelElementRegistry
     /**
      * Removes a model element from this registry.
      */
-    public unregisterModelElement( swModelElement : elements.IModelElement ) : void {
-        this._modelElementRegistry.unregisterModelElement( swModelElement );
+    public unregisterModelElement( modelElement : elements.IModelElement ) : void {
+        this._modelElementRegistry.unregisterModelElement( modelElement );
     }
 
     private _modelElementRegistry : registry.IModelElementRegistry;
