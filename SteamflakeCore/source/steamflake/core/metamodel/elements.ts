@@ -20,6 +20,8 @@ export enum JsonDetailLevel {
     FullTree = 29
 }
 
+export interface IContainerElement { /* see below */ }
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -30,8 +32,11 @@ export enum JsonDetailLevel {
  */
 export interface IModelElement {
 
-    /** Whether this model element is a contaienr element. */
+    /** Whether this model element is a container element. NOTE: read only. */
     isContainer : boolean;
+
+    /** The parent container of this model element. NOTE: read only. */
+    parentContainer : IContainerElement;
 
     /** A short description of this model element. */
     summary : string;
@@ -137,19 +142,6 @@ export interface IContainerElement
 
     /** Whether the children of this container have been loaded from a persistent store. */
     childElementsLoaded : boolean;
-
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * Interface representing a model element container within another model element.
- */
-export interface IContainedElement<ParentElement extends IContainerElement>
-    extends IModelElement {
-
-    /** The parent container of this model element. */
-    parentContainer : ParentElement;
 
 }
 

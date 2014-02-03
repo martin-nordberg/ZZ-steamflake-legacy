@@ -10,9 +10,8 @@ import elements = require( './elements' );
 /**
  * Top level base class for Steamflake model elements. Represents any model element with a summary and a unique ID.
  */
-export class ModelElement<ParentElement extends elements.IContainerElement>
-    implements elements.IModelElement,
-               elements.IContainedElement<ParentElement> {
+export class ModelElement
+    implements elements.IModelElement {
 
     /**
      * Constructs a new code element.
@@ -22,7 +21,7 @@ export class ModelElement<ParentElement extends elements.IContainerElement>
      * @param summary A short description of this code element.
      */
     constructor(
-        parentContainer : ParentElement,
+        parentContainer : elements.IContainerElement,
         typeName: string,
         uuid : string,
         summary : string
@@ -109,6 +108,9 @@ export class ModelElement<ParentElement extends elements.IContainerElement>
     public get parentContainer() {
         return this._parentContainer;
     }
+    public set parentContainer( value : elements.IContainerElement ) {
+        throw new Error( "Attempted to change read only attribute - parentContainer." );
+    }
 
     /**
      * Updates the attributes of this code element from the given plain (JSON-derived) object.
@@ -169,7 +171,6 @@ export class ModelElement<ParentElement extends elements.IContainerElement>
     public get typeName() {
         return this._typeName;
     }
-
     public set typeName( value : string ) {
         throw new Error( "Attempted to change read only attribute - typeName." );
     }
@@ -178,7 +179,6 @@ export class ModelElement<ParentElement extends elements.IContainerElement>
     public get uuid() {
         return this._uuid;
     }
-
     public set uuid( value : string ) {
         throw new Error( "Attempted to change read only attribute - uuid." );
     }
@@ -205,7 +205,7 @@ export class ModelElement<ParentElement extends elements.IContainerElement>
     private _extendedAttributes : any;
 
     /** The parent container of this code element. */
-    private _parentContainer : ParentElement;
+    private _parentContainer : elements.IContainerElement;
 
     /** A short description of this code element. */
     private _summary : string;
@@ -223,8 +223,8 @@ export class ModelElement<ParentElement extends elements.IContainerElement>
 /**
  * High level base class for Steamflake model elements that have names.
  */
-export class NamedElement<ParentElement extends elements.IContainerElement>
-    extends ModelElement<ParentElement>
+export class NamedElement
+    extends ModelElement
     implements elements.INamedElement
 {
 
@@ -237,7 +237,7 @@ export class NamedElement<ParentElement extends elements.IContainerElement>
      * @param summary A short description of this named element.
      */
     constructor(
-        parentContainer: ParentElement,
+        parentContainer: elements.IContainerElement,
         typeName: string,
         uuid: string,
         name: string,
@@ -287,8 +287,8 @@ export class NamedElement<ParentElement extends elements.IContainerElement>
 /**
  * High level base class for named model elements that contain other elements.
  */
-export class NamedContainerElement<ParentElement extends elements.IContainerElement>
-    extends NamedElement<ParentElement>
+export class NamedContainerElement
+    extends NamedElement
     implements elements.IContainerElement, elements.INamedElement
 {
 
@@ -301,7 +301,7 @@ export class NamedContainerElement<ParentElement extends elements.IContainerElem
      * @param summary A short description of this code element.
      */
     constructor(
-        parentContainer: ParentElement,
+        parentContainer: elements.IContainerElement,
         typeName: string,
         uuid: string,
         name: string,
