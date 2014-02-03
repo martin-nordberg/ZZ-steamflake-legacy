@@ -7,30 +7,6 @@ import commands = require( './commands' );
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * A no-op history of completed command actions.
- */
-class NullCommandHistory
-    implements commands.ICommandHistory
-{
-
-    /**
-     * Adds a command to this history.
-     */
-    add( command : commands.IReversibleCommand ) : void {
-        // do nothing
-    }
-
-    // TBD: undo, redo, max depth, etc.
-
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// TBD: general purpose command history
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
  * Abstract base command with template methods for command execution.
  */
 export class AbstractCommand<T>
@@ -189,18 +165,6 @@ export class AbstractCommand<T>
 
     /** Whether this command is undoable. */
     private _undoable : boolean = true;
-
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-export function initialize() {
-
-    if ( typeof commands.makeNullCommandHistory === 'undefined' ) {
-        commands.makeNullCommandHistory = function() {
-            return new NullCommandHistory();
-        }
-    }
 
 }
 

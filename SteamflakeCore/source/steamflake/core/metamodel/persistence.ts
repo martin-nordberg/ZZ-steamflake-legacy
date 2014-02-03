@@ -110,23 +110,144 @@ export interface IPersistentStore {
     /**
      * The creator service associated with this persistent store.
      */
-    creator() : IPersistentStoreCreator;
+    creator : IPersistentStoreCreator;
 
     /**
      * The deleter service associated with this persistent store.
      */
-    deleter() : IPersistentStoreDeleter;
+    deleter : IPersistentStoreDeleter;
 
     /**
      * The reader service associated with this store.
      */
-    reader() : IPersistentStoreReader;
+    reader : IPersistentStoreReader;
 
     /**
      * The updater service associated with this store.
      */
-    updater() : IPersistentStoreUpdater;
+    updater : IPersistentStoreUpdater;
 
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/** No-op creator implementation. */
+class NullPersistentStoreCreator
+    implements IPersistentStoreCreator
+{
+
+    public createModelElement<Element extends elements.IModelElement>(
+        modelElement : Element,
+        options : options.IOptionsOneResult<Element>
+    ) : void {
+        // do nothing
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/** No-op reader. */
+class NullPersistentStoreReader
+    implements IPersistentStoreReader
+{
+
+    public loadModelElementContents<Element extends elements.IContainerElement>(
+        containerElement : Element,
+        options : options.IOptionsOneResult<Element>
+    ) : void {
+        throw Error( "Unexpected attempt to read from a null reader." );
+    }
+
+    public loadRootModelElement<Element extends elements.IRootContainerElement>(
+        options : options.IOptionsOneResult<Element>
+    ) : void {
+        throw Error( "Unexpected attempt to read from a null reader." );
+    }
+
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/** No-op updater. */
+class NullPersistentStoreUpdater
+     implements IPersistentStoreUpdater
+{
+
+    public updateModelElement<Element extends elements.IModelElement>(
+        modelElement : Element,
+        options : IPersistentStoreUpdaterOptions
+    ) : void {
+        // do nothing
+    }
+
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/** No-op deleter. */
+class NullPersistentStoreDeleter
+    implements IPersistentStoreDeleter
+{
+
+    public deleteModelElement<Element extends elements.IModelElement>(
+        modelElement : Element,
+        options : options.IOptionsFailure
+    ) : void {
+        // do nothing
+    }
+
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/** No-op persistent store. */
+class NullPersistentStore
+    implements IPersistentStore
+{
+
+    constructor() {
+        this._creator = new NullPersistentStoreCreator();
+        this._deleter = new NullPersistentStoreDeleter();
+        this._reader = new NullPersistentStoreReader();
+        this._updater = new NullPersistentStoreUpdater();
+    }
+
+    public get creator() {
+        return this._creator;
+    }
+
+    public get deleter() {
+        return this._deleter;
+    }
+
+    public get reader() {
+        return this._reader;
+    }
+
+    public get updater() {
+        return this._updater;
+    }
+
+    private _creator : IPersistentStoreCreator;
+
+    private _deleter : IPersistentStoreDeleter;
+
+    private _reader : IPersistentStoreReader;
+
+    private _updater : IPersistentStoreUpdater;
+
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Constructs a no-op persistent store (No-op for create/update/delete; thrown error for read.)
+ * @returns the newly created store
+ */
+export function makeNullPersistentStore() : IPersistentStore {
+    return new NullPersistentStore();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

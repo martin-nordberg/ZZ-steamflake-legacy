@@ -6,13 +6,8 @@
 
 
 import events = require( '../../../../source/steamflake/core/utilities/events' );
-import events_impl = require( '../../../../source/steamflake/core/utilities/events_impl' );
 
 describe( "Events", function() {
-
-    beforeEach( function() {
-        events_impl.initialize();
-    } )
 
     describe( "Stateless Event", function() {
         var event : events.IStatelessEvent<string>,

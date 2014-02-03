@@ -16,8 +16,6 @@ describe( "Model Elements", function() {
     var uuid = "UUID";
 
     beforeEach( function() {
-        elements_impl.initialize();
-
         modelElement = new elements_impl.ModelElement( null, typeName, uuid, summary );
     } );
 

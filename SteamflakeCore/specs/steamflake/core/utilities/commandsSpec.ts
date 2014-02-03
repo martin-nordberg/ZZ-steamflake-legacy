@@ -6,13 +6,8 @@
 
 
 import commands = require( '../../../../source/steamflake/core/utilities/commands' );
-import commands_impl = require( '../../../../source/steamflake/core/utilities/commands_impl' );
 
 describe( "Commands", function() {
-
-    beforeEach( function() {
-        commands_impl.initialize();
-    } )
 
     describe( "Null Command History", function() {
         var commandHistory : commands.ICommandHistory;

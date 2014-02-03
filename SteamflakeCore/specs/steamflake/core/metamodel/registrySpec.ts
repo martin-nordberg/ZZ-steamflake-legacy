@@ -8,7 +8,6 @@
 import elements = require( '../../../../source/steamflake/core/metamodel/elements' );
 import elements_impl = require( '../../../../source/steamflake/core/metamodel/elements_impl' );
 import registry = require( '../../../../source/steamflake/core/metamodel/registry' );
-import registry_impl = require( '../../../../source/steamflake/core/metamodel/registry_impl' );
 import uuids = require( '../../../../source/steamflake/core/utilities/uuids' );
 
 
@@ -20,8 +19,6 @@ describe( "Registry", function() {
     var elementRegistry : registry.IModelElementRegistry;
 
     beforeEach( function() {
-        registry_impl.initialize();
-
         modelElement1 = new elements_impl.ModelElement( null, "One", uuids.makeUuid(), "Sample element one" );
         modelElement2 = new elements_impl.ModelElement( null, "Two", uuids.makeUuid(), "Sample element two" );
         modelElement3 = new elements_impl.ModelElement( null, "Three", uuids.makeUuid(), "Sample element three" );
