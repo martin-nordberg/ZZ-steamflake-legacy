@@ -10,15 +10,23 @@ import events = require( '../utilities/events' );
  * Enumeration of possible levels of detail in JSON output.
  */
 export enum JsonDetailLevel {
+    /** Include an element's UUID. */
     Identity = 0,
+    /** Include an element's attributes. */
     Attributes = 1,
+    /** Include the UUID of an element's parent. */
     ParentIdentity = 2,
+    /** Include the UUIDs of an element's children. */
     ChildIdentities = 4,
+    /** Include the attributes of an elements children. */
     ChildAttributes = 8,
+    /** Recursively include an element's children, grandchildren, etc. */
     Recursive = 16,
 
     FullTree = 29
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 export interface IContainerElement { /* see below */ }
 
@@ -96,7 +104,7 @@ export interface IModelElement {
 
     /**
      * @param level The level of detail to include in the JSON output.
-     * @param recursingTypeNames Optionally the quoted type names for types to include children of in recursive output.
+     * @param recursingTypeNames Optionally, the quoted type names for types to include children of in recursive output.
      *                       (e.g. "'RootPackage','Namespace'"). Null means recurse for all types (if flagged).
      * @returns {*} An object representing this model element for use in JSON data transfers.
      */
@@ -148,20 +156,22 @@ export interface IContainerElement
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * Marker interface for top-level uncontained containers.
+ * Marker interface for top-level containers with no parent.
  */
 export interface IRootContainerElement
-    extends IContainerElement {
-
+    extends IContainerElement
+{
+    // marker only
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * Base class representing a relationship between two model elements. TBD: relationship containment.
+ * Base class representing a relationship between two model elements.
  */
 export interface IModelRelationship<FromElement,ToElement>
-    extends IModelElement {
+    extends IModelElement
+{
 
     /** The element on the from side of the relationship. */
     fromElement : FromElement;

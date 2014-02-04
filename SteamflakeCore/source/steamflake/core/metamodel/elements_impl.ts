@@ -58,6 +58,9 @@ export class ModelElement
     public get attributeChangeEvent() {
         return this._attributeChangeEvent;
     }
+    public set attributeChangeEvent( value : events.IStatefulEvent<elements.IModelElement,{attributeName:string; oldValue : any; newValue : any}> ) {
+        throw new Error( "Attempted to change read only event - attributeChangeEvent." );
+    }
 
     /**
      * Returns the value of a given named attribute that is an extension of the statically typed model.
@@ -100,6 +103,9 @@ export class ModelElement
      */
     public get isContainer() {
         return false;
+    }
+    public set isContainer( value : boolean ) {
+        throw new Error( "Attempted to change read only attribute - isContainer." );
     }
 
     /**
@@ -198,8 +204,7 @@ export class ModelElement
         jsonObject.uuid = this.uuid;
     }
 
-    /** Event triggered by attribute changes. */
-    private _attributeChangeEvent : events.IStatefulEvent<elements.IModelElement,{attributeName:string; oldValue : any; newValue : any}>;
+  ////
 
     /** Object containing extended attributes. */
     private _extendedAttributes : any;
@@ -215,6 +220,11 @@ export class ModelElement
 
     /** The unique ID of this code element. */
     private _uuid : string;
+
+  ////
+
+    /** Event triggered by attribute changes. */
+    private _attributeChangeEvent : events.IStatefulEvent<elements.IModelElement,{attributeName:string; oldValue : any; newValue : any}>;
 
 }
 
@@ -316,10 +326,17 @@ export class NamedContainerElement
     public get childElements() {
         return this._childElements;
     }
+    public set childElements( value : elements.IModelElement[] ) {
+        throw new Error( "Attempted to change read only attribute - childElements." );
+    }
 
     /** Whether the child elements of this container have been loaded from a persistent store. */
     public get childElementsLoaded() {
         return this._childElementsLoaded;
+    }
+    public set childElementsLoaded( value : boolean ) {
+        this._childElementsLoaded = value;
+        // TBD: this probably deserves an event
     }
 
     /**

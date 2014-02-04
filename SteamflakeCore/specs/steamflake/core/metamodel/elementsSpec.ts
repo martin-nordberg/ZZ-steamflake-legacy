@@ -7,22 +7,46 @@
 
 import elements = require( '../../../../source/steamflake/core/metamodel/elements' );
 import elements_impl = require( '../../../../source/steamflake/core/metamodel/elements_impl' );
+import sampleElements = require( './sampleElements' );
 
 
 describe( "Model Elements", function() {
-    var modelElement : elements.IModelElement;
+    var modelElement : elements.INamedElement;
+    var name = "example";
     var summary = "Summary of test element";
-    var typeName = "TestElement";
     var uuid = "UUID";
 
     beforeEach( function() {
-        modelElement = new elements_impl.ModelElement( null, typeName, uuid, summary );
+        modelElement = new sampleElements.Element( null, uuid, name, summary );
     } );
 
     it( "Constructs with expected attributes", function() {
+        expect( modelElement.isContainer ).toBeFalsy();
+        expect( modelElement.name ).toEqual( name );
         expect( modelElement.summary ).toEqual( summary );
-        expect( modelElement.typeName ).toEqual( typeName );
+        expect( modelElement.typeName ).toEqual( "Element" );
         expect( modelElement.uuid ).toEqual( uuid );
+    } );
+
+    it( "Triggers an event for name attribute change", function() {
+        var newName = "exemplar";
+        var changed = false;
+
+        function listener( eventSource : elements.IModelElement, data:{ attributeName:string; oldValue:string; newValue:string } ) {
+            expect( eventSource ).toBe( modelElement );
+            expect( data.attributeName ).toEqual( "name" );
+            expect( data.oldValue ).toEqual( name );
+            expect( data.newValue ).toEqual( newName );
+            changed = true;
+        }
+
+        modelElement.attributeChangeEvent.registerListener( listener );
+
+        modelElement.name = newName;
+
+        modelElement.attributeChangeEvent.unregisterListener( listener );
+
+        expect( changed ).toBeTruthy();
     } );
 
     it( "Triggers an event for summary attribute change", function() {
@@ -49,8 +73,18 @@ describe( "Model Elements", function() {
     it( "Writes to JSON", function() {
         var json = modelElement.toJson( elements.JsonDetailLevel.FullTree );
 
-        expect( json ).toEqual( { type : 'TestElement', uuid : 'UUID', summary : 'Summary of test element' } );
+        expect( json ).toEqual( { type : 'Element', uuid : 'UUID', name : 'example', summary : 'Summary of test element' } );
     } );
 
+    it( "Saves and retrieves extended attributes", function() {
+        modelElement.setExtendedAttribute( "spec.a", "AAA" );
+
+        expect( modelElement.getExtendedAttribute( "spec.a" ) ).toEqual( "AAA" );
+    } );
+
+    it( "Retrieves extended attribute defaults", function() {
+        expect( modelElement.getExtendedAttribute( "spec.a", "AAA" ) ).toEqual( "AAA" );
+        expect( modelElement.getExtendedAttribute( "spec.a" ) ).toEqual( "AAA" );
+    } );
 
 } );
