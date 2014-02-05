@@ -40,3 +40,20 @@ export class Container
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export class RootContainer
+    extends elements_impl.NamedContainerElement
+    implements elements.IRootContainerElement {
+
+    constructor(
+        parentContainer: elements.IContainerElement,
+        uuid: string,
+        name: string,
+        summary: string
+        ) {
+        super( parentContainer, "RootContainer", uuid, name, summary );
+    }
+
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

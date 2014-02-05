@@ -79,7 +79,7 @@
             <srcfiles dir="${core.specs}" includes="Compile.sh"/>
         </uptodate>
 
-        <echo>Steamflake Core up to date: ${core.specs.uptodate}</echo>
+        <echo>Steamflake Core specs up to date: ${core.specs.uptodate}</echo>
 
     </target>
 

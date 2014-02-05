@@ -108,7 +108,7 @@ class ElementCreationCommand<ParentElement extends elements.IContainerElement>
         this._modelElementRegistry.registerModelElement( this._newChild );
 
         // persist the new element
-        this._creator.createModelElement( this._newChild, { succeed:function(lzChild:elements.IModelElement){} } );
+        this._creator.createModelElement( this._newChild );
 
         return this._newChild;
     }
@@ -122,7 +122,7 @@ class ElementCreationCommand<ParentElement extends elements.IContainerElement>
         this._modelElementRegistry.unregisterModelElement( this._newChild );
 
         // persist the deletion
-        this._deleter["delete" + this._childType]( this._newChild, {} );
+        this._deleter.deleteModelElement( this._newChild );
     }
 
     private _attributes : any;

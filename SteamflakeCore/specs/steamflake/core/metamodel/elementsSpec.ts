@@ -1,5 +1,5 @@
 /**
- * Spec Module: steamflake/core/metamodel/core/elementsSpec
+ * Spec Module: steamflake/core/metamodel/elementsSpec
  */
 
 ///<reference path='../../../thirdparty/jasmine/jasmine.d.ts'/>
@@ -71,7 +71,7 @@ describe( "Model Elements", function() {
     } );
 
     it( "Writes to JSON", function() {
-        var json = modelElement.toJson( elements.JsonDetailLevel.FullTree );
+        var json = modelElement.toJson( elements.EJsonDetailLevel.FullTree );
 
         expect( json ).toEqual( { type : 'Element', uuid : 'UUID', name : 'example', summary : 'Summary of test element' } );
     } );

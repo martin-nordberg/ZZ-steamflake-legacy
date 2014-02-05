@@ -9,7 +9,7 @@ import events = require( '../utilities/events' );
 /**
  * Enumeration of possible levels of detail in JSON output.
  */
-export enum JsonDetailLevel {
+export enum EJsonDetailLevel {
     /** Include an element's UUID. */
     Identity = 0,
     /** Include an element's attributes. */
@@ -108,7 +108,7 @@ export interface IModelElement {
      *                       (e.g. "'RootPackage','Namespace'"). Null means recurse for all types (if flagged).
      * @returns {*} An object representing this model element for use in JSON data transfers.
      */
-    toJson( level : JsonDetailLevel, recursingTypeNames? : string ) : any;
+    toJson( level : EJsonDetailLevel, recursingTypeNames? : string ) : any;
 
     /**
      * Writes the attributes of this model element out to a plain object for JSON serialization.

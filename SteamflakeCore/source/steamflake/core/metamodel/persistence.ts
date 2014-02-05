@@ -4,7 +4,7 @@
  */
 
 import elements = require( './elements' );
-import options = require( '../utilities/options' );
+import promises = require( '../concurrency/promises' );
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -16,12 +16,10 @@ export interface IPersistentStoreCreator {
     /**
      * Saves a newly created model element.
      * @param modelElement The just created model element to store.
-     * @param options The callback options.
      */
     createModelElement<Element extends elements.IModelElement>(
-        modelElement : Element,
-        options : options.IOptionsOneResult<Element>
-    ) : void;
+        modelElement : Element
+    ) : promises.IPromise<Element>;
 
 }
 
@@ -30,32 +28,27 @@ export interface IPersistentStoreCreator {
 /**
  * Interface to a persistent store reader for model elements.
  */
-export interface IPersistentStoreReader {
+export interface IPersistentStoreReader<RootElement extends elements.IRootContainerElement> {
 
     /**
      * Queries this store for all the child elements of an already loaded model element.
      * @param containerElement The model element whose content is to be loaded.
-     * @param options Callbacks to receive the exception that occurred or the successfully found result.
      */
     loadModelElementContents<Element extends elements.IContainerElement>(
-        containerElement : Element,
-        options : options.IOptionsOneResult<Element>
-    ) : void;
+        containerElement : Element
+    ) : promises.IPromise<Element>;
 
     /**
      * Queries this store for a root container plus its (application-defined) immediate contents.
      * @param options Callbacks to receive the exception that occurred or the successfully found result.
      */
-    loadRootModelElement<Element extends elements.IRootContainerElement>(
-        options : options.IOptionsOneResult<Element>
-    ) : void;
+    loadRootModelElement() : promises.IPromise<RootElement>;
 
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export interface IPersistentStoreUpdaterOptions
-    extends options.IOptionsFailure {
+export interface IPersistentStoreUpdaterOptions {
 
     /**
      * The names of the attributes that have changed.
@@ -78,7 +71,7 @@ export interface IPersistentStoreUpdater {
     updateModelElement<Element extends elements.IModelElement>(
         modelElement : Element,
         options : IPersistentStoreUpdaterOptions
-    ) : void;
+    ) : promises.IPromise<Element>;
 
 }
 
@@ -94,9 +87,8 @@ export interface IPersistentStoreDeleter {
      * @param modelElement The model element to delete persistently.
      */
     deleteModelElement<Element extends elements.IModelElement>(
-        modelElement : Element,
-        options : options.IOptionsFailure
-    ) : void;
+        modelElement : Element
+    ) : promises.IPromise<Element>;
 
 }
 
@@ -105,7 +97,7 @@ export interface IPersistentStoreDeleter {
 /**
  * Interface to a persistent store for model elements.
  */
-export interface IPersistentStore {
+export interface IPersistentStore<RootElement extends elements.IRootContainerElement> {
 
     /**
      * The creator service associated with this persistent store.
@@ -120,7 +112,7 @@ export interface IPersistentStore {
     /**
      * The reader service associated with this store.
      */
-    reader : IPersistentStoreReader;
+    reader : IPersistentStoreReader<RootElement>;
 
     /**
      * The updater service associated with this store.
@@ -138,30 +130,26 @@ class NullPersistentStoreCreator
 {
 
     public createModelElement<Element extends elements.IModelElement>(
-        modelElement : Element,
-        options : options.IOptionsOneResult<Element>
-    ) : void {
-        // do nothing
+        modelElement : Element
+    ) : promises.IPromise<Element> {
+        return promises.makeImmediatelyFulfilledPromise( modelElement );
     }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /** No-op reader. */
-class NullPersistentStoreReader
-    implements IPersistentStoreReader
+class NullPersistentStoreReader<RootElement extends elements.IRootContainerElement>
+    implements IPersistentStoreReader<RootElement>
 {
 
     public loadModelElementContents<Element extends elements.IContainerElement>(
-        containerElement : Element,
-        options : options.IOptionsOneResult<Element>
-    ) : void {
+        containerElement : Element
+    ) : promises.IPromise<Element> {
         throw Error( "Unexpected attempt to read from a null reader." );
     }
 
-    public loadRootModelElement<Element extends elements.IRootContainerElement>(
-        options : options.IOptionsOneResult<Element>
-    ) : void {
+    public loadRootModelElement() : promises.IPromise<RootElement> {
         throw Error( "Unexpected attempt to read from a null reader." );
     }
 
@@ -175,10 +163,9 @@ class NullPersistentStoreUpdater
 {
 
     public updateModelElement<Element extends elements.IModelElement>(
-        modelElement : Element,
-        options : IPersistentStoreUpdaterOptions
-    ) : void {
-        // do nothing
+        modelElement : Element
+    ) : promises.IPromise<Element> {
+        return promises.makeImmediatelyFulfilledPromise( modelElement );
     }
 
 }
@@ -191,10 +178,9 @@ class NullPersistentStoreDeleter
 {
 
     public deleteModelElement<Element extends elements.IModelElement>(
-        modelElement : Element,
-        options : options.IOptionsFailure
-    ) : void {
-        // do nothing
+        modelElement : Element
+    ) : promises.IPromise<Element> {
+        return promises.makeImmediatelyFulfilledPromise( modelElement );
     }
 
 }
@@ -202,14 +188,14 @@ class NullPersistentStoreDeleter
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /** No-op persistent store. */
-class NullPersistentStore
-    implements IPersistentStore
+class NullPersistentStore<RootElement extends elements.IRootContainerElement>
+    implements IPersistentStore<RootElement>
 {
 
     constructor() {
         this._creator = new NullPersistentStoreCreator();
         this._deleter = new NullPersistentStoreDeleter();
-        this._reader = new NullPersistentStoreReader();
+        this._reader = new NullPersistentStoreReader<RootElement>();
         this._updater = new NullPersistentStoreUpdater();
     }
 
@@ -233,7 +219,7 @@ class NullPersistentStore
 
     private _deleter : IPersistentStoreDeleter;
 
-    private _reader : IPersistentStoreReader;
+    private _reader : IPersistentStoreReader<RootElement>;
 
     private _updater : IPersistentStoreUpdater;
 
@@ -246,8 +232,8 @@ class NullPersistentStore
  * Constructs a no-op persistent store (No-op for create/update/delete; thrown error for read.)
  * @returns the newly created store
  */
-export function makeNullPersistentStore() : IPersistentStore {
-    return new NullPersistentStore();
+export function makeNullPersistentStore<RootElement extends elements.IRootContainerElement>() : IPersistentStore<RootElement> {
+    return new NullPersistentStore<RootElement>();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

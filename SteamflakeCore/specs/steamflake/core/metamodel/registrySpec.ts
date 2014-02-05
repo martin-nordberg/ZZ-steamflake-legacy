@@ -1,5 +1,5 @@
 /**
- * Spec Module: steamflake/core/metamodel/core/registrySpec
+ * Spec Module: steamflake/core/metamodel/registrySpec
  */
 
 ///<reference path='../../../thirdparty/jasmine/jasmine.d.ts'/>

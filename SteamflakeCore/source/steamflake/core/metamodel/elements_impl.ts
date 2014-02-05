@@ -156,16 +156,16 @@ export class ModelElement
      *                       (e.g. "'RootPackage','Namespace'"). Null means recurse for all types (if flagged).
      * @returns {*} An object representing this code element for use in JSON data transfers.
      */
-    public toJson( level : elements.JsonDetailLevel, recursingTypeNames : string = null ) : any {
+    public toJson( level : elements.EJsonDetailLevel, recursingTypeNames : string = null ) : any {
         var result : any = {};
 
         this.writeJsonIdentity( result );
 
-        if ( level & elements.JsonDetailLevel.Attributes ) {
+        if ( level & elements.EJsonDetailLevel.Attributes ) {
             this.writeJsonAttributes( result );
         }
 
-        if ( level & elements.JsonDetailLevel.ParentIdentity ) {
+        if ( level & elements.EJsonDetailLevel.ParentIdentity ) {
             result.parentContainer = {};
             this._parentContainer.writeJsonIdentity( result.parentContainer );
         }
@@ -349,22 +349,22 @@ export class NamedContainerElement
     /**
      * @returns {*} An object representing this named code element for use in JSON data transfers.
      */
-    public toJson( level: elements.JsonDetailLevel, recursingTypeNames : string = null ) : any {
+    public toJson( level: elements.EJsonDetailLevel, recursingTypeNames : string = null ) : any {
         var result = super.toJson( level );
 
         if (
-            ( level & elements.JsonDetailLevel.ChildIdentities ) &&
+            ( level & elements.EJsonDetailLevel.ChildIdentities ) &&
                 this._childElementsLoaded &&
                 ( recursingTypeNames === null || recursingTypeNames.indexOf( "'"+this.typeName+"'" ) >= 0 )
             ) {
-            var childLevel = elements.JsonDetailLevel.Identity;
-            if ( level & elements.JsonDetailLevel.ChildAttributes ) {
-                childLevel = childLevel | elements.JsonDetailLevel.Attributes;
+            var childLevel = elements.EJsonDetailLevel.Identity;
+            if ( level & elements.EJsonDetailLevel.ChildAttributes ) {
+                childLevel = childLevel | elements.EJsonDetailLevel.Attributes;
             }
-            if ( level & elements.JsonDetailLevel.Recursive ) {
-                childLevel = childLevel | ( level & elements.JsonDetailLevel.ChildIdentities );
-                childLevel = childLevel | ( level & elements.JsonDetailLevel.ChildAttributes );
-                childLevel = childLevel | elements.JsonDetailLevel.Recursive;
+            if ( level & elements.EJsonDetailLevel.Recursive ) {
+                childLevel = childLevel | ( level & elements.EJsonDetailLevel.ChildIdentities );
+                childLevel = childLevel | ( level & elements.EJsonDetailLevel.ChildAttributes );
+                childLevel = childLevel | elements.EJsonDetailLevel.Recursive;
             }
 
             result.childElements = [ ];
