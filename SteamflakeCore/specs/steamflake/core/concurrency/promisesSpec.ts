@@ -256,6 +256,22 @@ describe( "Promises", function() {
             setTimeout( function(){ promise.fulfill( "done" ); }, 1 );
         } );
 
+        it( "Handles callback exceptions", function( done : ()=>void ) {
+            function f1( value : string ) : string {
+                expect( value ).toEqual( "done" );
+                throw new Error( "failed" );
+                return "never";
+            }
+            function f2( value : string ) {
+            }
+            function r2( value : any ) {
+                expect( value ).toEqual( new Error( "failed" ) );
+                done();
+            }
+            promise.then( f1 ).then( f2, r2 );
+            setTimeout( function(){ promise.fulfill( "done" ); }, 1 );
+        } );
+
     } );
 
     describe( "Asynchronously Rejected Promise", function()  {
@@ -305,6 +321,22 @@ describe( "Promises", function() {
             }
             function r2( value : string ) {
                 expect( value ).toEqual( "very bad" );
+                done();
+            }
+            promise.then( f, r1 ).then( f, r2 );
+            setTimeout( function(){ promise.reject( "bad" ); }, 1 );
+        } );
+
+        it( "Handles callback exceptions", function( done : ()=>void ) {
+            function f( value : string ) {
+                return "more";
+            }
+            function r1( value : string ) {
+                expect( value ).toEqual( "bad" );
+                throw new Error( "failed" );
+            }
+            function r2( value : any ) {
+                expect( value ).toEqual( new Error( "failed" ) );
                 done();
             }
             promise.then( f, r1 ).then( f, r2 );

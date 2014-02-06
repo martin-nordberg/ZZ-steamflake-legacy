@@ -102,15 +102,27 @@ class Promise<T>
     ) : IPromise<T2> {
         var result = new Promise<T2>();
 
+        // wrapper passes fulfillment of this promise on to the resulting promise
         function chainedOnFulfilled( value : T ) {
-            var chainedValue = onFulfilled( value );
-            result.fulfill( chainedValue );
+            try {
+                var chainedValue = onFulfilled( value );
+                result.fulfill( chainedValue );
+            }
+            catch ( err ) {
+                result.reject( err );
+            }
         }
 
+        // wrapper passes rejection of this promise on to the resulting promise
         function chainedOnRejected( reason : any ) {
             var chainedReason : any = undefined;
             if ( onRejected ) {
-                chainedReason = onRejected( reason );
+                try {
+                    chainedReason = onRejected( reason );
+                }
+                catch ( err ) {
+                    chainedReason = err;
+                }
             }
             if ( !chainedReason ) {
                 chainedReason = reason;
@@ -118,9 +130,11 @@ class Promise<T>
             result.reject( chainedReason );
         }
 
+        // queue the two callbacks
         this._onFulfilled.push( chainedOnFulfilled );
         this._onRejected.push( chainedOnRejected );
 
+        // handle immediately if appropriate
         if ( this._state === EPromiseState.Fulfilled ) {
             this.onFulfilled();
         }
@@ -138,6 +152,7 @@ class Promise<T>
      */
     private onFulfilled() {
         var self = this;
+        self._onRejected = [];
         if ( self._onFulfilled.length > 0 ) {
             var fulfill = self._onFulfilled[0];
             self._onFulfilled.splice( 0, 1 );
@@ -147,7 +162,7 @@ class Promise<T>
                 self.onFulfilled();
             }
 
-            setTimeout( fulfillRecursively, 0 );
+            self.queueCallback( fulfillRecursively );
         }
     }
 
@@ -156,6 +171,7 @@ class Promise<T>
      */
     private onRejected() {
         var self = this;
+        self._onFulfilled = [];
         if ( self._onRejected.length > 0 ) {
             var reject = this._onRejected[0];
             self._onRejected.splice( 0, 1 );
@@ -165,20 +181,34 @@ class Promise<T>
                 self.onRejected();
             }
 
-            setTimeout( rejectRecursively, 0 );
+            self.queueCallback( rejectRecursively );
         }
+    }
+
+    /**
+     * Queues a callback into the event loop.
+     * @param callback The callback to be executed when idle.
+     */
+    private queueCallback( callback : () => void ) {
+        // TBD: setImmediate
+        setTimeout( callback, 0 );
     }
 
   ////
 
+    /** Queue of callbacks for a fulfilled promise. */
     private _onFulfilled: { ( value : T ) : void }[];
 
+    /** Queue of callbacks for a rejected promise. */
     private _onRejected: { ( reason: any ) : void }[];
 
+    /** Reason for rejection of this promise. */
     private _reason : any;
 
+    /** The state of this promise. */
     private _state : EPromiseState;
 
+    /** The promised value when fulfilled. */
     private _value : T;
 
 }
