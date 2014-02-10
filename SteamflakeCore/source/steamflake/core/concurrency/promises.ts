@@ -17,7 +17,7 @@ export interface IPromise<T> {
      */
     then<T2>(
         onFulfilled: ( value : T ) => T2,
-        onRejected?: ( reason: any ) => any
+        onRejected?: ( reason : any ) => any
     ) : IPromise<T2>;
 
 }
@@ -50,12 +50,16 @@ export interface IPromiseResult<T>
 
 /** Possible states of a promise. */
 enum EPromiseState {
+
     /** Waiting for fulfillment or rejection. */
     Pending,
+
     /** Fulfilled - value computed and ready. */
     Fulfilled,
+
     /** Rejected - computation failed. */
     Rejected
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -76,9 +80,16 @@ class Promise<T>
      * @param value The promised value.
      */
     public fulfill( value : T ) {
-        this._value = value;
+
+        this.ensurePending();
+
+        // TBD: Handle the case that value is itself a promise
+        // TBD: Handle the case that value is "thenable"
+
         this._state = EPromiseState.Fulfilled;
+        this._value = value;
         this.onFulfilled();
+
     }
 
     /**
@@ -86,9 +97,16 @@ class Promise<T>
      * @param reason The reason for failure.
      */
     public reject( reason : any  ) {
-        this._reason = reason;
+
+        this.ensurePending();
+
+        // TBD: Handle the case that reason is itself a promise
+        // TBD: Handle the case that reason is "thenable"
+
         this._state = EPromiseState.Rejected;
+        this._reason = reason;
         this.onRejected();
+
     }
 
     /**
@@ -100,16 +118,19 @@ class Promise<T>
         onFulfilled: ( value : T ) => T2,
         onRejected?: ( reason: any ) => any
     ) : IPromise<T2> {
+
         var result = new Promise<T2>();
 
         // wrapper passes fulfillment of this promise on to the resulting promise
         function chainedOnFulfilled( value : T ) {
-            try {
-                var chainedValue = onFulfilled( value );
-                result.fulfill( chainedValue );
-            }
-            catch ( err ) {
-                result.reject( err );
+            if ( onFulfilled ) {
+                try {
+                    var chainedValue = onFulfilled( value );
+                    result.fulfill( chainedValue );
+                }
+                catch ( err ) {
+                    result.reject( err );
+                }
             }
         }
 
@@ -143,15 +164,32 @@ class Promise<T>
         }
 
         return result;
+
     }
 
   ////
 
     /**
+     * Checks that the promise is still in a pending state.
+     */
+    private ensurePending() {
+
+        if ( this._state === EPromiseState.Fulfilled ) {
+            throw new Error( "Promise already fulfilled." );
+        }
+        else if ( this._state === EPromiseState.Rejected ) {
+            throw new Error( "Promise already rejected." );
+        }
+
+    }
+
+    /**
      * Handles calling all the onFulfilled registered callbacks.
      */
     private onFulfilled() {
+
         var self = this;
+
         self._onRejected = [];
         if ( self._onFulfilled.length > 0 ) {
             var fulfill = self._onFulfilled[0];
@@ -164,13 +202,16 @@ class Promise<T>
 
             self.queueCallback( fulfillRecursively );
         }
+
     }
 
     /**
      * Handles calling all the registered onRejected callbacks.
      */
     private onRejected() {
+
         var self = this;
+
         self._onFulfilled = [];
         if ( self._onRejected.length > 0 ) {
             var reject = this._onRejected[0];
@@ -183,6 +224,7 @@ class Promise<T>
 
             self.queueCallback( rejectRecursively );
         }
+
     }
 
     /**
@@ -231,7 +273,7 @@ export function makeImmediatelyFulfilledPromise<T>( value : T ) : IPromise<T> {
 
 /**
  * Makes a promise that is immediately rejected with given reason.
- * @param value The reson for failure.
+ * @param reason The reason for failure.
  * @returns the newly created promise
  */
 export function makeImmediatelyRejectedPromise<T>( reason : any ) : IPromise<T> {

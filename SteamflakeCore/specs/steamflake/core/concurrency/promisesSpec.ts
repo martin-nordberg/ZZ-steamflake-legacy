@@ -105,6 +105,18 @@ describe( "Promises", function() {
             promise.then( f, r1 ).then( f, r2 );
         } );
 
+        it( "Supports rejection handler without fulfillment handler", function( done : ()=>void ) {
+            function r1( value : string ) {
+                expect( value ).toEqual( "bad" );
+                return "very bad";
+            }
+            function r2( value : string ) {
+                expect( value ).toEqual( "very bad" );
+                done();
+            }
+            promise.then( null, r1 ).then( null, r2 );
+        } );
+
     } );
 
     describe( "Later Fulfilled Promise", function()  {
@@ -151,6 +163,16 @@ describe( "Promises", function() {
             }
             promise.then( f1 ).then( f2 );
             promise.fulfill( "done" );
+        } );
+
+        it( "Cannot be fulfilled/rejected twice", function() {
+            function f( value : string ) {
+                expect( value ).toEqual( "done" );
+            }
+            promise.then( f );
+            promise.fulfill( "done" );
+            expect( function(){ promise.fulfill( "more done" ); } ).toThrow();
+            expect( function(){ promise.reject( "too late" ); } ).toThrow();
         } );
 
     } );
@@ -206,6 +228,18 @@ describe( "Promises", function() {
             }
             promise.then( f, r1 ).then( f, r2 );
             promise.reject( "bad" );
+        } );
+
+        it( "Cannot be fulfilled/rejected twice", function() {
+            function f( value : string ) {
+            }
+            function r( reason : string ) {
+                expect( reason ).toEqual( "bad" )
+            }
+            promise.then( f, r );
+            promise.reject( "bad" );
+            expect( function(){ promise.fulfill( "more done" ); } ).toThrow();
+            expect( function(){ promise.reject( "too late" ); } ).toThrow();
         } );
 
     } );
