@@ -3,12 +3,15 @@
  * Module: steamflake/core/utilities/commands
  */
 
+import promises = require( 'promises' );
+import values = require( '../utilities/values' );
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
  * Enumeration of command execution states.
  */
-export enum CommandState {
+export enum ECommandState {
 
     /** Not yet executed at all. */
     Created,
@@ -45,12 +48,12 @@ export interface IReversibleCommand {
     /**
      * Repeats the execution of this command after it has been undone.
      */
-    redo() : void;
+    redo() : promises.IPromise<values.ENothing>;
 
     /**
      * The current status of this command.
      */
-    state() : CommandState;
+    state() : ECommandState;
 
     /**
      * @returns A brief (generic) description of this command.
@@ -60,7 +63,7 @@ export interface IReversibleCommand {
     /**
      * Reverts the execution of this command.
      */
-    undo() : void;
+    undo() : promises.IPromise<values.ENothing>;
 
 }
 
@@ -75,9 +78,9 @@ export interface ICommand<T>
 
     /**
      * Executes this command.
-     * @returns An arbitrary value resulting from the command execution.
+     * @returns The promise of an arbitrary value resulting from the command execution.
      */
-    do() : T;
+    do() : promises.IPromise<T>;
 
 }
 

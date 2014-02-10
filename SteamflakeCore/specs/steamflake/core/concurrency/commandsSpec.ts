@@ -5,7 +5,7 @@
 ///<reference path='../../../thirdparty/jasmine/jasmine.d.ts'/>
 
 
-import commands = require( '../../../../source/steamflake/core/utilities/commands' );
+import commands = require( '../../../../source/steamflake/core/concurrency/commands' );
 
 describe( "Commands", function() {
 

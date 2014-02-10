@@ -3,11 +3,13 @@
  * Module: steamflake/core/metamodel/corecommands
  */
 
-import commands = require( '../utilities/commands' );
-import commands_impl = require( '../utilities/commands_impl' );
+import commands = require( '../concurrency/commands' );
+import commands_impl = require( '../concurrency/commands_impl' );
 import elements = require( './elements' );
 import persistence = require( './persistence' );
+import promises = require( '../concurrency/promises' );
 import registry = require( './registry' );
+import values = require( '../utilities/values' );
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -43,15 +45,19 @@ class AttributeChangeCommand<Element extends elements.IModelElement,T>
         // save the change persistently
         this._updater.updateModelElement( this._modelElement, { changedAttributeNames:[this._attributeName], fail:function(err:any){/*TBD*/} } );
 
-        return this._newValue;
+        // TBD: updater needs to return the promise
+        return promises.makeImmediatelyFulfilledPromise( this._newValue );
     }
 
-    public unexecute() : void {
+    public unexecute() {
         // reverse the change
         this._modelElement[this._attributeName] = this._oldValue;
 
         // save the change persistently
         this._updater.updateModelElement( this._modelElement, { changedAttributeNames:[this._attributeName], fail:function(err:any){/*TBD*/} } );
+
+        // TBD: wrap the updater promise
+        return promises.makeImmediatelyFulfilledPromise( values.nothing );
     }
 
     private _attributeName : string;
@@ -99,7 +105,7 @@ class ElementCreationCommand<ParentElement extends elements.IContainerElement>
         this._maker = maker;
     }
 
-    public execute() : elements.IModelElement {
+    public execute() {
         // create the new element and add it to its parent
         this._newChild = this._maker["make" + this._childType]( this._parentElement , this._attributes );
         this._parentElement.childElements.push( this._newChild );
@@ -110,10 +116,11 @@ class ElementCreationCommand<ParentElement extends elements.IContainerElement>
         // persist the new element
         this._creator.createModelElement( this._newChild );
 
-        return this._newChild;
+        // TBD: creator should return the promise
+        return promises.makeImmediatelyFulfilledPromise( this._newChild );
     }
 
-    public unexecute() : void {
+    public unexecute() {
         // remove the new element from its parent
         var index = this._parentElement.childElements.indexOf( this._newChild );
         this._parentElement.childElements.splice(index, 1);
@@ -123,6 +130,9 @@ class ElementCreationCommand<ParentElement extends elements.IContainerElement>
 
         // persist the deletion
         this._deleter.deleteModelElement( this._newChild );
+
+        // TBD: deleter should return a promise
+        return promises.makeImmediatelyFulfilledPromise( values.nothing );
     }
 
     private _attributes : any;

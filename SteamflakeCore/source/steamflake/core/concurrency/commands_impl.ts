@@ -3,6 +3,8 @@
  */
 
 import commands = require( './commands' );
+import promises = require( './promises' );
+import values = require( '../utilities/values' );
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -27,7 +29,7 @@ export class AbstractCommand<T>
     ) {
         this._description = description;
         this._redoable = redoable;
-        this._state = commands.CommandState.Created;
+        this._state = commands.ECommandState.Created;
         this._title = title;
         this._undoable = undoable;
     }
@@ -43,8 +45,8 @@ export class AbstractCommand<T>
      * Executes this command.
      * @returns An arbitrary value resulting from the command execution.
      */
-    do() : T {
-        if ( this._state != commands.CommandState.Created ) {
+    do() : promises.IPromise<T> {
+        if ( this._state != commands.ECommandState.Created ) {
             throw new Error( "Illegal command state." );
         }
 
@@ -52,16 +54,16 @@ export class AbstractCommand<T>
             var result = this.execute();
 
             if ( this._undoable ) {
-                this._state = commands.CommandState.ReadyToUndo;
+                this._state = commands.ECommandState.ReadyToUndo;
             }
             else {
-                this._state = commands.CommandState.Done;
+                this._state = commands.ECommandState.Done;
             }
 
             return result;
         }
         catch ( e ) {
-            this._state = commands.CommandState.Error;
+            this._state = commands.ECommandState.Error;
             throw e;
         }
     }
@@ -70,46 +72,54 @@ export class AbstractCommand<T>
      * Executes this command for the first time.
      * @returns An arbitrary value resulting from the command execution.
      */
-    execute() : T {
+    execute() : promises.IPromise<T> {
         throw new Error( "Abstract method 'execute' must be overridden by derived class." );
     }
 
     /**
      * Repeats the execution of this command after it has been undone.
      */
-    redo() : void {
-        if ( this._state != commands.CommandState.ReadyToRedo ) {
-            throw new Error( "Illegal command state." );
+    redo() : promises.IPromise<values.ENothing> {
+
+        if ( this._state != commands.ECommandState.ReadyToRedo ) {
+            return promises.makeImmediatelyRejectedPromise<values.ENothing>( "Illegal command state." );
         }
 
-        try {
-            this.reexecute();
+        var result = this.reexecute();
 
+        /** Callback updates the state of this command after reeexecution. */
+        function updateCommandState( value : T ) {
             if ( this._undoable ) {
-                this._state = commands.CommandState.ReadyToUndo;
+                this._state = commands.ECommandState.ReadyToUndo;
             }
             else {
-                this._state = commands.CommandState.Done;
+                this._state = commands.ECommandState.Done;
             }
+            return values.nothing;
         }
-        catch ( e ) {
-            this._state = commands.CommandState.Error;
-            throw e;
+
+        /** Callback updates the state of this command after an error. */
+        function errorCommandState( reason : any ) {
+            this._state = commands.ECommandState.Error;
+            return reason;
         }
+
+        return result.then( updateCommandState, errorCommandState );
+
     }
 
     /**
      * Executes this command after it has been undone at least once.
      * @returns An arbitrary value resulting from the command execution.
      */
-    reexecute() : void {
-        this.execute();
+    reexecute() : promises.IPromise<T> {
+        return this.execute();
     }
 
     /**
      * The current status of this command.
      */
-    state() : commands.CommandState {
+    state() : commands.ECommandState {
         return this._state;
     }
 
@@ -123,31 +133,36 @@ export class AbstractCommand<T>
     /**
      * Reverts the execution of this command.
      */
-    undo() : void {
-        if ( this._state != commands.CommandState.ReadyToUndo ) {
-            throw new Error( "Illegal command state." );
+    undo() : promises.IPromise<values.ENothing> {
+
+        if ( this._state != commands.ECommandState.ReadyToUndo ) {
+            return promises.makeImmediatelyRejectedPromise<values.ENothing>( "Illegal command state." );
         }
 
-        try {
-            this.unexecute();
+        var result = this.unexecute();
 
+        function updateCommandState( value : values.ENothing ) {
             if ( this._redoable ) {
-                this._state = commands.CommandState.ReadyToRedo;
+                this._state = commands.ECommandState.ReadyToRedo;
             }
             else {
-                this._state = commands.CommandState.Undone;
+                this._state = commands.ECommandState.Undone;
             }
+            return values.nothing;
         }
-        catch ( e ) {
-            this._state = commands.CommandState.Error;
-            throw e;
+
+        function errorCommandState( reason : any ) {
+            this._state = commands.ECommandState.Error;
+            return reason;
         }
+
+        return result.then( updateCommandState, errorCommandState );
     }
 
     /**
      * Reverse the previous execution of this command.
      */
-    unexecute() : void {
+    unexecute() : promises.IPromise<values.ENothing> {
         throw new Error( "Abstract method 'unexecute' must be overridden by derived class." );
     }
 
@@ -158,7 +173,7 @@ export class AbstractCommand<T>
     private _redoable : boolean;
 
     /** The current status of this command. */
-    private _state : commands.CommandState;
+    private _state : commands.ECommandState;
 
     /** The title of this command. */
     private _title : string;
