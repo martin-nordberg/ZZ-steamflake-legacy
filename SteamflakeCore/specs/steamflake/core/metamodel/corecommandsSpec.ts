@@ -14,7 +14,7 @@ import registry = require( '../../../../source/steamflake/core/metamodel/registr
 describe( "Core Commands", function() {
 
     describe( "Attribute Change Command", function() {
-        var command : commands.ICommand<string>;
+        var command : commands.ICommand<elements.IModelElement>;
         var modelElement : elements.IModelElement;
 
         beforeEach( function() {

@@ -17,7 +17,7 @@ import values = require( '../utilities/values' );
  * Command to change an attribute of a model element.
  */
 class AttributeChangeCommand<Element extends elements.IModelElement,T>
-    extends commands_impl.AbstractCommand<T>
+    extends commands_impl.AbstractCommand<Element>
 {
 
     /**
@@ -30,34 +30,43 @@ class AttributeChangeCommand<Element extends elements.IModelElement,T>
         attributeName : string,
         newValue : T
     ) {
-        super( attributeTitle + " Change", "Change " + attributeTitle + " from \"" + modelElement[this._attributeName] + "\" to \"" + newValue + "\"" );
+
+        super(
+            attributeTitle + " Change",
+            "Change " + attributeTitle + " from \"" + modelElement[this._attributeName] + "\" to \"" + newValue + "\""
+        );
+
         this._attributeName = attributeName;
         this._modelElement = modelElement;
         this._newValue = newValue;
         this._oldValue = modelElement[this._attributeName];
         this._updater = updater;
+
     }
 
     public execute() {
+
         // make the change
         this._modelElement[this._attributeName] = this._newValue;
 
         // save the change persistently
-        this._updater.updateModelElement( this._modelElement, { changedAttributeNames:[this._attributeName], fail:function(err:any){/*TBD*/} } );
+        return this._updater.updateModelElement( this._modelElement, { changedAttributeNames:[this._attributeName] } );
 
-        // TBD: updater needs to return the promise
-        return promises.makeImmediatelyFulfilledPromise( this._newValue );
     }
 
     public unexecute() {
+
         // reverse the change
         this._modelElement[this._attributeName] = this._oldValue;
 
         // save the change persistently
-        this._updater.updateModelElement( this._modelElement, { changedAttributeNames:[this._attributeName], fail:function(err:any){/*TBD*/} } );
+        return this._updater.updateModelElement(
+            this._modelElement,
+            { changedAttributeNames:[this._attributeName] }
+        ).then( function( modelElement : elements.IModelElement ) {
+            return values.nothing;
+        } );
 
-        // TBD: wrap the updater promise
-        return promises.makeImmediatelyFulfilledPromise( values.nothing );
     }
 
     private _attributeName : string;
@@ -106,6 +115,7 @@ class ElementCreationCommand<ParentElement extends elements.IContainerElement>
     }
 
     public execute() {
+
         // create the new element and add it to its parent
         this._newChild = this._maker["make" + this._childType]( this._parentElement , this._attributes );
         this._parentElement.childElements.push( this._newChild );
@@ -114,13 +124,12 @@ class ElementCreationCommand<ParentElement extends elements.IContainerElement>
         this._modelElementRegistry.registerModelElement( this._newChild );
 
         // persist the new element
-        this._creator.createModelElement( this._newChild );
+        return this._creator.createModelElement( this._newChild );
 
-        // TBD: creator should return the promise
-        return promises.makeImmediatelyFulfilledPromise( this._newChild );
     }
 
     public unexecute() {
+
         // remove the new element from its parent
         var index = this._parentElement.childElements.indexOf( this._newChild );
         this._parentElement.childElements.splice(index, 1);
@@ -129,10 +138,10 @@ class ElementCreationCommand<ParentElement extends elements.IContainerElement>
         this._modelElementRegistry.unregisterModelElement( this._newChild );
 
         // persist the deletion
-        this._deleter.deleteModelElement( this._newChild );
+        return this._deleter.deleteModelElement( this._newChild ).then( function( modelElement : elements.IModelElement ) {
+            return values.nothing;
+        } );
 
-        // TBD: deleter should return a promise
-        return promises.makeImmediatelyFulfilledPromise( values.nothing );
     }
 
     private _attributes : any;
@@ -162,7 +171,7 @@ export function makeAttributeChangeCommand<Element extends elements.IModelElemen
     attributeTitle : string,
     attributeName : string,
     newValue : T
-) : commands.ICommand<T> {
+) : commands.ICommand<Element> {
     return new AttributeChangeCommand( updater, modelElement, attributeTitle, attributeName, newValue );
 }
 

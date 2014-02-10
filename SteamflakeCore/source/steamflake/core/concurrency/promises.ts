@@ -123,14 +123,12 @@ class Promise<T>
 
         // wrapper passes fulfillment of this promise on to the resulting promise
         function chainedOnFulfilled( value : T ) {
-            if ( onFulfilled ) {
-                try {
-                    var chainedValue = onFulfilled( value );
-                    result.fulfill( chainedValue );
-                }
-                catch ( err ) {
-                    result.reject( err );
-                }
+            try {
+                var chainedValue = onFulfilled( value );
+                result.fulfill( chainedValue );
+            }
+            catch ( err ) {
+                result.reject( err );
             }
         }
 
