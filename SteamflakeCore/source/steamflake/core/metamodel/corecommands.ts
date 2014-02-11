@@ -49,8 +49,17 @@ class AttributeChangeCommand<Element extends elements.IModelElement,T>
         // make the change
         this._modelElement[this._attributeName] = this._newValue;
 
+        // error handling: reverse the change
+        function revert( reason : any ) {
+            this._modelElement[this._attributeName] = this._oldValue;
+            return reason;
+        }
+
         // save the change persistently
-        return this._updater.updateModelElement( this._modelElement, { changedAttributeNames:[this._attributeName] } );
+        return this._updater.updateModelElement(
+            this._modelElement,
+            { changedAttributeNames:[this._attributeName] }
+        ).then( elements.passThrough, revert );
 
     }
 
@@ -59,13 +68,17 @@ class AttributeChangeCommand<Element extends elements.IModelElement,T>
         // reverse the change
         this._modelElement[this._attributeName] = this._oldValue;
 
+        // error handling: redo the change
+        function revert( reason : any ) {
+            this._modelElement[this._attributeName] = this._newValue;
+            return reason;
+        }
+
         // save the change persistently
         return this._updater.updateModelElement(
             this._modelElement,
             { changedAttributeNames:[this._attributeName] }
-        ).then( function( modelElement : elements.IModelElement ) {
-            return values.nothing;
-        } );
+        ).then( elements.ignore, revert );
 
     }
 
@@ -123,8 +136,16 @@ class ElementCreationCommand<ParentElement extends elements.IContainerElement>
         // register the new element
         this._modelElementRegistry.registerModelElement( this._newChild );
 
+        // error handling: abandon the new element
+        function revert( reason : any ) {
+            var index = this._parentElement.childElements.indexOf( this._newChild );
+            this._parentElement.childElements.splice(index, 1);
+            this._modelElementRegistry.unregisterModelElement( this._newChild );
+            return reason;
+        }
+
         // persist the new element
-        return this._creator.createModelElement( this._newChild );
+        return this._creator.createModelElement( this._newChild ).then( elements.passThrough, revert );
 
     }
 
@@ -132,15 +153,19 @@ class ElementCreationCommand<ParentElement extends elements.IContainerElement>
 
         // remove the new element from its parent
         var index = this._parentElement.childElements.indexOf( this._newChild );
-        this._parentElement.childElements.splice(index, 1);
+        var oldChild = this._parentElement.childElements.splice(index, 1);
 
         // unregister it
         this._modelElementRegistry.unregisterModelElement( this._newChild );
 
+        // error handling: undo the deletion
+        function revert( reason : any ) {
+            this._parentElement.childElements.splice( index, 0, oldChild );
+            this._modelElementRegistry.registerModelElement( oldChild );
+        }
+
         // persist the deletion
-        return this._deleter.deleteModelElement( this._newChild ).then( function( modelElement : elements.IModelElement ) {
-            return values.nothing;
-        } );
+        return this._deleter.deleteModelElement( this._newChild ).then( elements.ignore, revert );
 
     }
 

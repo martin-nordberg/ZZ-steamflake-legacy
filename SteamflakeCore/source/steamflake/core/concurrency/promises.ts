@@ -3,6 +3,8 @@
  * Module: steamflake/core/concurrency/promises
  */
 
+import timing = require( './timing' );
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -198,7 +200,7 @@ class Promise<T>
                 self.onFulfilled();
             }
 
-            self.queueCallback( fulfillRecursively );
+            timing.doWhenIdle( fulfillRecursively );
         }
 
     }
@@ -220,18 +222,9 @@ class Promise<T>
                 self.onRejected();
             }
 
-            self.queueCallback( rejectRecursively );
+            timing.doWhenIdle( rejectRecursively );
         }
 
-    }
-
-    /**
-     * Queues a callback into the event loop.
-     * @param callback The callback to be executed when idle.
-     */
-    private queueCallback( callback : () => void ) {
-        // TBD: setImmediate
-        setTimeout( callback, 0 );
     }
 
   ////

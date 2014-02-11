@@ -3,7 +3,7 @@
  * Module: steamflake/core/utilities/commands
  */
 
-import promises = require( 'promises' );
+import promises = require( './promises' );
 import values = require( '../utilities/values' );
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -36,14 +36,14 @@ export enum ECommandState {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * Interface to a general reversible command action.
+ * Interface to a reversible command action.
  */
 export interface IReversibleCommand {
 
     /**
-     * @returns A detailed description of this command.
+     * @returns A detailed description of this command. Note: read-only.
      */
-    description() : string;
+    description : string;
 
     /**
      * Repeats the execution of this command after it has been undone.
@@ -51,14 +51,14 @@ export interface IReversibleCommand {
     redo() : promises.IPromise<values.ENothing>;
 
     /**
-     * The current status of this command.
+     * The current status of this command. Note: read-only.
      */
-    state() : ECommandState;
+    state : ECommandState;
 
     /**
-     * @returns A brief (generic) description of this command.
+     * @returns A brief (generic) description of this command. Note: read-only.
      */
-    title() : string;
+    title : string;
 
     /**
      * Reverts the execution of this command.
@@ -91,12 +91,26 @@ export interface ICommand<T>
  */
 export interface ICommandHistory {
 
-    /**
-     * Adds a command to this history.
-     */
-    add( command : IReversibleCommand ) : void;
+    /** Whether the last command can be undone. */
+    canUndo : boolean;
 
-    // TBD: undo, redo, max depth, etc.
+    /** Whether there is an undone command that can be redone. */
+    canRedo : boolean;
+
+    /**
+     * Adds a command to this history; executes it [do()] after any already queued commands are done.
+     */
+    queue<T>( command : ICommand<T> ) : promises.IPromise<T>;
+
+    /**
+     * Redoes the last undone command.
+     */
+    redo() : promises.IPromise<values.ENothing>;
+
+    /**
+     * Undoes the last command (or the last command not already undone).
+     */
+    undo() : promises.IPromise<values.ENothing>;
 
 }
 
@@ -110,26 +124,178 @@ class NullCommandHistory
     implements ICommandHistory
 {
 
-    /**
-     * Adds a command to this history.
-     */
-    add( command : IReversibleCommand ) : void {
-        // do nothing
+    /** Whether the last command can be undone. */
+    public get canUndo() : boolean {
+        return false;
     }
 
-    // TBD: undo, redo, max depth, etc.
+    /** Whether there is an undone command that can be redone. */
+    public get canRedo() : boolean {
+        return false;
+    }
+
+    /**
+     * Adds a command to this history; immediately executes it
+     */
+    public queue<T>( command : ICommand<T> ) : promises.IPromise<T> {
+        return command.do();
+    }
+
+    /**
+     * Redoes the last undone command.
+     */
+    public redo() : promises.IPromise<values.ENothing> {
+        throw new Error( "Illegal command history state: nothing to redo" );
+    }
+
+    /**
+     * Undoes the last command (or the last command not already undone).
+     */
+    public undo() : promises.IPromise<values.ENothing> {
+        throw new Error( "Illegal command history state: nothing to undo" );
+    }
 
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// TBD: general purpose command history
+/**
+ * A general purpose history of completed command actions.
+ */
+class CommandHistory
+    implements ICommandHistory
+{
+
+    constructor( maxUndoCount : number ) {
+        this._doneCommands = [];
+        this._maxUndoCount = maxUndoCount;
+        this._queue = promises.makeImmediatelyFulfilledPromise( values.nothing );
+        this._queuedCommandCount = 0;
+        this._undoneCommands = [];
+    }
+
+    /** Whether the last command can be undone. */
+    public get canUndo() : boolean {
+        var result = this._doneCommands.length > 0;
+        result = result && this._doneCommands[this._doneCommands.length-1].state === ECommandState.ReadyToUndo;
+        result = result && this._queuedCommandCount === 0;
+        return result;
+    }
+
+    /** Whether there is an undone command that can be redone. */
+    public get canRedo() : boolean {
+        var result = this._undoneCommands.length > 0;
+        result = result && this._undoneCommands[this._undoneCommands.length-1].state === ECommandState.ReadyToRedo;
+        return result;
+    }
+
+    /**
+     * Adds a command to this history; immediately executes it
+     */
+    public queue<T>( command : ICommand<T> ) : promises.IPromise<T> {
+
+        var self = this;
+        var result = promises.makePromise<T>();
+
+        // count the commands waiting
+        self._queuedCommandCount += 1;
+
+        // cannot undo after backtracking and starting a new trail
+        self._undoneCommands = [];
+
+        /**
+         * Puts a successfully completed command into the undo stack.
+         * @param value The value returned by the command.
+         */
+        function maintainHistory( value : T ) {
+            self._queuedCommandCount -= 1;
+            if ( command.state === ECommandState.ReadyToUndo ) {
+                self._doneCommands.push( command );
+                if ( self._doneCommands.length > self._maxUndoCount ) {
+                    self._doneCommands.slice( 0, 1 );
+                }
+            }
+            else {
+                self._doneCommands = [];
+            }
+            result.fulfill( value );
+            return values.nothing;
+        }
+
+        /**
+         * Handles a failed command
+         * @param reason The reason for failure.
+         */
+        function handleError( reason : any ) {
+            self._queuedCommandCount -= 1;
+            self._doneCommands = [];
+            result.reject( reason );
+            return reason;
+        }
+
+        /**
+         * Executes the command
+         */
+        function doCommand( value : values.ENothing ) {
+            command.do().then( maintainHistory, handleError );
+            return values.nothing;
+        }
+
+        // queue the command behind any that are in progress
+        if ( self._queuedCommandCount > 1 ) {
+            self._queue = self._queue.then( doCommand, handleError );
+        }
+        else {
+            self._queue = promises.makeImmediatelyFulfilledPromise( values.nothing ).then( doCommand );
+        }
+
+        return result;
+
+    }
+
+    /**
+     * Redoes the last undone command.
+     */
+    public redo() : promises.IPromise<values.ENothing> {
+        // TBD
+        throw new Error( "Illegal command history state: nothing to redo" );
+    }
+
+    /**
+     * Undoes the last command (or the last command not already undone).
+     */
+    public undo() : promises.IPromise<values.ENothing> {
+        // TBD
+        throw new Error( "Illegal command history state: nothing to undo" );
+    }
+
+  ////
+
+    private _doneCommands : IReversibleCommand[];
+
+    private _maxUndoCount : number;
+
+    private _queue : promises.IPromise<values.ENothing>;
+
+    private _queuedCommandCount : number;
+
+    private _undoneCommands : IReversibleCommand[];
+
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /** Creates a do-nothing command history. */
 export function makeNullCommandHistory() : ICommandHistory {
     return new NullCommandHistory();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/** Creates a general purpose command history. */
+export function makeCommandHistory( maxUndoCount : number ) : ICommandHistory {
+    return new CommandHistory( maxUndoCount );
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -14,6 +14,7 @@ import values = require( '../utilities/values' );
 export class AbstractCommand<T>
     implements commands.ICommand<T>
 {
+
     /**
      * Constructs a new abstract command.
      * @param title The title of the command.
@@ -37,15 +38,18 @@ export class AbstractCommand<T>
     /**
      * @returns A detailed description of this command.
      */
-    description() : string {
+    public get description() : string {
         return this._description;
+    }
+    public set description( value : string ) {
+        throw new Error( "Attempted to change read only attribute - description." );
     }
 
     /**
      * Executes this command.
      * @returns An arbitrary value resulting from the command execution.
      */
-    do() : promises.IPromise<T> {
+    public do() : promises.IPromise<T> {
         if ( this._state != commands.ECommandState.Created ) {
             throw new Error( "Illegal command state." );
         }
@@ -69,17 +73,9 @@ export class AbstractCommand<T>
     }
 
     /**
-     * Executes this command for the first time.
-     * @returns An arbitrary value resulting from the command execution.
-     */
-    execute() : promises.IPromise<T> {
-        throw new Error( "Abstract method 'execute' must be overridden by derived class." );
-    }
-
-    /**
      * Repeats the execution of this command after it has been undone.
      */
-    redo() : promises.IPromise<values.ENothing> {
+    public redo() : promises.IPromise<values.ENothing> {
 
         if ( this._state != commands.ECommandState.ReadyToRedo ) {
             return promises.makeImmediatelyRejectedPromise<values.ENothing>( "Illegal command state." );
@@ -109,31 +105,29 @@ export class AbstractCommand<T>
     }
 
     /**
-     * Executes this command after it has been undone at least once.
-     * @returns An arbitrary value resulting from the command execution.
-     */
-    reexecute() : promises.IPromise<T> {
-        return this.execute();
-    }
-
-    /**
      * The current status of this command.
      */
-    state() : commands.ECommandState {
+    public get state() : commands.ECommandState {
         return this._state;
+    }
+    public set state( value : commands.ECommandState ) {
+        throw new Error( "Attempted to change read only attribute - state." );
     }
 
     /**
      * @returns A brief (generic) description of this command.
      */
-    title() : string {
+    public get title() : string {
         return this._title;
+    }
+    public set title( value : string ) {
+        throw new Error( "Attempted to change read only attribute - title." );
     }
 
     /**
      * Reverts the execution of this command.
      */
-    undo() : promises.IPromise<values.ENothing> {
+    public undo() : promises.IPromise<values.ENothing> {
 
         if ( this._state != commands.ECommandState.ReadyToUndo ) {
             return promises.makeImmediatelyRejectedPromise<values.ENothing>( "Illegal command state." );
@@ -159,12 +153,32 @@ export class AbstractCommand<T>
         return result.then( updateCommandState, errorCommandState );
     }
 
+  ////
+
+    /**
+     * Executes this command for the first time.
+     * @returns An arbitrary value resulting from the command execution.
+     */
+    public/*protected*/ execute() : promises.IPromise<T> {
+        throw new Error( "Abstract method 'execute' must be overridden by derived class." );
+    }
+
+    /**
+     * Executes this command after it has been undone at least once.
+     * @returns An arbitrary value resulting from the command execution.
+     */
+    public/*protected*/ reexecute() : promises.IPromise<T> {
+        return this.execute();
+    }
+
     /**
      * Reverse the previous execution of this command.
      */
-    unexecute() : promises.IPromise<values.ENothing> {
+    public/*protected*/ unexecute() : promises.IPromise<values.ENothing> {
         throw new Error( "Abstract method 'unexecute' must be overridden by derived class." );
     }
+
+  ////
 
     /** A longer description of this command. */
     private _description : string;
