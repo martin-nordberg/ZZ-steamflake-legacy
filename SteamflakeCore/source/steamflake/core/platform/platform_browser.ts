@@ -1,19 +1,18 @@
 
 /**
- * Module: steamflake/core/concurrency/timing
+ * Module: steamflake/core/platform/platform_browser
  */
-
-import platform = require( '../platform/platform' );
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * Executes a callback the next time the event loop is idle.
+ * Executes a task during the next idle point of the event loop.
  * @param task The callback task to execute.
  */
-export function doWhenIdle( task : () => void ) {
-    platform.doWhenIdle( task );
+export function doWhenIdle( task : () => void ) : void {
+    // TBD: use setImmediate when available
+    // TBD: consider Barnes&Noble setImmediate shim
+    setTimeout( task, 0 );
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-

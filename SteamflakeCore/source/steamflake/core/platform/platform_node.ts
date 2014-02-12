@@ -1,19 +1,18 @@
 
 /**
- * Module: steamflake/core/concurrency/timing
+ * Module: steamflake/core/platform/platform_node
  */
 
-import platform = require( '../platform/platform' );
+///<reference path='../../../thirdparty/node.d.ts'/>
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * Executes a callback the next time the event loop is idle.
+ * Executes a task during the next idle point of the event loop.
  * @param task The callback task to execute.
  */
-export function doWhenIdle( task : () => void ) {
-    platform.doWhenIdle( task );
+export function doWhenIdle( task : () => void ) : void {
+    setImmediate( task );
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
