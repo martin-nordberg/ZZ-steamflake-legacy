@@ -50,26 +50,35 @@ export class AbstractCommand<T>
      * @returns An arbitrary value resulting from the command execution.
      */
     public do() : promises.IPromise<T> {
-        if ( this._state != commands.ECommandState.Created ) {
-            throw new Error( "Illegal command state." );
+
+        var self = this;
+
+        if ( self._state != commands.ECommandState.Created ) {
+            return promises.makeImmediatelyRejectedPromise<T>( "Illegal command state." );
         }
 
-        try {
-            var result = this.execute();
+        self._state = commands.ECommandState.Executing;
 
-            if ( this._undoable ) {
-                this._state = commands.ECommandState.ReadyToUndo;
+        var result = self.execute();
+
+        /** Callback updates the state of this command after execution. */
+        function updateCommandState( value : T ) {
+            if ( self._undoable ) {
+                self._state = commands.ECommandState.ReadyToUndo;
             }
             else {
-                this._state = commands.ECommandState.Done;
+                self._state = commands.ECommandState.Done;
             }
+            return value;
+        }
 
-            return result;
+        /** Callback updates the state of this command after an error. */
+        function errorCommandState( reason : any ) {
+            self._state = commands.ECommandState.Error;
+            return reason;
         }
-        catch ( e ) {
-            this._state = commands.ECommandState.Error;
-            throw e;
-        }
+
+        return result.then( updateCommandState, errorCommandState );
     }
 
     /**
@@ -77,26 +86,30 @@ export class AbstractCommand<T>
      */
     public redo() : promises.IPromise<values.ENothing> {
 
-        if ( this._state != commands.ECommandState.ReadyToRedo ) {
+        var self = this;
+
+        if ( self._state != commands.ECommandState.ReadyToRedo ) {
             return promises.makeImmediatelyRejectedPromise<values.ENothing>( "Illegal command state." );
         }
 
-        var result = this.reexecute();
+        self._state = commands.ECommandState.Executing;
 
-        /** Callback updates the state of this command after reeexecution. */
+        var result = self.reexecute();
+
+        /** Callback updates the state of this command after re-execution. */
         function updateCommandState( value : T ) {
-            if ( this._undoable ) {
-                this._state = commands.ECommandState.ReadyToUndo;
+            if ( self._undoable ) {
+                self._state = commands.ECommandState.ReadyToUndo;
             }
             else {
-                this._state = commands.ECommandState.Done;
+                self._state = commands.ECommandState.Done;
             }
             return values.nothing;
         }
 
         /** Callback updates the state of this command after an error. */
         function errorCommandState( reason : any ) {
-            this._state = commands.ECommandState.Error;
+            self._state = commands.ECommandState.Error;
             return reason;
         }
 
@@ -129,24 +142,30 @@ export class AbstractCommand<T>
      */
     public undo() : promises.IPromise<values.ENothing> {
 
-        if ( this._state != commands.ECommandState.ReadyToUndo ) {
+        var self = this;
+
+        if ( self._state != commands.ECommandState.ReadyToUndo ) {
             return promises.makeImmediatelyRejectedPromise<values.ENothing>( "Illegal command state." );
         }
 
-        var result = this.unexecute();
+        self._state = commands.ECommandState.Executing;
 
+        var result = self.unexecute();
+
+        /** Callback updates the state of this command after un-execution. */
         function updateCommandState( value : values.ENothing ) {
-            if ( this._redoable ) {
-                this._state = commands.ECommandState.ReadyToRedo;
+            if ( self._redoable ) {
+                self._state = commands.ECommandState.ReadyToRedo;
             }
             else {
-                this._state = commands.ECommandState.Undone;
+                self._state = commands.ECommandState.Undone;
             }
             return values.nothing;
         }
 
+        /** Callback updates the state of this command after an error. */
         function errorCommandState( reason : any ) {
-            this._state = commands.ECommandState.Error;
+            self._state = commands.ECommandState.Error;
             return reason;
         }
 

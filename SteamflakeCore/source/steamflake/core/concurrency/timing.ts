@@ -10,7 +10,7 @@
  * @param task The callback task to execute.
  */
 export function doWhenIdle( task : () => void ) {
-    // TBD: setImmediate
+    // TBD: setImmediate & feature detection
     setTimeout( task, 0 );
 }
 

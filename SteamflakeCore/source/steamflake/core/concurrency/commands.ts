@@ -16,6 +16,9 @@ export enum ECommandState {
     /** Not yet executed at all. */
     Created,
 
+    /* Currently executing. */
+    Executing,
+
     /** An attempted execution resulted in an exception. */
     Error,
 
@@ -227,8 +230,9 @@ class CommandHistory
          * @param reason The reason for failure.
          */
         function handleError( reason : any ) {
-            self._queuedCommandCount -= 1;
+            self._queuedCommandCount = 0;
             self._doneCommands = [];
+            self._undoneCommands = [];
             result.reject( reason );
             return reason;
         }
@@ -257,16 +261,132 @@ class CommandHistory
      * Redoes the last undone command.
      */
     public redo() : promises.IPromise<values.ENothing> {
-        // TBD
-        throw new Error( "Illegal command history state: nothing to redo" );
+
+        var self = this;
+
+        if ( !self.canRedo ) {
+            throw new Error( "Illegal command history state: nothing to redo" );
+        }
+
+        var result = promises.makePromise<values.ENothing>();
+
+        // count the commands waiting
+        self._queuedCommandCount += 1;
+
+        // get the command to redo
+        var command = self._undoneCommands.pop();
+
+        /**
+         * Puts a successfully completed command into the undo stack.
+         */
+        function maintainHistory( value : values.ENothing ) {
+            self._queuedCommandCount -= 1;
+            if ( command.state === ECommandState.ReadyToUndo ) {
+                self._doneCommands.push( command );
+            }
+            else {
+                self._doneCommands = [];
+            }
+            result.fulfill( values.nothing );
+            return values.nothing;
+        }
+
+        /**
+         * Handles a failed command
+         * @param reason The reason for failure.
+         */
+        function handleError( reason : any ) {
+            self._queuedCommandCount = 0;
+            self._doneCommands = [];
+            self._undoneCommands = [];
+            result.reject( reason );
+            return reason;
+        }
+
+        /**
+         * Re-executes the command
+         */
+        function redoCommand( value : values.ENothing ) {
+            command.redo().then( maintainHistory, handleError );
+            return values.nothing;
+        }
+
+        // queue the command behind any that are in progress
+        if ( self._queuedCommandCount > 1 ) {
+            self._queue = self._queue.then( redoCommand, handleError );
+        }
+        else {
+            self._queue = promises.makeImmediatelyFulfilledPromise( values.nothing ).then( redoCommand );
+        }
+
+        return result;
+
     }
 
     /**
      * Undoes the last command (or the last command not already undone).
      */
     public undo() : promises.IPromise<values.ENothing> {
-        // TBD
-        throw new Error( "Illegal command history state: nothing to undo" );
+
+        var self = this;
+
+        if ( !self.canUndo ) {
+            throw new Error( "Illegal command history state: nothing to undo" );
+        }
+
+        var result = promises.makePromise<values.ENothing>();
+
+        // count the commands waiting
+        self._queuedCommandCount += 1;
+
+        // get the command to undo
+        var command = self._doneCommands.pop();
+
+        /**
+         * Puts a successfully completed command into the undo stack.
+         */
+        function maintainHistory( value : values.ENothing ) {
+            self._queuedCommandCount -= 1;
+            if ( command.state === ECommandState.ReadyToRedo ) {
+                self._undoneCommands.push( command );
+            }
+            else {
+                self._undoneCommands = [];
+            }
+            result.fulfill( values.nothing );
+            return values.nothing;
+        }
+
+        /**
+         * Handles a failed command
+         * @param reason The reason for failure.
+         */
+        function handleError( reason : any ) {
+            self._queuedCommandCount = 0;
+            self._doneCommands = [];
+            self._undoneCommands = [];
+            result.reject( reason );
+            return reason;
+        }
+
+        /**
+         * Unexecutes the command
+         */
+        function undoCommand( value : values.ENothing ) {
+            command.undo().then( maintainHistory, handleError );
+            return values.nothing;
+        }
+
+        // queue the command behind any that are in progress
+        if ( self._queuedCommandCount > 1 ) {
+            self._queue = self._queue.then( undoCommand, handleError );
+        }
+        else {
+            self._queue = promises.makeImmediatelyFulfilledPromise( values.nothing ).then( undoCommand );
+        }
+
+        return result;
+
     }
 
   ////

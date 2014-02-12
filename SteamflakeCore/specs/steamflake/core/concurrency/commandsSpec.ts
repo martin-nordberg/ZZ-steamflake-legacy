@@ -122,7 +122,8 @@ describe( "Commands", function() {
 
     function executeOneImmediateCommand( done ) {
         function checkOutcome( value : string ) {
-            expect( value ).toEqual( "executed" )
+            expect( value ).toEqual( "executed" );
+            expect( cmds[0].state ).toEqual( commands.ECommandState.ReadyToUndo );
             expect( cmds[0].executionCount ).toEqual( 1 );
             expect( cmds[0].unexecutionCount ).toEqual( 0 );
             done();
@@ -133,6 +134,7 @@ describe( "Commands", function() {
     function executeOneDeferredCommand( done ) {
         function checkOutcome( value : string ) {
             expect( value ).toEqual( "executed" )
+            expect( cmds[1].state ).toEqual( commands.ECommandState.ReadyToUndo );
             expect( cmds[1].executionCount ).toEqual( 1 );
             expect( cmds[1].unexecutionCount ).toEqual( 0 );
             done();
@@ -145,6 +147,7 @@ describe( "Commands", function() {
             return function( value : string ) {
                 expect( value ).toEqual( "executed" )
                 for ( var i=0 ; i<sequence ; i+=1 ) {
+                    expect( cmds[i].state ).toEqual( commands.ECommandState.ReadyToUndo );
                     expect( cmds[i].executionCount ).toEqual( 1 );
                     expect( cmds[i].unexecutionCount ).toEqual( 0 );
                 }
@@ -205,6 +208,58 @@ describe( "Commands", function() {
                 done();
             }
             commandHistory.queue( cmds[0] ).then( checkOutcome );
+        } );
+
+        it( "Undoes a command", function( done ) {
+            function checkOutcome( value : values.ENothing ) {
+                expect( cmds[0].state ).toEqual( commands.ECommandState.ReadyToRedo );
+                expect( commandHistory.canUndo ).toBeFalsy();
+                expect( commandHistory.canRedo ).toBeTruthy();
+                done();
+            }
+            function undo( value : string ) {
+                expect( cmds[0].state ).toEqual( commands.ECommandState.ReadyToUndo );
+                commandHistory.undo().then( checkOutcome );
+            }
+            commandHistory.queue( cmds[0] ).then( undo );
+        } );
+
+        it( "Undoes and redoes commands", function( done ) {
+            function checkOutcome( value : values.ENothing ) {
+                expect( cmds[0].state ).toEqual( commands.ECommandState.ReadyToUndo );
+                expect( cmds[1].state ).toEqual( commands.ECommandState.ReadyToUndo );
+                expect( cmds[2].state ).toEqual( commands.ECommandState.ReadyToRedo );
+                expect( commandHistory.canUndo ).toBeTruthy();
+                expect( commandHistory.canRedo ).toBeTruthy();
+                done();
+            }
+            function redo1( value : values.ENothing ) {
+                expect( cmds[0].state ).toEqual( commands.ECommandState.ReadyToUndo );
+                expect( cmds[1].state ).toEqual( commands.ECommandState.ReadyToRedo );
+                expect( cmds[2].state ).toEqual( commands.ECommandState.ReadyToRedo );
+                expect( commandHistory.canUndo ).toBeTruthy();
+                expect( commandHistory.canRedo ).toBeTruthy();
+                commandHistory.redo().then( checkOutcome );
+            }
+            function undo1( value : values.ENothing ) {
+                expect( cmds[0].state ).toEqual( commands.ECommandState.ReadyToUndo );
+                expect( cmds[1].state ).toEqual( commands.ECommandState.ReadyToUndo );
+                expect( cmds[2].state ).toEqual( commands.ECommandState.ReadyToRedo );
+                expect( commandHistory.canUndo ).toBeTruthy();
+                expect( commandHistory.canRedo ).toBeTruthy();
+                commandHistory.undo().then( redo1 );
+            }
+            function undo2( value : string ) {
+                expect( cmds[0].state ).toEqual( commands.ECommandState.ReadyToUndo );
+                expect( cmds[1].state ).toEqual( commands.ECommandState.ReadyToUndo );
+                expect( cmds[2].state ).toEqual( commands.ECommandState.ReadyToUndo );
+                expect( commandHistory.canUndo ).toBeTruthy();
+                expect( commandHistory.canRedo ).toBeFalsy();
+                commandHistory.undo().then( undo1 );
+            }
+            commandHistory.queue( cmds[0] );
+            commandHistory.queue( cmds[1] );
+            commandHistory.queue( cmds[2] ).then( undo2 );
         } );
 
     } );
