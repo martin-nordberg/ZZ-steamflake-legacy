@@ -21,15 +21,15 @@ export interface IModelElementRegistry {
 
     /**
      * Adds a model element to this registry.
-     * @param swModelElement The model element to be added.
+     * @param modelElement The model element to be added.
      */
-    registerModelElement( swModelElement : elements.IModelElement ) : void;
+    registerModelElement( modelElement : elements.IModelElement ) : void;
 
     /**
      * Removes a model element from this registry.
-     * @param swModelElement The model element to remove.
+     * @param modelElement The model element to remove.
      */
-    unregisterModelElement( swModelElement : elements.IModelElement ) : void;
+    unregisterModelElement( modelElement : elements.IModelElement ) : void;
 
 }
 
