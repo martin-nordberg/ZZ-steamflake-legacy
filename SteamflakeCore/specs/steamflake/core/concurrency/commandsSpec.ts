@@ -103,6 +103,52 @@ class DeferredCommand
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+class ExecutionCheckingCommand
+    extends commands_impl.AbstractCommand<values.ENothing> {
+
+    constructor( commandHistory : commands.ICommandHistory ) {
+        super( "ExecutionChecking", "ExecutionChecking" );
+        this._commandHistory = commandHistory;
+    }
+
+    public/*protected*/ execute() : promises.IPromise<values.ENothing> {
+
+        var self = this;
+        var result = promises.makePromise<values.ENothing>();
+
+        function doIt() {
+            expect( self._commandHistory.isExecutingCommand ).toBeTruthy();
+            result.fulfill( values.nothing );
+        }
+
+        timing.doWhenIdle( doIt );
+
+        return result;
+
+    }
+
+    public/*protected*/ unexecute() : promises.IPromise<values.ENothing> {
+
+        var self = this;
+        var result = promises.makePromise<values.ENothing>();
+
+        function undoIt() {
+            expect( self._commandHistory.isExecutingCommand ).toBeTruthy();
+            result.fulfill( values.nothing );
+        }
+
+        timing.doWhenIdle( undoIt );
+
+        return result;
+
+    }
+
+    private _commandHistory : commands.ICommandHistory;
+
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 // TBD: ErrorCommand
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -111,6 +157,7 @@ describe( "Commands", function() {
 
     var cmds : SampleCommand[];
     var commandHistory : commands.ICommandHistory;
+    var xcmd : ExecutionCheckingCommand;
 
     beforeEach( function() {
         cmds = [];
@@ -164,10 +211,21 @@ describe( "Commands", function() {
         expect( commandHistory.canUndo ).toBeFalsy();
     }
 
+    function executeWithExecutionChecking( done ) {
+        function checkOutcome( value : values.ENothing ) {
+            expect( commandHistory.isExecutingCommand ).toBeFalsy();
+            done();
+        }
+        expect( commandHistory.isExecutingCommand ).toBeFalsy();
+        commandHistory.queue( xcmd ).then( checkOutcome );
+        expect( commandHistory.isExecutingCommand ).toBeFalsy();
+    }
+
     describe( "Null Command History", function() {
 
         beforeEach( function() {
             commandHistory = commands.makeNullCommandHistory();
+            xcmd = new ExecutionCheckingCommand( commandHistory );
         } );
 
         it( "Cannot redo or undo when empty", checkEmptyHistory );
@@ -177,6 +235,8 @@ describe( "Commands", function() {
         it( "Executes one deferred command successfully", executeOneDeferredCommand );
 
         it( "Executes a sequence of commands successfully", executeCommandSequence );
+
+        it( "Tracks execution state correctly", executeWithExecutionChecking );
 
         it( "Cannot undo", function( done ) {
             function checkOutcome( value : string ) {
@@ -192,6 +252,7 @@ describe( "Commands", function() {
 
         beforeEach( function() {
             commandHistory = commands.makeCommandHistory( 10 );
+            xcmd = new ExecutionCheckingCommand( commandHistory );
         } );
 
         it( "Cannot redo or undo when empty", checkEmptyHistory );
@@ -201,6 +262,8 @@ describe( "Commands", function() {
         it( "Executes one deferred command successfully", executeOneDeferredCommand );
 
         it( "Executes a sequence of commands successfully", executeCommandSequence );
+
+        it( "Tracks execution state correctly", executeWithExecutionChecking );
 
         it( "Can undo a done command", function( done ) {
             function checkOutcome( value : string ) {

@@ -75,6 +75,7 @@ export class AbstractCommand<T>
         /** Callback updates the state of this command after an error. */
         function errorCommandState( reason : any ) {
             self._state = commands.ECommandState.Error;
+            self.revertTriggeringAction();
             return reason;
         }
 
@@ -115,6 +116,13 @@ export class AbstractCommand<T>
 
         return result.then( updateCommandState, errorCommandState );
 
+    }
+
+    /**
+     * Reverts the initiating action (if any) that triggered this command after command completion failure.
+     */
+    public revertTriggeringAction() : void {
+        // do nothing; override if needed in a derived class
     }
 
     /**

@@ -85,6 +85,11 @@ export interface ICommand<T>
      */
     do() : promises.IPromise<T>;
 
+    /**
+     * Reverts the initiating action (if any) that triggered this command after command completion failure.
+     */
+    revertTriggeringAction() : void;
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -94,11 +99,14 @@ export interface ICommand<T>
  */
 export interface ICommandHistory {
 
-    /** Whether the last command can be undone. */
+    /** Whether there is an undone command that can be redone. Note: read-only. */
+    canRedo : boolean;
+
+    /** Whether the last command can be undone. Note: read-only. */
     canUndo : boolean;
 
-    /** Whether there is an undone command that can be redone. */
-    canRedo : boolean;
+    /** Whether a command is currently executing. Note: read-only. */
+    isExecutingCommand : boolean;
 
     /**
      * Adds a command to this history; executes it [do()] after any already queued commands are done.
@@ -127,21 +135,65 @@ class NullCommandHistory
     implements ICommandHistory
 {
 
+    /** Whether there is an undone command that can be redone. */
+    public get canRedo() : boolean {
+        return false;
+    }
+    public set canRedo( value : boolean ) {
+        throw new Error( "Attempted to set read-only attribute: canRedo." );
+    }
+
     /** Whether the last command can be undone. */
     public get canUndo() : boolean {
         return false;
     }
+    public set canUndo( value : boolean ) {
+        throw new Error( "Attempted to set read-only attribute: canUndo." );
+    }
 
-    /** Whether there is an undone command that can be redone. */
-    public get canRedo() : boolean {
-        return false;
+    /** Whether a command is currently executing. Note: read-only. */
+    public get isExecutingCommand() : boolean {
+        return this._isExecutingCommand;
+    }
+    public set isExecutingCommand( value : boolean ) {
+        throw new Error( "Attempted to set read-only attribute: isExecutingCommand." );
     }
 
     /**
      * Adds a command to this history; immediately executes it
      */
     public queue<T>( command : ICommand<T> ) : promises.IPromise<T> {
-        return command.do();
+
+        var self = this;
+
+        /**
+         * Tracks the execution state.
+         */
+        function maintainHistory( value : T ) {
+            self._isExecutingCommand = false;
+            return value;
+        }
+
+        /**
+         * Tracks execution state after an error.
+         */
+        function handleError( reason : any ) {
+            self._isExecutingCommand = false;
+            return reason;
+        }
+
+        /**
+         * Executes the command
+         */
+        function doCommand( value : values.ENothing ) {
+            self._isExecutingCommand = true;
+            command.do().then( maintainHistory, handleError );
+            return values.nothing;
+        }
+
+        promises.makeImmediatelyFulfilledPromise( values.nothing ).then( doCommand );
+
+        return command.do().then( maintainHistory, handleError );
     }
 
     /**
@@ -157,6 +209,8 @@ class NullCommandHistory
     public undo() : promises.IPromise<values.ENothing> {
         throw new Error( "Illegal command history state: nothing to undo" );
     }
+
+    private _isExecutingCommand = false;
 
 }
 
@@ -177,6 +231,16 @@ class CommandHistory
         this._undoneCommands = [];
     }
 
+    /** Whether there is an undone command that can be redone. */
+    public get canRedo() : boolean {
+        var result = this._undoneCommands.length > 0;
+        result = result && this._undoneCommands[this._undoneCommands.length-1].state === ECommandState.ReadyToRedo;
+        return result;
+    }
+    public set canRedo( value : boolean ) {
+        throw new Error( "Attempted to set read-only attribute: canRedo." );
+    }
+
     /** Whether the last command can be undone. */
     public get canUndo() : boolean {
         var result = this._doneCommands.length > 0;
@@ -184,12 +248,16 @@ class CommandHistory
         result = result && this._queuedCommandCount === 0;
         return result;
     }
+    public set canUndo( value : boolean ) {
+        throw new Error( "Attempted to set read-only attribute: canUndo." );
+    }
 
-    /** Whether there is an undone command that can be redone. */
-    public get canRedo() : boolean {
-        var result = this._undoneCommands.length > 0;
-        result = result && this._undoneCommands[this._undoneCommands.length-1].state === ECommandState.ReadyToRedo;
-        return result;
+    /** Whether a command is currently executing. Note: read-only. */
+    public get isExecutingCommand() : boolean {
+        return this._isExecutingCommand;
+    }
+    public set isExecutingCommand( value : boolean ) {
+        throw new Error( "Attempted to set read-only attribute: isExecutingCommand." );
     }
 
     /**
@@ -211,6 +279,7 @@ class CommandHistory
          * @param value The value returned by the command.
          */
         function maintainHistory( value : T ) {
+            self._isExecutingCommand = false;
             self._queuedCommandCount -= 1;
             if ( command.state === ECommandState.ReadyToUndo ) {
                 self._doneCommands.push( command );
@@ -230,6 +299,7 @@ class CommandHistory
          * @param reason The reason for failure.
          */
         function handleError( reason : any ) {
+            self._isExecutingCommand = false;
             self._queuedCommandCount = 0;
             self._doneCommands = [];
             self._undoneCommands = [];
@@ -241,6 +311,7 @@ class CommandHistory
          * Executes the command
          */
         function doCommand( value : values.ENothing ) {
+            self._isExecutingCommand = true;
             command.do().then( maintainHistory, handleError );
             return values.nothing;
         }
@@ -280,6 +351,7 @@ class CommandHistory
          * Puts a successfully completed command into the undo stack.
          */
         function maintainHistory( value : values.ENothing ) {
+            self._isExecutingCommand = false;
             self._queuedCommandCount -= 1;
             if ( command.state === ECommandState.ReadyToUndo ) {
                 self._doneCommands.push( command );
@@ -296,6 +368,7 @@ class CommandHistory
          * @param reason The reason for failure.
          */
         function handleError( reason : any ) {
+            self._isExecutingCommand = false;
             self._queuedCommandCount = 0;
             self._doneCommands = [];
             self._undoneCommands = [];
@@ -307,6 +380,7 @@ class CommandHistory
          * Re-executes the command
          */
         function redoCommand( value : values.ENothing ) {
+            self._isExecutingCommand = true;
             command.redo().then( maintainHistory, handleError );
             return values.nothing;
         }
@@ -346,6 +420,7 @@ class CommandHistory
          * Puts a successfully completed command into the undo stack.
          */
         function maintainHistory( value : values.ENothing ) {
+            self._isExecutingCommand = false;
             self._queuedCommandCount -= 1;
             if ( command.state === ECommandState.ReadyToRedo ) {
                 self._undoneCommands.push( command );
@@ -362,6 +437,7 @@ class CommandHistory
          * @param reason The reason for failure.
          */
         function handleError( reason : any ) {
+            self._isExecutingCommand = false;
             self._queuedCommandCount = 0;
             self._doneCommands = [];
             self._undoneCommands = [];
@@ -373,6 +449,7 @@ class CommandHistory
          * Unexecutes the command
          */
         function undoCommand( value : values.ENothing ) {
+            self._isExecutingCommand = true;
             command.undo().then( maintainHistory, handleError );
             return values.nothing;
         }
@@ -392,6 +469,8 @@ class CommandHistory
   ////
 
     private _doneCommands : IReversibleCommand[];
+
+    private _isExecutingCommand = false;
 
     private _maxUndoCount : number;
 
