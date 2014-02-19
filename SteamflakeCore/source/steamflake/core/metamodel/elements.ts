@@ -11,16 +11,22 @@ import values = require( '../utilities/values' );
  * Enumeration of possible levels of detail in JSON output.
  */
 export enum EJsonDetailLevel {
+
     /** Include an element's UUID. */
     Identity = 0,
+
     /** Include an element's attributes. */
     Attributes = 1,
+
     /** Include the UUID of an element's parent. */
     ParentIdentity = 2,
+
     /** Include the UUIDs of an element's children. */
     ChildIdentities = 4,
+
     /** Include the attributes of an elements children. */
     ChildAttributes = 8,
+
     /** Recursively include an element's children, grandchildren, etc. */
     Recursive = 16,
 
@@ -57,6 +63,9 @@ export interface IAttributeChangeEventData {
  */
 export interface IModelElement {
 
+    /** Whether this element has been destroyed. */
+    destroyed : boolean;
+
     /** Whether this model element is a container element. NOTE: read only. */
     isContainer : boolean;
 
@@ -76,6 +85,9 @@ export interface IModelElement {
 
     /** Event signaling a change in some attribute of this model element. */
     attributeChangeEvent : events.IStatefulEvent<IModelElement,IAttributeChangeEventData>;
+
+    /** Event signaling that this element has been removed from the model (after it is removed from its parent). */
+    elementDestroyedEvent : events.IStatelessEvent<IModelElement>;
 
   ////
 
@@ -162,11 +174,37 @@ export interface IContainerElement
     extends IModelElement
 {
 
-    /** The child elements within this container. */
+    /** The child elements within this container. Note: read-only, immutable result. */
     childElements: IModelElement[];
 
-    /** Whether the children of this container have been loaded from a persistent store. */
+    /** Whether the children of this container have been loaded from a persistent store. Note: read-only. */
     childElementsLoaded : boolean;
+
+  ////
+
+    /** Event triggered when a new child element has been fully constructed and contained by this parent. */
+    childElementAddedEvent : events.IStatefulEvent<IModelElement,IModelElement>;
+
+    /** Event triggered when a new child element has been removed from this parent container. */
+    childElementRemovedEvent : events.IStatefulEvent<IModelElement,IModelElement>;
+
+    /** Event triggered after the child elements of this container have been loaded from a persistent store. */
+    childElementsLoadedEvent : events.IStatefulEvent<IModelElement,IModelElement[]>
+
+    ////
+
+    /**
+     * Adds a child model element to this container. Triggers childElementAddedEvent.
+     * @param childElement The model element to add.
+     */
+    addChild( childElement : IModelElement );
+
+    /**
+     * Removes a child element from this container.
+     * Note: not intended to be called directly; use IModelElement.destroy().
+     * @param childElement The child element removed.
+     */
+    removeChild( childElement : IModelElement );
 
 }
 

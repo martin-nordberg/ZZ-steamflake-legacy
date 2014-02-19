@@ -26,13 +26,15 @@ export class ModelElement
         uuid : string,
         summary : string
     ) {
-        this._parentContainer = parentContainer;
+        this._destroyed = false;
         this._extendedAttributes = {};
+        this._parentContainer = parentContainer;
         this._summary = summary;
         this._typeName = typeName;
         this._uuid = uuid;
 
         this._attributeChangeEvent = events.makeStatefulEvent<elements.IModelElement,elements.IAttributeChangeEventData>( this );
+        this._elementDestroyedEvent = events.makeStatelessEvent( this );
     }
 
     /**
@@ -60,6 +62,30 @@ export class ModelElement
     }
     public set attributeChangeEvent( value : events.IStatefulEvent<elements.IModelElement,elements.IAttributeChangeEventData> ) {
         throw new Error( "Attempted to change read only event - attributeChangeEvent." );
+    }
+
+    /**
+     * Removes this element from its parent and from the model it's part of. Triggers elementDestroyedEvent.
+     */
+    public get destroyed() {
+        return this._destroyed;
+    }
+    public set destroyed( value : boolean ) {
+        if ( !this._destroyed && value ) {
+            this.parentContainer.removeChild( this );
+            this._elementDestroyedEvent.trigger();
+        }
+        else if ( this._destroyed && !value ) {
+            this.parentContainer.addChild( this );
+        }
+    }
+
+    /** Returns the event for element destruction. */
+    public get elementDestroyedEvent() {
+        return this._elementDestroyedEvent;
+    }
+    public set elementDestroyedEvent( value : events.IStatelessEvent<elements.IModelElement> ) {
+        throw new Error( "Attempted to change read only event - elementCreatedEvent." );
     }
 
     /**
@@ -141,7 +167,7 @@ export class ModelElement
     }
 
     /** A short description of this code element. */
-    public get summary() : string {
+    public get summary() {
         return this._summary;
     }
     public set summary( value : string ) {
@@ -206,6 +232,9 @@ export class ModelElement
 
   ////
 
+    /** Whether this element has been destroyed. */
+    private _destroyed : boolean;
+
     /** Object containing extended attributes. */
     private _extendedAttributes : any;
 
@@ -225,6 +254,9 @@ export class ModelElement
 
     /** Event triggered by attribute changes. */
     private _attributeChangeEvent : events.IStatefulEvent<elements.IModelElement,elements.IAttributeChangeEventData>;
+
+    /** Event signaling that this element has been removed from the model (after it is removed from its parent). */
+    private _elementDestroyedEvent : events.IStatelessEvent<elements.IModelElement>;
 
 }
 
@@ -320,6 +352,34 @@ export class NamedContainerElement
         super( parentContainer, typeName, uuid, name, summary );
         this._childElements = [];
         this._childElementsLoaded = false;
+        this._childElementAddedEvent = events.makeStatefulEvent( this );
+        this._childElementsLoadedEvent = events.makeStatefulEvent( this );
+        this._childElementRemovedEvent = events.makeStatefulEvent( this );
+    }
+
+    /**
+     * Adds a child model element to this container. Triggers childElementAddedEvent.
+     * @param childElement The model element to add.
+     */
+    public addChild( childElement : elements.IModelElement ) {
+        this._childElements.push( childElement );
+        this._childElementAddedEvent.trigger( childElement );
+    }
+
+    /** Event triggered when a new child element has been fully constructed and contained by this parent. */
+    public get childElementAddedEvent() {
+        return this._childElementAddedEvent;
+    }
+    public set childElementAddedEvent( value : events.IStatefulEvent<elements.IModelElement,elements.IModelElement> ) {
+        throw new Error( "Attempted to change read only event - childElementAddedEvent." );
+    }
+
+    /** Event triggered when a new child element has been removed from this parent container. */
+    public get childElementRemovedEvent() {
+        return this._childElementRemovedEvent;
+    }
+    public set childElementRemovedEvent( value : events.IStatefulEvent<elements.IModelElement,elements.IModelElement> ) {
+        throw new Error( "Attempted to change read only event - childElementRemovedEvent." );
     }
 
     /** The child elements of this container. */
@@ -335,8 +395,18 @@ export class NamedContainerElement
         return this._childElementsLoaded;
     }
     public set childElementsLoaded( value : boolean ) {
-        this._childElementsLoaded = value;
-        // TBD: this probably deserves an event
+        if ( !this._childElementsLoaded && value ) {
+            this._childElementsLoaded = value;
+            this._childElementsLoadedEvent.trigger( this._childElements );
+        }
+    }
+
+    /** Event triggered after the child elements of this container have been loaded from a persistent store. */
+    public get childElementsLoadedEvent() {
+        return this._childElementsLoadedEvent;
+    }
+    public set childElementsLoadedEvent( value : events.IStatefulEvent<elements.IModelElement,elements.IModelElement[]> ) {
+        throw new Error( "Attempted to change read only event - childElementsLoadedEvent." );
     }
 
     /**
@@ -344,6 +414,19 @@ export class NamedContainerElement
      */
     public get isContainer() {
         return true;
+    }
+
+    /**
+     * Removes a child element from this container.
+     * Note: not intended to be called directly; use IModelElement.destroy().
+     * @param childElement The child element removed.
+     */
+    public removeChild( childElement : elements.IModelElement ) {
+        var index = this._childElements.indexOf( childElement );
+        if ( index > -1 ) {
+            this._childElements.splice( index, 1 );
+            this._childElementRemovedEvent.trigger( childElement );
+        }
     }
 
     /**
@@ -376,11 +459,25 @@ export class NamedContainerElement
         return result;
     }
 
+  ////
+
     /** The child elements within this container. */
-    public _childElements: elements.IModelElement[];
+    private _childElements: elements.IModelElement[];
 
     /** Whether the children of this container have been loaded from a persistent store. */
-    public _childElementsLoaded : boolean;
+    private _childElementsLoaded : boolean;
+
+  ////
+
+    /** Event triggered when a new child element has been fully constructed and contained by this parent. */
+    private _childElementAddedEvent : events.IStatefulEvent<elements.IModelElement,elements.IModelElement>;
+
+    /** Event triggered after the child elements of this container have been loaded from a persistent store. */
+    private _childElementsLoadedEvent : events.IStatefulEvent<elements.IModelElement,elements.IModelElement[]>
+
+    /** Event triggered when a new child element has been removed from this parent container. */
+    private _childElementRemovedEvent : events.IStatefulEvent<elements.IModelElement,elements.IModelElement>;
+
 
 }
 
