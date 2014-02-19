@@ -85,11 +85,6 @@ export interface ICommand<T>
      */
     do() : promises.IPromise<T>;
 
-    /**
-     * Reverts the initiating action (if any) that triggered this command after command completion failure.
-     */
-    revertTriggeringAction() : void;
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

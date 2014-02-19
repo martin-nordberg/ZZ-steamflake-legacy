@@ -14,7 +14,7 @@ import values = require( '../utilities/values' );
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * Command to change an attribute of a model element.
+ * Command to persist a model element after one of its attributes has changed.
  */
 class AttributeChangeCommand<Element extends elements.IModelElement,T>
     extends commands_impl.AbstractCommand<Element>
@@ -26,38 +26,39 @@ class AttributeChangeCommand<Element extends elements.IModelElement,T>
     constructor(
         updater : persistence.IPersistentStoreUpdater,
         modelElement : Element,
-        attributeTitle : string,
         attributeName : string,
-        newValue : T
+        oldValue : T
     ) {
 
         super(
-            attributeTitle + " Change",
-            "Change " + attributeTitle + " from \"" + modelElement[this._attributeName] + "\" to \"" + newValue + "\""
+            // TBD: UI strings from config file with internationalization
+            attributeName[0].toUpperCase() + attributeName.substring(1) + " Change",
+            "Change " + attributeName + " from \"" + oldValue + "\" to \"" + modelElement[this._attributeName] + "\""
         );
 
         this._attributeName = attributeName;
         this._modelElement = modelElement;
-        this._newValue = newValue;
-        this._oldValue = modelElement[this._attributeName];
+        this._newValue = modelElement[this._attributeName];
+        this._oldValue = oldValue;
         this._updater = updater;
 
     }
 
     public execute() {
 
-        // make the change
-        this._modelElement[this._attributeName] = this._newValue;
+        var self = this;
 
         // error handling: reverse the change
         function revert( reason : any ) {
-            this._modelElement[this._attributeName] = this._oldValue;
+            self._modelElement.attributeChangeEvent.whileDisabledDo( function() {
+                self._modelElement[this._attributeName] = this._oldValue;
+            } );
             return reason;
         }
 
         // save the change persistently
-        return this._updater.updateModelElement(
-            this._modelElement,
+        return self._updater.updateModelElement(
+            self._modelElement,
             { changedAttributeNames:[this._attributeName] }
         ).then( elements.passThrough, revert );
 
@@ -65,18 +66,22 @@ class AttributeChangeCommand<Element extends elements.IModelElement,T>
 
     public unexecute() {
 
+        var self = this;
+
         // reverse the change
-        this._modelElement[this._attributeName] = this._oldValue;
+        self._modelElement[this._attributeName] = this._oldValue;
 
         // error handling: redo the change
         function revert( reason : any ) {
-            this._modelElement[this._attributeName] = this._newValue;
+            self._modelElement.attributeChangeEvent.whileDisabledDo( function() {
+                self._modelElement[this._attributeName] = this._newValue;
+            } );
             return reason;
         }
 
         // save the change persistently
-        return this._updater.updateModelElement(
-            this._modelElement,
+        return self._updater.updateModelElement(
+            self._modelElement,
             { changedAttributeNames:[this._attributeName] }
         ).then( elements.ignore, revert );
 
@@ -193,11 +198,10 @@ class ElementCreationCommand<ParentElement extends elements.IContainerElement>
 export function makeAttributeChangeCommand<Element extends elements.IModelElement,T>(
     updater : persistence.IPersistentStoreUpdater,
     modelElement : Element,
-    attributeTitle : string,
     attributeName : string,
     newValue : T
 ) : commands.ICommand<Element> {
-    return new AttributeChangeCommand( updater, modelElement, attributeTitle, attributeName, newValue );
+    return new AttributeChangeCommand( updater, modelElement, attributeName, newValue );
 }
 
 export function makeElementCreationCommand<ParentElement extends elements.IContainerElement>(

@@ -22,7 +22,6 @@ describe( "Core Commands", function() {
             command = corecommands.makeAttributeChangeCommand(
                 null,
                 modelElement,
-                "Summary",
                 "summary",
                 "A new summary" );
         } );

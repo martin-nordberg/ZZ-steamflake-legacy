@@ -50,7 +50,7 @@ export class RootContainer
         uuid: string,
         name: string,
         summary: string
-        ) {
+    ) {
         super( parentContainer, "RootContainer", uuid, name, summary );
     }
 

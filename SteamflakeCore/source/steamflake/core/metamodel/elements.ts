@@ -33,6 +33,22 @@ export interface IContainerElement { /* see below */ }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/** Data passed in an attribute change event. */
+export interface IAttributeChangeEventData {
+
+    /** The name of the attribute. */
+    attributeName:string;
+
+    /** The new value just set. */
+    newValue : any
+
+    /** The old value prior to the just completed change. */
+    oldValue : any;
+
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 /**
  * Top level base class for Steamflake model elements. Represents any model element with a summary and a unique ID.
  * Also provides mechanisms to add extended attributes - boolean, numeric, or string. Defines an API for converting
@@ -59,7 +75,7 @@ export interface IModelElement {
   ////
 
     /** Event signaling a change in some attribute of this model element. */
-    attributeChangeEvent : events.IStatefulEvent<IModelElement,{attributeName:string; oldValue : any; newValue : any}>;
+    attributeChangeEvent : events.IStatefulEvent<IModelElement,IAttributeChangeEventData>;
 
   ////
 

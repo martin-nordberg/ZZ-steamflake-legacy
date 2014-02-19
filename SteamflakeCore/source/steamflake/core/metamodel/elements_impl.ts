@@ -32,7 +32,7 @@ export class ModelElement
         this._typeName = typeName;
         this._uuid = uuid;
 
-        this._attributeChangeEvent = events.makeStatefulEvent<elements.IModelElement,{attributeName:string; oldValue : any; newValue : any}>( this );
+        this._attributeChangeEvent = events.makeStatefulEvent<elements.IModelElement,elements.IAttributeChangeEventData>( this );
     }
 
     /**
@@ -58,7 +58,7 @@ export class ModelElement
     public get attributeChangeEvent() {
         return this._attributeChangeEvent;
     }
-    public set attributeChangeEvent( value : events.IStatefulEvent<elements.IModelElement,{attributeName:string; oldValue : any; newValue : any}> ) {
+    public set attributeChangeEvent( value : events.IStatefulEvent<elements.IModelElement,elements.IAttributeChangeEventData> ) {
         throw new Error( "Attempted to change read only event - attributeChangeEvent." );
     }
 
@@ -224,7 +224,7 @@ export class ModelElement
   ////
 
     /** Event triggered by attribute changes. */
-    private _attributeChangeEvent : events.IStatefulEvent<elements.IModelElement,{attributeName:string; oldValue : any; newValue : any}>;
+    private _attributeChangeEvent : events.IStatefulEvent<elements.IModelElement,elements.IAttributeChangeEventData>;
 
 }
 
