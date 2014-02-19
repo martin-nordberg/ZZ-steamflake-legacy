@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <!-- Steamflake ANT Build -->
 <project name="Steamflake"
-         default="all">
+         default="clean,all">
+
     <description>
         ANT Build for Steamflake
     </description>
@@ -18,12 +20,18 @@
     <property name="core.source" value="${core}/source"/>
     <property name="core.specs" value="${core}/specs"/>
 
+    <property name="model" value="../SteamflakeModel"/>
+    <property name="model.lib" value="${model}/lib"/>
+    <property name="model.scripts" value="${model}/scripts"/>
+    <property name="model.source" value="${model}/source"/>
+    <property name="model.specs" value="${model}/specs"/>
+
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
     <!-- All -->
     <target name="all"
             description="Compile, test, and document all of Steamflake"
-            depends="all-core">
+            depends="all-model">
     </target>
 
     <!-- All Steamflake Core -->
@@ -32,11 +40,28 @@
             depends="test-core">
     </target>
 
+    <!-- All Steamflake Model -->
+    <target name="all-model"
+            description="Compile, test, and document Steamflake Model"
+            depends="test-model">
+    </target>
+
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
     <!-- Clean -->
-    <target name="clean">
+    <target name="clean"
+            depends="clean-core,clean-model">
+    </target>
+
+    <!-- Clean -->
+    <target name="clean-core">
         <delete dir="${core.scripts}"/>
+    </target>
+
+    <!-- Clean -->
+    <target name="clean-model"
+            depends="clean-core">
+        <delete dir="${model.scripts}"/>
     </target>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -103,6 +128,76 @@
 
         <echo>Running Core tests ...</echo>
         <exec dir="${core.specs}" executable="sh" failonerror="true">
+            <arg value="Test.sh"/>
+        </exec>
+
+    </target>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <!-- Model -->
+
+    <!-- Check whether Steamflake Model code is up to date -->
+    <target name="check-model-uptodate"
+            description="Check whether the model is up to date"
+            if="core.uptodate">
+
+        <uptodate property="model.uptodate" targetfile="${model.scripts}/SteamflakeModel/source/builddate.txt" >
+            <srcfiles dir="${model.source}" includes="**/*.ts"/>
+            <srcfiles dir="${model.source}" includes="Compile.sh"/>
+        </uptodate>
+
+        <echo>Steamflake Model up to date: ${model.uptodate}</echo>
+
+    </target>
+
+    <!-- Compile Steamflake Model -->
+    <target name="compile-model"
+            description="Compile Steamflake Model"
+            depends="compile-core,check-model-uptodate"
+            unless="model.uptodate">
+
+        <echo>Compiling Steamflake Model code ...</echo>
+        <exec dir="${model.source}" executable="sh" failonerror="true">
+            <arg value="Compile.sh"/>
+        </exec>
+
+    </target>
+
+    <!-- Check whether Steamflake Model specs are up to date -->
+    <target name="check-model-specs-uptodate"
+            description="Check whether the model specs are up to date"
+            if="model.uptodate">
+
+        <uptodate property="model.specs.uptodate" targetfile="${model.scripts}/SteamflakeModel/specs/builddate.txt" >
+            <srcfiles dir="${model.specs}" includes="**/*.ts"/>
+            <srcfiles dir="${model.specs}" includes="Compile.sh"/>
+        </uptodate>
+
+        <echo>Steamflake Model specs up to date: ${model.specs.uptodate}</echo>
+
+    </target>
+
+    <!-- Compile Steamflake Model specs -->
+    <target name="compile-model-specs"
+            description="Run Steamflake Model specs"
+            depends="compile-model, check-model-specs-uptodate"
+            unless="model.specs.uptodate">
+
+        <echo>Compiling Model specifications ...</echo>
+        <exec dir="${model.specs}" executable="sh" failonerror="true">
+            <arg value="Compile.sh"/>
+        </exec>
+
+    </target>
+
+    <!-- Run Steamflake Model tests -->
+    <target name="test-model"
+            description="Run Steamflake Model specs"
+            depends="test-core,compile-model-specs">
+
+        <echo>Running Model tests ...</echo>
+        <exec dir="${model.specs}" executable="sh" failonerror="true">
             <arg value="Test.sh"/>
         </exec>
 
