@@ -93,7 +93,7 @@ class InMemoryModelElementRegistry
     public lookUpModelElementByUuid( uuid : string ) : elements.IModelElement {
         var uuidSegments = this.splitUuid( uuid );
         var subregistry = this._registry[ uuidSegments[0] ];
-        if ( subregistry === undefined ) {
+        if ( typeof subregistry === 'undefined' ) {
             return undefined;
         }
         return subregistry[ uuidSegments[1] ];
@@ -106,7 +106,7 @@ class InMemoryModelElementRegistry
         var uuid = modelElement.uuid;
         var uuidSegments = this.splitUuid( uuid );
         var subregistry = this._registry[ uuidSegments[0] ];
-        if ( subregistry === undefined ) {
+        if ( typeof subregistry === 'undefined' ) {
             subregistry = {};
             this._registry[ uuidSegments[0] ] = subregistry;
         }
@@ -120,7 +120,7 @@ class InMemoryModelElementRegistry
         var uuid = modelElement.uuid;
         var uuidSegments = this.splitUuid( uuid );
         var subregistry = this._registry[ uuidSegments[0] ];
-        if ( subregistry !== undefined ) {
+        if ( typeof subregistry !== 'undefined' ) {
             delete subregistry[ uuidSegments[1] ];
         }
     }

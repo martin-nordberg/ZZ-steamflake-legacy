@@ -98,7 +98,7 @@ export class ModelElement
 
         result = this._extendedAttributes[ attributeName ];
 
-        if ( typeof(result) === 'undefined' && typeof(defaultValue) !== 'undefined' ) {
+        if ( typeof result === 'undefined' && typeof defaultValue !== 'undefined' ) {
             result = defaultValue;
             this._extendedAttributes[ attributeName ] = result;
         }
@@ -149,7 +149,7 @@ export class ModelElement
      * @param jsonObject Plain object with attributes to be merged into this code element.
      */
     public readJsonAttributes( jsonObject : any ) : void {
-        if ( typeof(jsonObject.summary) !== 'undefined' ) {
+        if ( typeof jsonObject.summary !== 'undefined' ) {
             this.summary = jsonObject.summary;
         }
     }
@@ -305,7 +305,7 @@ export class NamedElement
     public readJsonAttributes( jsonObject : any ) : void {
         super.readJsonAttributes( jsonObject );
         console.log( "new name", jsonObject.name );
-        if ( typeof(jsonObject.name) !== "undefined" ) {
+        if ( typeof jsonObject.name !== 'undefined' ) {
             console.log( "changing name" );
             this.name = jsonObject.name;
         }

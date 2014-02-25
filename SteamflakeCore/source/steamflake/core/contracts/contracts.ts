@@ -228,12 +228,41 @@ class AdjectivalContract<T>
         enforceCondition : (actualValue:T) => boolean,
         adjective : string
     ) {
+        function makeSuccessMessage( valueName : string ) {
+            return "Verified " + valueName + " to be " + adjective + ".";
+        }
+
+        function makeFailureMessage( actualValue : T, valueName : string ) {
+            return "Expected " + valueName + " to be " + adjective + ", but was " + this.valueToString(actualValue) + ".";
+        }
+
+        function makeExceptionMessage( actualValue : T, valueName : string ) {
+            return "An exception occurred while checking whether " + valueName + " is " + adjective + ".";
+        }
+
         super(
             enforceCondition,
-            (valueName:string) => "Verified " + valueName + " to be " + adjective + ".",
-            (actualValue:T, valueName:string) => "Expected " + valueName + " to be " + adjective + ", but was " + actualValue + ".",
-            (actualValue:T, valueName:string) => "An exception occurred while enforceing whether " + valueName + " is " + adjective + "."
+            makeSuccessMessage,
+            makeFailureMessage,
+            makeExceptionMessage
         )
+    }
+
+    /**
+     * Converts a value to a string, quoting the value if it is itself a string and eliding a long string
+     * @param value The value to convert.
+     */
+    public valueToString( value : any ) : string {
+        if ( typeof value === 'string' ) {
+            var strVal : string = <string> value;
+            if ( strVal.length > 23 ) {
+                strVal = strVal.substring( 0, 10 ) + "..." + strVal.substring( strVal.length - 10 );
+            }
+            return "'" + strVal + "'";
+        }
+        else {
+            return value.toString();
+        }
     }
 
 }
@@ -253,7 +282,7 @@ class ComparisonContract<T>
     ) {
         super(
             enforceCondition,
-            comparisonText + " " + comparableValue
+            comparisonText + " " + this.valueToString(comparableValue)
         )
     }
 }

@@ -430,7 +430,7 @@ export class FunctionSignature
      */
     public readJsonAttributes( jsonObject : any ) : void {
         super.readJsonAttributes( jsonObject );
-        if ( typeof(jsonObject.isExported) !== "undefined" ) {
+        if ( typeof jsonObject.isExported !== 'undefined' ) {
             this.isExported = jsonObject.isExported;
         }
     }
@@ -492,7 +492,7 @@ export class Interface
      */
     public readJsonAttributes( jsonObject : any ) : void {
         super.readJsonAttributes( jsonObject );
-        if ( typeof(jsonObject.isExported) !== "undefined" ) {
+        if ( typeof jsonObject.isExported !== 'undefined' ) {
             this.isExported = jsonObject.isExported;
         }
     }
@@ -874,7 +874,7 @@ export class Module
      */
     public readJsonAttributes( jsonObject : any ) : void {
         super.readJsonAttributes( jsonObject );
-        if ( typeof(jsonObject.version) !== "undefined" ) {
+        if ( typeof jsonObject.version !== 'undefined' ) {
             this.version = jsonObject.version;
         }
     }
