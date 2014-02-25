@@ -12,6 +12,10 @@ pushd steamflake/core/concurrency >/dev/null
 tsc -t ES5 --module commonjs *.ts --outDir ../../../../scripts/SteamflakeCore
 popd >/dev/null
 
+pushd steamflake/core/contracts >/dev/null
+tsc -t ES5 --module commonjs *.ts --outDir ../../../../scripts/SteamflakeCore
+popd >/dev/null
+
 pushd steamflake/core/metamodel >/dev/null
 tsc -t ES5 --module commonjs *.ts --outDir ../../../../scripts/SteamflakeCore
 popd >/dev/null

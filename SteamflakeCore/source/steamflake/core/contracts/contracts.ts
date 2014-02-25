@@ -26,7 +26,7 @@ export interface IContract<T> {
      * @param actualValue
      * @param valueName
      */
-    enforce( actualValue : T, valueName : string ) : IContractEnforcementResult;
+    enforce( actualValue : T, valueName : string ) : outcomes.IContractEnforcementResult;
 
     /**
      * Builds a new contract that is the disjunction of this contract and another.
@@ -59,7 +59,7 @@ class AbstractContract<T>
      * @param actualValue
      * @param valueName
      */
-    public enforce( actualValue : T, valueName : string ) : IContractEnforcementResult {
+    public enforce( actualValue : T, valueName : string ) : outcomes.IContractEnforcementResult {
         throw new Error( "Abstract method" );
     }
 
@@ -85,6 +85,7 @@ class AndContract<T>
         contract1 : IContract<T>,
         contract2 : IContract<T>
     ) {
+        super();
         this._contract1 = contract1;
         this._contract2 = contract2;
     }
@@ -95,7 +96,7 @@ class AndContract<T>
      * @param actualValue
      * @param valueName
      */
-    public enforce( actualValue : T, valueName : string ) : IContractEnforcementResult {
+    public enforce( actualValue : T, valueName : string ) : outcomes.IContractEnforcementResult {
 
         var result1 = this._contract1.enforce( actualValue, valueName );
 
@@ -130,6 +131,7 @@ class OrContract<T>
         contract1 : IContract<T>,
         contract2 : IContract<T>
     ) {
+        super();
         this._contract1 = contract1;
         this._contract2 = contract2;
     }
@@ -140,7 +142,7 @@ class OrContract<T>
      * @param actualValue
      * @param valueName
      */
-    public enforce( actualValue : T, valueName : string ) : IContractEnforcementResult {
+    public enforce( actualValue : T, valueName : string ) : outcomes.IContractEnforcementResult {
 
         var result1 = this._contract1.enforce( actualValue, valueName );
 
@@ -179,6 +181,7 @@ class BasicContract<T>
         makeFailureMessage : (actualValue:T, valueName:string) => string,
         makeExceptionMessage : (actualValue:T, valueName:string) => string
     ) {
+        super();
         this._enforceCondition = enforceCondition;
         this._makeExceptionMessage = makeExceptionMessage;
         this._makeFailureMessage = makeFailureMessage;
@@ -191,7 +194,7 @@ class BasicContract<T>
      * @param actualValue
      * @param valueName
      */
-    public enforce( actualValue : T, valueName : string ) : IContractEnforcementResult {
+    public enforce( actualValue : T, valueName : string ) : outcomes.IContractEnforcementResult {
         try {
             if ( this._enforceCondition( actualValue ) ) {
                 return outcomes.makeContractEnforcementSuccess( this._makeSuccessMessage( valueName ) );

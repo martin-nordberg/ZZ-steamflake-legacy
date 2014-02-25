@@ -66,7 +66,7 @@ class NonexistentExpectation<T>
      * Performs a contract check, giving back a contract check result.
      * @param contract
      */
-    public toBe( contract : IContract<T> ) : IContractEnforcementResult {
+    public toBe( contract : contracts.IContract<T> ) : outcomes.IContractEnforcementResult {
 
         if ( this._name === "value" ) {
             return outcomes.makeContractEnforcementUnexpectedNull( "Expected a nonexistent value." );
@@ -79,7 +79,7 @@ class NonexistentExpectation<T>
     /**
      * Performs a contract check on a value that is expected to not exist.
      */
-    public toNotExist() : IContractEnforcementResult {
+    public toNotExist() : outcomes.IContractEnforcementResult {
         return outcomes.makeContractEnforcementSuccess( "Verified that " + this._name + " does not exist." );
     }
 
@@ -88,7 +88,7 @@ class NonexistentExpectation<T>
      * succeeding if the tested actual value does not exist.
      * @param contract
      */
-    public toOptionallyBe( contract : IContract<T> ) : IContractEnforcementResult {
+    public toOptionallyBe( contract : contracts.IContract<T> ) : outcomes.IContractEnforcementResult {
         return outcomes.makeContractEnforcementSuccess( "Ignored nonexistent but optional " + this._name + "." );
     }
 
@@ -124,14 +124,14 @@ class ExistentExpectation<T>
      * Performs a contract check, giving back a contract check result.
      * @param contract
      */
-    public toBe( contract : IContract<T> ) : IContractEnforcementResult {
+    public toBe( contract : contracts.IContract<T> ) : outcomes.IContractEnforcementResult {
         return contract.enforce( this._actualValue, this._valueName );
     }
 
     /**
      * Performs a contract check on a value that is expected to not exist.
      */
-    public toNotExist() : IContractEnforcementResult {
+    public toNotExist() : outcomes.IContractEnforcementResult {
         return outcomes.makeContractEnforcementUnexpectedNull( "Expected " + this._valueName + " to not exist, but is " + this._actualValue + "." );
     }
 
@@ -140,7 +140,7 @@ class ExistentExpectation<T>
      * succeeding if the tested actual value does not exist.
      * @param contract
      */
-    public toOptionallyBe( contract : IContract<T> ) : IContractEnforcementResult {
+    public toOptionallyBe( contract : contracts.IContract<T> ) : outcomes.IContractEnforcementResult {
         return contract.enforce( this._actualValue, this._valueName );
     }
 
@@ -176,14 +176,14 @@ class AssertedExpectation<T>
      * Performs a contract check, giving back a contract check result.
      * @param contract
      */
-    public toBe( contract : IContract<T> ) : IContractEnforcementResult {
+    public toBe( contract : contracts.IContract<T> ) : outcomes.IContractEnforcementResult {
         return this.thrownIfFailed( this._expectation.toBe( contract ) );
     }
 
     /**
      * Performs a contract check on a value that is expected to not exist.
      */
-    public toNotExist() : IContractEnforcementResult {
+    public toNotExist() : outcomes.IContractEnforcementResult {
         return this.thrownIfFailed( this._expectation.toNotExist() );
     }
 
@@ -192,14 +192,14 @@ class AssertedExpectation<T>
      * succeeding if the tested actual value does not exist.
      * @param contract
      */
-    public toOptionallyBe( contract : IContract<T> ) : IContractEnforcementResult {
+    public toOptionallyBe( contract : contracts.IContract<T> ) : outcomes.IContractEnforcementResult {
         return this.thrownIfFailed( this._expectation.toOptionallyBe( contract ) );
     }
 
     /**
      * Throws an error if the given contract checking result is a failure; otherwise returns the successful result.
      */
-    private thrownIfFailed( result : IContractEnforcementResult ) {
+    private thrownIfFailed( result : outcomes.IContractEnforcementResult ) {
 
         if ( !result.isSuccess ) {
             throw new Error( result.message );
@@ -222,7 +222,7 @@ class AssertedExpectation<T>
  */
 export function expect<T>( actualValue : T ) : IExpectation<T> {
 
-    if ( actualValue ) {
+    if ( typeof actualValue !== 'undefined' ) {
         return new ExistentExpectation( actualValue );
     }
 
