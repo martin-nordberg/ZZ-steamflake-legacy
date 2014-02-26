@@ -9,51 +9,91 @@ import elements_impl = require( '../../../../source/steamflake/core/metamodel/el
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export class Element
-    extends elements_impl.NamedElement {
+export interface ISampleElement
+    extends elements.INamedElement
+{
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export interface ISampleContainer
+    extends elements.IContainerElement
+{
+
+    makeSampleElement( uuid: string, attributes: any ) : ISampleElement;
+
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export interface ISampleRootContainer
+    extends elements.IRootContainerElement {
+
+    makeSampleContainer( uuid : string, attributes : any ) : ISampleContainer;
+
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class SampleElement
+    extends elements_impl.NamedElement
+    implements ISampleElement {
 
     constructor(
-        parentContainer: elements.IContainerElement,
+        parentContainer: ISampleContainer,
         uuid: string,
         name: string,
         summary: string
     ) {
-        super( parentContainer, "Element", uuid, name, summary );
+        super( parentContainer, "SampleElement", uuid, name, summary );
     }
 
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export class Container
-    extends elements_impl.NamedContainerElement {
+class SampleContainer
+    extends elements_impl.NamedContainerElement
+    implements ISampleContainer {
 
     constructor(
-        parentContainer: elements.IContainerElement,
+        parentContainer: ISampleRootContainer,
         uuid: string,
         name: string,
         summary: string
     ) {
-        super( parentContainer, "Container", uuid, name, summary );
+        super( parentContainer, "SampleContainer", uuid, name, summary );
     }
 
+    public makeSampleElement( uuid : string, attributes : any ) {
+        return new SampleElement( this, uuid, attributes.name, attributes.summary );
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export class RootContainer
+class SampleRootContainer
     extends elements_impl.NamedContainerElement
     implements elements.IRootContainerElement {
 
     constructor(
-        parentContainer: elements.IContainerElement,
-        uuid: string,
-        name: string,
-        summary: string
+        uuid: string
     ) {
-        super( parentContainer, "RootContainer", uuid, name, summary );
+        super( this, "SampleRootContainer", uuid, "$", "(Top level sample root container)" );
     }
 
+    public makeSampleContainer( uuid : string, attributes : any ) {
+        return new SampleContainer( this, uuid, attributes.name, attributes.summary );
+    }
+
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export function makeSampleRootContainer( uuid : string ) : ISampleRootContainer {
+    return new SampleRootContainer( uuid );
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

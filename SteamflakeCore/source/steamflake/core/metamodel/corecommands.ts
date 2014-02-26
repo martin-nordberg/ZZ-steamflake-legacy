@@ -60,7 +60,30 @@ class AttributeChangeCommand<Element extends elements.IModelElement,T>
         return self._updater.updateModelElement(
             self._modelElement,
             { changedAttributeNames:[this._attributeName] }
-        ).then( elements.passThrough, revert );
+        ).then( elements.identity, revert );
+
+    }
+
+    public reexecute() {
+
+        var self = this;
+
+        // reapply the change
+        self._modelElement[this._attributeName] = this._newValue;
+
+        // error handling: undo the change
+        function revert( reason : any ) {
+            self._modelElement.attributeChangeEvent.whileDisabledDo( function() {
+                self._modelElement[this._attributeName] = this._oldValue;
+            } );
+            return reason;
+        }
+
+        // save the change persistently
+        return self._updater.updateModelElement(
+            self._modelElement,
+            { changedAttributeNames:[this._attributeName] }
+        ).then( elements.ignore, revert );
 
     }
 
@@ -104,8 +127,8 @@ class AttributeChangeCommand<Element extends elements.IModelElement,T>
 /**
  * Command to create a new model element generically.
  */
-class ElementCreationCommand<ParentElement extends elements.IContainerElement>
-    extends commands_impl.AbstractCommand<elements.IModelElement>
+class ElementCreationCommand<ParentElement extends elements.IContainerElement,ChildElement extends elements.IModelElement>
+    extends commands_impl.AbstractCommand<ChildElement>
 {
 
     /**
@@ -115,8 +138,8 @@ class ElementCreationCommand<ParentElement extends elements.IContainerElement>
         creator : persistence.IPersistentStoreCreator,
         deleter : persistence.IPersistentStoreDeleter,
         modelElementRegistry: registry.IModelElementRegistry,
-        maker: any,
         parentElement : ParentElement,
+        childElement : ChildElement,
         childType : string,
         attributes : any
     ) {
@@ -126,55 +149,97 @@ class ElementCreationCommand<ParentElement extends elements.IContainerElement>
         this._deleter = deleter;
         this._modelElementRegistry = modelElementRegistry;
         this._parentElement = parentElement;
+        this._childElement = childElement;
         this._childType = childType;
         this._attributes = attributes;
-
-        this._maker = maker;
     }
 
     public execute() {
 
-        // create the new element and add it to its parent
-        this._newChild = this._maker["make" + this._childType]( this._parentElement , this._attributes );
-        this._parentElement.childElements.push( this._newChild );
+        var self = this;
 
         // register the new element
-        this._modelElementRegistry.registerModelElement( this._newChild );
+        self._modelElementRegistry.registerModelElement( this._childElement );
 
         // error handling: abandon the new element
         function revert( reason : any ) {
-            var index = this._parentElement.childElements.indexOf( this._newChild );
-            this._parentElement.childElements.splice(index, 1);
-            this._modelElementRegistry.unregisterModelElement( this._newChild );
+            self._parentElement.childElementRemovedEvent.whileDisabledDo( function() {
+                self._childElement.elementDestroyedEvent.whileDisabledDo( function() {
+                    self._childElement.destroyed = true;
+                })
+            } );
+            self._modelElementRegistry.unregisterModelElement( self._childElement );
             return reason;
         }
 
         // persist the new element
-        return this._creator.createModelElement( this._newChild ).then( elements.passThrough, revert );
+        return self._creator.createModelElement( self._childElement ).then( elements.identity, revert );
+
+    }
+
+    public reexecute() {
+
+        var self = this;
+
+        // add the child back to its parent
+        self._parentElement.childElementAddedEvent.whileDisabledDo( function() {
+            self._childElement.elementDestroyedEvent.whileDisabledDo( function() {
+                self._childElement.destroyed = false;
+            } );
+        } );
+
+        // register it
+        this._modelElementRegistry.registerModelElement( this._childElement );
+
+        // error handling: undo the addition
+        function revert( reason : any ) {
+            self._parentElement.childElementRemovedEvent.whileDisabledDo( function() {
+                self._childElement.elementDestroyedEvent.whileDisabledDo( function() {
+                    self._childElement.destroyed = true;
+                } );
+            } );
+            this._modelElementRegistry.unregisterModelElement( self._childElement );
+            return reason;
+        }
+
+        // persist the deletion
+        return this._creator.createModelElement( self._childElement ).then( elements.ignore, revert );
 
     }
 
     public unexecute() {
 
+        var self = this;
+
         // remove the new element from its parent
-        var index = this._parentElement.childElements.indexOf( this._newChild );
-        var oldChild = this._parentElement.childElements.splice(index, 1);
+        self._parentElement.childElementRemovedEvent.whileDisabledDo( function() {
+            self._childElement.elementDestroyedEvent.whileDisabledDo( function() {
+                self._childElement.destroyed = true;
+            } );
+        } );
 
         // unregister it
-        this._modelElementRegistry.unregisterModelElement( this._newChild );
+        this._modelElementRegistry.unregisterModelElement( this._childElement );
 
         // error handling: undo the deletion
         function revert( reason : any ) {
-            this._parentElement.childElements.splice( index, 0, oldChild );
-            this._modelElementRegistry.registerModelElement( oldChild );
+            self._parentElement.childElementAddedEvent.whileDisabledDo( function() {
+                self._childElement.elementDestroyedEvent.whileDisabledDo( function() {
+                    self._childElement.destroyed = false;
+                } );
+            } );
+            this._modelElementRegistry.registerModelElement( self._childElement );
+            return reason;
         }
 
         // persist the deletion
-        return this._deleter.deleteModelElement( this._newChild ).then( elements.ignore, revert );
+        return this._deleter.deleteModelElement( self._childElement ).then( elements.ignore, revert );
 
     }
 
     private _attributes : any;
+
+    private _childElement : ChildElement;
 
     private _childType : string;
 
@@ -182,11 +247,7 @@ class ElementCreationCommand<ParentElement extends elements.IContainerElement>
 
     private _deleter : persistence.IPersistentStoreDeleter;
 
-    private _maker : any;
-
     private _modelElementRegistry : registry.IModelElementRegistry;
-
-    private _newChild;
 
     private _parentElement : ParentElement;
 
@@ -204,16 +265,18 @@ export function makeAttributeChangeCommand<Element extends elements.IModelElemen
     return new AttributeChangeCommand( updater, modelElement, attributeName, newValue );
 }
 
-export function makeElementCreationCommand<ParentElement extends elements.IContainerElement>(
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export function makeElementCreationCommand<ParentElement extends elements.IContainerElement,ChildElement extends elements.IModelElement>(
     creator : persistence.IPersistentStoreCreator,
     deleter : persistence.IPersistentStoreDeleter,
     modelElementRegistry: registry.IModelElementRegistry,
-    maker: any,
     parentComponent : ParentElement,
+    childElement : ChildElement,
     childTypeName : string,
     attributes : any
 ) : commands.ICommand<elements.IModelElement> {
-    return new ElementCreationCommand<ParentElement>( creator, deleter, modelElementRegistry, maker, parentComponent, childTypeName, attributes );
+    return new ElementCreationCommand<ParentElement,ChildElement>( creator, deleter, modelElementRegistry, parentComponent, childElement, childTypeName, attributes );
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

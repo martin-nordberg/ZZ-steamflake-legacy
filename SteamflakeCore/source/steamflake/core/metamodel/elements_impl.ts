@@ -72,10 +72,12 @@ export class ModelElement
     }
     public set destroyed( value : boolean ) {
         if ( !this._destroyed && value ) {
+            this._destroyed = true;
             this.parentContainer.removeChild( this );
             this._elementDestroyedEvent.trigger();
         }
         else if ( this._destroyed && !value ) {
+            this._destroyed = false;
             this.parentContainer.addChild( this );
         }
     }

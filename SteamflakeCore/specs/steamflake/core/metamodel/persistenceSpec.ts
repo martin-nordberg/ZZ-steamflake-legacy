@@ -14,17 +14,18 @@ import uuids = require( '../../../../source/steamflake/core/utilities/uuids' );
 
 describe( "Persistence", function() {
 
-    var modelElement : elements.IContainerElement;
-    var store : persistence.IPersistentStore<sampleElements.RootContainer>;
+    var modelElement : sampleElements.ISampleContainer;
+    var store : persistence.IPersistentStore<sampleElements.ISampleRootContainer>;
 
     beforeEach( function() {
-        modelElement = new sampleElements.Container( null, uuids.makeUuid(), "container", "Sample element" );
+        var rootElement = sampleElements.makeSampleRootContainer( "1000" );
+        modelElement = rootElement.makeSampleContainer( "1001", { name:"Sample", summary:"Sample container for testing" } );
     } );
 
     describe( "Null Persistent Store", function() {
 
         beforeEach( function() {
-            store = persistence.makeNullPersistentStore<sampleElements.RootContainer>();
+            store = persistence.makeNullPersistentStore<sampleElements.ISampleRootContainer>();
         } );
 
         it( "Does nothing to create", function() {

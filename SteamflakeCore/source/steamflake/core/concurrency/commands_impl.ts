@@ -97,7 +97,7 @@ export class AbstractCommand<T>
         var result = self.reexecute();
 
         /** Callback updates the state of this command after re-execution. */
-        function updateCommandState( value : T ) {
+        function updateCommandState( value : values.ENothing ) {
             if ( self._undoable ) {
                 self._state = commands.ECommandState.ReadyToUndo;
             }
@@ -186,8 +186,13 @@ export class AbstractCommand<T>
      * Executes this command after it has been undone at least once.
      * @returns An arbitrary value resulting from the command execution.
      */
-    public/*protected*/ reexecute() : promises.IPromise<T> {
-        return this.execute();
+    public/*protected*/ reexecute() : promises.IPromise<values.ENothing> {
+
+        function ignore( value : T ) {
+            return values.nothing;
+        }
+
+        return this.execute().then( ignore );
     }
 
     /**

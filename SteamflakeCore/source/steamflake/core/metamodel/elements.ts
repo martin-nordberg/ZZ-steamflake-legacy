@@ -240,19 +240,19 @@ export interface IModelRelationship<FromElement,ToElement>
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * Do-nothing/return nothing function for use in promises & other times when an element can be ignored.
+ * Do nothing/return the input function for use e.g. in promises when only the error-callback needs to do something.
  */
-export function ignore( modelElement : IModelElement ) {
-    return values.nothing;
+export function identity( modelElement : IModelElement ) {
+    return modelElement;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * Do nothing/return the input function for use in promises when only the error-callback needs to do something.
+ * Do-nothing/return nothing function for use in promises & other times when an element can be ignored.
  */
-export function passThrough( modelElement : IModelElement ) {
-    return modelElement;
+export function ignore( modelElement : IModelElement ) {
+    return values.nothing;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

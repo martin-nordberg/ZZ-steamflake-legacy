@@ -362,7 +362,7 @@ export class AbstractNamespace
         attributes: any
     ) : IModule {
         var result = new Module( this, uuid, attributes.name, attributes.summary, attributes.version );
-        this.childElements.push( result );
+        this.addChild( result );
         return result;
     }
 
@@ -377,7 +377,7 @@ export class AbstractNamespace
         attributes: any
     ) : INamespace {
         var result = new Namespace( this, uuid, attributes.name, attributes.summary );
-        this.childElements.push( result );
+        this.addChild( result );
         return result;
     }
 
@@ -695,7 +695,7 @@ export class Component
         attributes: any
     ) : IClass {
         var result = new Class( this, uuid, attributes.name, attributes.summary, attributes.isExported );
-        this.childElements.push( result );
+        this.addChild( result );
         return result;
     }
 
@@ -743,7 +743,7 @@ export class AbstractPackage
         attributes: any
     ) : IPackage {
         var result = new Package( this, uuid, attributes.name, attributes.summary, attributes.isExported );
-        this.childElements.push( result );
+        this.addChild( result );
         return result;
     }
 
@@ -907,8 +907,8 @@ export class Module
  * A package collects related components.
  */
 export class Package
-extends AbstractPackage
-implements IPackage
+    extends AbstractPackage
+    implements IPackage
 {
 
     /**
@@ -919,13 +919,13 @@ implements IPackage
      * @param summary A short description of this package.
      * @param isExported Whether this package is accessible outside its parent package.
      */
-        constructor(
+    constructor(
         parentPackage: IAbstractPackage,
         uuid: string,
         name: string,
         summary: string,
         isExported: boolean
-        ) {
+    ) {
         super( parentPackage, "Package", uuid, name, summary, isExported );
     }
 

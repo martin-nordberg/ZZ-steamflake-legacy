@@ -8,8 +8,8 @@
 import commands = require( '../../../../source/steamflake/core/concurrency/commands' );
 import corecommands = require( '../../../../source/steamflake/core/metamodel/corecommands' );
 import elements = require( '../../../../source/steamflake/core/metamodel/elements' );
-import elements_impl = require( '../../../../source/steamflake/core/metamodel/elements_impl' );
 import registry = require( '../../../../source/steamflake/core/metamodel/registry' );
+import sampleElements = require( './sampleElements' );
 
 describe( "Core Commands", function() {
 
@@ -18,7 +18,9 @@ describe( "Core Commands", function() {
         var modelElement : elements.IModelElement;
 
         beforeEach( function() {
-            modelElement = new elements_impl.ModelElement( null, "SampleElement", "12345", "Old summary" );
+            var rootElement = sampleElements.makeSampleRootContainer( "1000" );
+            var containerElement = rootElement.makeSampleContainer( "1001", { name:"Sample", summary:"Sample container for testing" } );
+            modelElement = containerElement.makeSampleElement( "1111", { name:"SampleElement", summary:"Old summary" } );
             command = corecommands.makeAttributeChangeCommand(
                 null,
                 modelElement,
@@ -34,18 +36,19 @@ describe( "Core Commands", function() {
 
     describe( "Element Creation Command", function() {
         var command : commands.ICommand<elements.IModelElement>;
-        var modelElement : elements.IContainerElement;
         var elementRegistry : registry.IModelElementRegistry;
 
         beforeEach( function() {
             elementRegistry = registry.makeNullModelElementRegistry();
-            modelElement = new elements_impl.NamedContainerElement( null, "SampleElement", "12345", "MyName", "Old summary" );
+            var rootElement = sampleElements.makeSampleRootContainer( "1000" );
+            var containerElement = rootElement.makeSampleContainer( "1001", { name:"Sample", summary:"Sample container for testing" } );
+            var childElement = containerElement.makeSampleElement( "1111", { name:"SampleElement", summary:"Old summary" } );
             command = corecommands.makeElementCreationCommand(
                 null,
                 null,
                 elementRegistry,
-                {},
-                modelElement,
+                containerElement,
+                childElement,
                 "SampleElement",
                 {});
         } );

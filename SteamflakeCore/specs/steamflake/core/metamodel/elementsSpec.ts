@@ -17,14 +17,16 @@ describe( "Model Elements", function() {
     var uuid = "UUID";
 
     beforeEach( function() {
-        modelElement = new sampleElements.Element( null, uuid, name, summary );
+        var rootElement = sampleElements.makeSampleRootContainer( "1000" );
+        var containerElement = rootElement.makeSampleContainer( "1001", { name:"Sample", summary:"Sample container for testing" } );
+        modelElement = containerElement.makeSampleElement( uuid, { name:name, summary:summary } );
     } );
 
     it( "Constructs with expected attributes", function() {
         expect( modelElement.isContainer ).toBeFalsy();
         expect( modelElement.name ).toEqual( name );
         expect( modelElement.summary ).toEqual( summary );
-        expect( modelElement.typeName ).toEqual( "Element" );
+        expect( modelElement.typeName ).toEqual( "SampleElement" );
         expect( modelElement.uuid ).toEqual( uuid );
     } );
 
@@ -73,7 +75,7 @@ describe( "Model Elements", function() {
     it( "Writes to JSON", function() {
         var json = modelElement.toJson( elements.EJsonDetailLevel.FullTree );
 
-        expect( json ).toEqual( { type : 'Element', uuid : 'UUID', name : 'example', summary : 'Summary of test element' } );
+        expect( json ).toEqual( { type : 'SampleElement', uuid : 'UUID', name : 'example', summary : 'Summary of test element' } );
     } );
 
     it( "Saves and retrieves extended attributes", function() {
