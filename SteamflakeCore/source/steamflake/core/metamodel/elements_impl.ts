@@ -50,7 +50,6 @@ export class ModelElement
     ) : any {
         if ( !visitor[ methodPrefix + this.typeName ] ) {
             var msg = "Incomplete visitor. Missing method: " + typeof(visitor) + "." + methodPrefix + this.typeName;
-            console.log( "ERROR: ", msg );
             throw new Error( msg );
         }
         return visitor[ methodPrefix + this.typeName ]( this, options );
@@ -114,8 +113,6 @@ export class ModelElement
      * @param notifyChangeListeners Set to false to turn off change notifications during the update.
      */
     public fromJson( jsonObject : any, notifyChangeListeners : boolean = true ) : void {
-        console.log( "fromJson" );
-
         if ( notifyChangeListeners ) {
             this.readJsonAttributes( jsonObject );
         }
@@ -306,9 +303,7 @@ export class NamedElement
      */
     public readJsonAttributes( jsonObject : any ) : void {
         super.readJsonAttributes( jsonObject );
-        console.log( "new name", jsonObject.name );
         if ( typeof jsonObject.name !== 'undefined' ) {
-            console.log( "changing name" );
             this.name = jsonObject.name;
         }
     }
@@ -472,13 +467,13 @@ export class NamedContainerElement
   ////
 
     /** Event triggered when a new child element has been fully constructed and contained by this parent. */
-    private _childElementAddedEvent : events.IStatefulEvent<elements.IModelElement,elements.IModelElement>;
+    private _childElementAddedEvent : events.IStatefulEvent<elements.IContainerElement,elements.IModelElement>;
 
     /** Event triggered after the child elements of this container have been loaded from a persistent store. */
-    private _childElementsLoadedEvent : events.IStatefulEvent<elements.IModelElement,elements.IModelElement[]>
+    private _childElementsLoadedEvent : events.IStatefulEvent<elements.IContainerElement,elements.IModelElement[]>
 
     /** Event triggered when a new child element has been removed from this parent container. */
-    private _childElementRemovedEvent : events.IStatefulEvent<elements.IModelElement,elements.IModelElement>;
+    private _childElementRemovedEvent : events.IStatefulEvent<elements.IContainerElement,elements.IModelElement>;
 
 
 }

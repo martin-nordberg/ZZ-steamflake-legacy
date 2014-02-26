@@ -20,16 +20,18 @@ describe( "Core Commands", function() {
         beforeEach( function() {
             var rootElement = sampleElements.makeSampleRootContainer( "1000" );
             var containerElement = rootElement.makeSampleContainer( "1001", { name:"Sample", summary:"Sample container for testing" } );
-            modelElement = containerElement.makeSampleElement( "1111", { name:"SampleElement", summary:"Old summary" } );
+            modelElement = containerElement.makeSampleElement( "1111", { name:"SampleElement", summary:"New summary" } );
             command = corecommands.makeAttributeChangeCommand(
                 null,
                 modelElement,
                 "summary",
-                "A new summary" );
+                "Old summary" );
         } );
 
         it( "Constructs successfully", function() {
             expect( command ).not.toBeNull();
+            expect( command.title ).toEqual( "Summary Change" );
+            expect( command.description ).toEqual( "Change summary from \"Old summary\" to \"New summary\"")
         } );
 
     } );
@@ -41,20 +43,44 @@ describe( "Core Commands", function() {
         beforeEach( function() {
             elementRegistry = registry.makeNullModelElementRegistry();
             var rootElement = sampleElements.makeSampleRootContainer( "1000" );
-            var containerElement = rootElement.makeSampleContainer( "1001", { name:"Sample", summary:"Sample container for testing" } );
-            var childElement = containerElement.makeSampleElement( "1111", { name:"SampleElement", summary:"Old summary" } );
+            var containerElement = rootElement.makeSampleContainer( "1001", { name:"container", summary:"Sample container for testing" } );
+            var childElement = containerElement.makeSampleElement( "1111", { name:"child", summary:"Child summary" } );
             command = corecommands.makeElementCreationCommand(
                 null,
                 null,
                 elementRegistry,
-                containerElement,
-                childElement,
-                "SampleElement",
-                {});
+                childElement);
         } );
 
         it( "Constructs successfully", function() {
             expect( command ).not.toBeNull();
+            expect( command.title ).toEqual( "SampleElement Creation" );
+            expect( command.description ).toEqual( "Create sampleelement child")
+        } );
+
+    } );
+
+    describe( "Element Deletion Command", function() {
+        var command : commands.ICommand<elements.IModelElement>;
+        var elementRegistry : registry.IModelElementRegistry;
+
+        beforeEach( function() {
+            elementRegistry = registry.makeNullModelElementRegistry();
+            var rootElement = sampleElements.makeSampleRootContainer( "1000" );
+            var containerElement = rootElement.makeSampleContainer( "1001", { name:"container", summary:"Sample container for testing" } );
+            var childElement = containerElement.makeSampleElement( "1111", { name:"child", summary:"Child summary" } );
+            childElement.destroyed = true;
+            command = corecommands.makeElementDeletionCommand(
+                null,
+                null,
+                elementRegistry,
+                childElement );
+        } );
+
+        it( "Constructs successfully", function() {
+            expect( command ).not.toBeNull();
+            expect( command.title ).toEqual( "SampleElement Deletion" );
+            expect( command.description ).toEqual( "Delete sampleelement child")
         } );
 
     } );

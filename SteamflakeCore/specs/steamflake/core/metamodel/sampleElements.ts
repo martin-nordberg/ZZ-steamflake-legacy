@@ -67,8 +67,11 @@ class SampleContainer
     }
 
     public makeSampleElement( uuid : string, attributes : any ) {
-        return new SampleElement( this, uuid, attributes.name, attributes.summary );
+        var result = new SampleElement( this, uuid, attributes.name, attributes.summary );
+        this.addChild( result );
+        return result;
     }
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -84,7 +87,9 @@ class SampleRootContainer
     }
 
     public makeSampleContainer( uuid : string, attributes : any ) {
-        return new SampleContainer( this, uuid, attributes.name, attributes.summary );
+        var result = new SampleContainer( this, uuid, attributes.name, attributes.summary );
+        this.addChild( result );
+        return result;
     }
 
 }

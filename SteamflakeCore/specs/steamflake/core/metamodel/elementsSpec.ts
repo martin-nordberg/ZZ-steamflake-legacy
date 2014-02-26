@@ -11,6 +11,7 @@ import sampleElements = require( './sampleElements' );
 
 
 describe( "Model Elements", function() {
+    var containerElement : sampleElements.ISampleContainer;
     var modelElement : elements.INamedElement;
     var name = "example";
     var summary = "Summary of test element";
@@ -18,7 +19,7 @@ describe( "Model Elements", function() {
 
     beforeEach( function() {
         var rootElement = sampleElements.makeSampleRootContainer( "1000" );
-        var containerElement = rootElement.makeSampleContainer( "1001", { name:"Sample", summary:"Sample container for testing" } );
+        containerElement = rootElement.makeSampleContainer( "1001", { name:"Sample", summary:"Sample container for testing" } );
         modelElement = containerElement.makeSampleElement( uuid, { name:name, summary:summary } );
     } );
 
@@ -87,6 +88,51 @@ describe( "Model Elements", function() {
     it( "Retrieves extended attribute defaults", function() {
         expect( modelElement.getExtendedAttribute( "spec.a", "AAA" ) ).toEqual( "AAA" );
         expect( modelElement.getExtendedAttribute( "spec.a" ) ).toEqual( "AAA" );
+    } );
+
+    it( "Triggers an event for child creation", function() {
+        var listenCount = 0;
+
+        function listener1( container : elements.IContainerElement, child : elements.IModelElement ) {
+            expect( listenCount ).toEqual( 0 );
+            expect( container ).toEqual( containerElement );
+            expect( child.uuid ).toEqual( "12345" );
+            expect( ( <sampleElements.ISampleElement> child ).name ).toEqual( "test" );
+            expect( child.summary ).toEqual( "test" );
+            listenCount = 1;
+        }
+
+        containerElement.childElementAddedEvent.registerListener( listener1 );
+
+        containerElement.makeSampleElement( "12345", { name:"test", summary:"test" } );
+
+        expect( listenCount ).toEqual( 1 );
+    } );
+
+    it( "Triggers events for element destruction", function() {
+        var listenCount = 0;
+
+        function listener1( container : elements.IContainerElement, child : elements.IModelElement ) {
+            expect( listenCount ).toEqual( 0 );
+            expect( container ).toEqual( containerElement );
+            expect( child ).toEqual( modelElement );
+            expect( child.destroyed ).toBeTruthy();
+            listenCount = 1;
+        }
+
+        function listener2( child : elements.IModelElement ) {
+            expect( listenCount ).toEqual( 1 );
+            expect( child ).toEqual( modelElement );
+            expect( child.destroyed ).toBeTruthy();
+            listenCount = 2;
+        }
+
+        containerElement.childElementRemovedEvent.registerListener( listener1 );
+        modelElement.elementDestroyedEvent.registerListener( listener2 );
+
+        modelElement.destroyed = true;
+
+        expect( listenCount ).toEqual( 2 );
     } );
 
 } );

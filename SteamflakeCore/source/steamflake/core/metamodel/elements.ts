@@ -183,13 +183,13 @@ export interface IContainerElement
   ////
 
     /** Event triggered when a new child element has been fully constructed and contained by this parent. */
-    childElementAddedEvent : events.IStatefulEvent<IModelElement,IModelElement>;
+    childElementAddedEvent : events.IStatefulEvent<IContainerElement,IModelElement>;
 
     /** Event triggered when a new child element has been removed from this parent container. */
-    childElementRemovedEvent : events.IStatefulEvent<IModelElement,IModelElement>;
+    childElementRemovedEvent : events.IStatefulEvent<IContainerElement,IModelElement>;
 
     /** Event triggered after the child elements of this container have been loaded from a persistent store. */
-    childElementsLoadedEvent : events.IStatefulEvent<IModelElement,IModelElement[]>
+    childElementsLoadedEvent : events.IStatefulEvent<IContainerElement,IModelElement[]>
 
     ////
 
