@@ -4,37 +4,19 @@
  */
 
 import commands = require( '../concurrency/commands' );
+import corecommands = require( './corecommands' );
 import elements = require( './elements' );
 import persistence = require( './persistence' );
 import registry = require( './registry' );
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * Interface to a service that listens for changes in model elements.
- */
-export interface IUpdateListener {
-
-    /**
-     * Registers a listener to make updates to the database when a model element changes.
-     * @param modelElement The model element to keep up to date.
-     */
-    listenForChanges(
-        modelElement : elements.IModelElement
-    ) : void;
-
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * Service that listens for changes in L-Zero metamodel elements and passes them on to commands that update a
+ * Service that listens for changes in Steamflake model elements and passes them on to commands that update a
  * persistence layer.
  */
-class UpdateListener
-    implements IUpdateListener
-{
+class UpdateListener {
 
     /**
      * Constructs a new update listener.
@@ -43,23 +25,42 @@ class UpdateListener
         updater : persistence.IPersistentStoreUpdater,
         commandHistory : commands.ICommandHistory
     ) {
-        this._commandHistory = commandHistory;
-        this._updater = updater;
+        var self = this;
+
+        self._commandHistory = commandHistory;
+        self._updater = updater;
+
+        self._attributeChangeListener = function( modelElement : elements.IModelElement, change : elements.IAttributeChangeEventData ) {
+            var cmd = corecommands.makeAttributeChangeCommand( self._updater, modelElement, change.attributeName, change.oldValue )
+            self._commandHistory.queue( cmd );
+        }
     }
 
     /**
      * Registers a listener to make updates to the database when a model element changes.
      * @param modelElement The model element to keep up to date.
      */
-    public listenForChanges(
+    public startListening(
         modelElement : elements.IModelElement
     ) : void {
-        modelElement.attributeChangeEvent.registerListener( this.handleAttributeChange.bind( this ) );
+        modelElement.attributeChangeEvent.registerListener( this._attributeChangeListener );
+        // TBD: model element creation
+        // TBD: model element deletion
     }
 
-    public handleAttributeChange( modelElement : elements.IModelElement, change : {attributeName:string; oldValue : any; newValue : any} ) {
-        // TBD
+    /**
+     * Unregisters a listener to make updates to the database when a model element changes.
+     * @param modelElement The model element to keep up to date.
+     */
+    public stopListening(
+        modelElement : elements.IModelElement
+    ) : void {
+        modelElement.attributeChangeEvent.unregisterListener( this._attributeChangeListener );
+        // TBD: model element creation
+        // TBD: model element deletion
     }
+
+    private _attributeChangeListener : ( modelElement : elements.IModelElement, change : elements.IAttributeChangeEventData ) => void;
 
     private _commandHistory : commands.ICommandHistory;
 
@@ -81,10 +82,11 @@ export class UpdateListeningCodeElementRegistry
      */
     constructor(
         modelElementRegistry : registry.IModelElementRegistry,
-        updateListener : IUpdateListener
+        updater : persistence.IPersistentStoreUpdater,
+        commandHistory : commands.ICommandHistory
     ) {
         this._modelElementRegistry = modelElementRegistry;
-        this._updateListener = updateListener;
+        this._updateListener = new UpdateListener( updater, commandHistory );
     }
 
     /**
@@ -101,7 +103,7 @@ export class UpdateListeningCodeElementRegistry
      */
     public registerModelElement( modelElement : elements.IModelElement ) : void {
         this._modelElementRegistry.registerModelElement( modelElement );
-        this._updateListener.listenForChanges( modelElement );
+        this._updateListener.startListening( modelElement );
         console.log( "Code element registered; listening for code element changes: ", modelElement.uuid );
     }
 
@@ -109,39 +111,25 @@ export class UpdateListeningCodeElementRegistry
      * Removes a code element from this registry.
      */
     public unregisterModelElement( modelElement : elements.IModelElement ) : void {
-        // TBD: stop listening for updates ...
+        this._updateListener.stopListening( modelElement );
         this._modelElementRegistry.unregisterModelElement( modelElement );
     }
 
     private _modelElementRegistry : registry.IModelElementRegistry;
 
-    private _updateListener : IUpdateListener;
+    private _updateListener : UpdateListener;
 
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * Constructs a new update listener.
- * @param updater The persistent store updater behind the scenes
- * @param commandHistory The command history to keep commands in.
- * @returns {lzero.language.metamodel.listeners.UpdateListener}
- */
-export function makeUpdateListener(
-    updater : persistence.IPersistentStoreUpdater,
-    commandHistory : commands.ICommandHistory = commands.makeNullCommandHistory()
-) : IUpdateListener {
-    return new UpdateListener( updater, commandHistory );
-}
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 export function makeUpdateListeningCodeElementRegistry(
     modelElementRegistry : registry.IModelElementRegistry,
-    updateListener : IUpdateListener
+    updater : persistence.IPersistentStoreUpdater,
+    commandHistory : commands.ICommandHistory = commands.makeNullCommandHistory()
 ) : registry.IModelElementRegistry {
-    return new UpdateListeningCodeElementRegistry( modelElementRegistry, updateListener );
+    return new UpdateListeningCodeElementRegistry( modelElementRegistry, updater, commandHistory );
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

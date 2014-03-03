@@ -356,9 +356,9 @@ export function makeAttributeChangeCommand<Element extends elements.IModelElemen
     updater : persistence.IPersistentStoreUpdater,
     modelElement : Element,
     attributeName : string,
-    newValue : T
+    oldValue : T
 ) : commands.ICommand<Element> {
-    return new AttributeChangeCommand( updater, modelElement, attributeName, newValue );
+    return new AttributeChangeCommand( updater, modelElement, attributeName, oldValue );
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

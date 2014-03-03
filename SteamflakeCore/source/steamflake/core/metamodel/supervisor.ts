@@ -42,10 +42,8 @@ class MetamodelSupervisor<RootElement extends elements.IRootContainerElement>
         persistentStore : persistence.IPersistentStore<RootElement>,
         commandHistory : commands.ICommandHistory
     ) {
-        var updateListener = listeners.makeUpdateListener( persistentStore.updater, commandHistory );
-
         var codeElementRegistry = registry.makeInMemoryModelElementRegistry();
-        codeElementRegistry = listeners.makeUpdateListeningCodeElementRegistry( codeElementRegistry, updateListener );
+        codeElementRegistry = listeners.makeUpdateListeningCodeElementRegistry( codeElementRegistry, persistentStore.updater, commandHistory );
         codeElementRegistry = registry.makeChildRegisteringModelElementRegistry( codeElementRegistry );
 
         this._commandHistory = commandHistory;
