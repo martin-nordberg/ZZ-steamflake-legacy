@@ -124,7 +124,7 @@ class Promise<T>
         var result = new Promise<T2>();
 
         // wrapper passes fulfillment of this promise on to the resulting promise
-        function chainedOnFulfilled( value : T ) {
+        var chainedOnFulfilled = function( value : T ) {
             try {
                 var chainedValue = onFulfilled( value );
                 result.fulfill( chainedValue );
@@ -135,7 +135,7 @@ class Promise<T>
         }
 
         // wrapper passes rejection of this promise on to the resulting promise
-        function chainedOnRejected( reason : any ) {
+        var chainedOnRejected = function( reason : any ) {
             var chainedReason : any = undefined;
             if ( onRejected ) {
                 try {
@@ -195,7 +195,7 @@ class Promise<T>
             var fulfill = self._onFulfilled[0];
             self._onFulfilled.splice( 0, 1 );
 
-            function fulfillRecursively() {
+            var fulfillRecursively = function() {
                 fulfill( self._value );
                 self.onFulfilled();
             }
@@ -217,7 +217,7 @@ class Promise<T>
             var reject = this._onRejected[0];
             self._onRejected.splice( 0, 1 );
 
-            function rejectRecursively() {
+            var rejectRecursively = function() {
                 reject( self._reason );
                 self.onRejected();
             }

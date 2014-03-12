@@ -62,7 +62,7 @@ export class AbstractCommand<T>
         var result = self.execute();
 
         /** Callback updates the state of this command after execution. */
-        function updateCommandState( value : T ) {
+        var updateCommandState = function( value : T ) {
             if ( self._undoable ) {
                 self._state = commands.ECommandState.ReadyToUndo;
             }
@@ -73,7 +73,7 @@ export class AbstractCommand<T>
         }
 
         /** Callback updates the state of this command after an error. */
-        function errorCommandState( reason : any ) {
+        var errorCommandState = function( reason : any ) {
             self._state = commands.ECommandState.Error;
             return reason;
         }
@@ -97,7 +97,7 @@ export class AbstractCommand<T>
         var result = self.reexecute();
 
         /** Callback updates the state of this command after re-execution. */
-        function updateCommandState( value : values.ENothing ) {
+        var updateCommandState = function( value : values.ENothing ) {
             if ( self._undoable ) {
                 self._state = commands.ECommandState.ReadyToUndo;
             }
@@ -108,7 +108,7 @@ export class AbstractCommand<T>
         }
 
         /** Callback updates the state of this command after an error. */
-        function errorCommandState( reason : any ) {
+        var errorCommandState = function( reason : any ) {
             self._state = commands.ECommandState.Error;
             return reason;
         }
@@ -153,7 +153,7 @@ export class AbstractCommand<T>
         var result = self.unexecute();
 
         /** Callback updates the state of this command after un-execution. */
-        function updateCommandState( value : values.ENothing ) {
+        var updateCommandState = function( value : values.ENothing ) {
             if ( self._redoable ) {
                 self._state = commands.ECommandState.ReadyToRedo;
             }
@@ -164,7 +164,7 @@ export class AbstractCommand<T>
         }
 
         /** Callback updates the state of this command after an error. */
-        function errorCommandState( reason : any ) {
+        var errorCommandState = function( reason : any ) {
             self._state = commands.ECommandState.Error;
             return reason;
         }
@@ -188,7 +188,7 @@ export class AbstractCommand<T>
      */
     public/*protected*/ reexecute() : promises.IPromise<values.ENothing> {
 
-        function ignore( value : T ) {
+        var ignore = function( value : T ) {
             return values.nothing;
         }
 

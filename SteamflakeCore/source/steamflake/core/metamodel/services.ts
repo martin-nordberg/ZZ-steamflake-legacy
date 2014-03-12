@@ -77,7 +77,7 @@ class QueryService<RootElement extends elements.IRootContainerElement>
         }
 
         /** Registers the newly loaded children of a container. */
-        function registerContents( containerElement : Element ) {
+        var registerContents = function( containerElement : Element ) {
             containerElement.childElements.forEach( function( childElement : elements.IModelElement ) {
                 self._modelElementRegistry.registerModelElement( childElement );
             } );
@@ -97,7 +97,7 @@ class QueryService<RootElement extends elements.IRootContainerElement>
 
         var self = this;
 
-        function register( element : RootElement ) {
+        var register = function( element : RootElement ) {
             self._modelElementRegistry.registerModelElement( element );
             return element;
         }

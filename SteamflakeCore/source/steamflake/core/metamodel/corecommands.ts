@@ -49,7 +49,7 @@ class AttributeChangeCommand<Element extends elements.IModelElement,T>
         var self = this;
 
         // error handling: reverse the change
-        function revert( reason : any ) {
+        var revert = function( reason : any ) {
             self._modelElement.attributeChangeEvent.whileDisabledDo( function() {
                 self._modelElement[this._attributeName] = this._oldValue;
             } );
@@ -72,7 +72,7 @@ class AttributeChangeCommand<Element extends elements.IModelElement,T>
         self._modelElement[this._attributeName] = this._newValue;
 
         // error handling: undo the change
-        function revert( reason : any ) {
+        var revert = function( reason : any ) {
             self._modelElement.attributeChangeEvent.whileDisabledDo( function() {
                 self._modelElement[this._attributeName] = this._oldValue;
             } );
@@ -95,7 +95,7 @@ class AttributeChangeCommand<Element extends elements.IModelElement,T>
         self._modelElement[this._attributeName] = this._oldValue;
 
         // error handling: redo the change
-        function revert( reason : any ) {
+        var revert = function( reason : any ) {
             self._modelElement.attributeChangeEvent.whileDisabledDo( function() {
                 self._modelElement[this._attributeName] = this._newValue;
             } );
@@ -164,7 +164,7 @@ class ElementCreationCommand<ChildElement extends elements.IModelElement>
         self._modelElementRegistry.registerModelElement( self._childElement );
 
         // error handling: abandon the new element
-        function revert( reason : any ) {
+        var revert = function( reason : any ) {
             self._childElement.parentContainer.childElementRemovedEvent.whileDisabledDo( function() {
                 self._childElement.elementDestroyedEvent.whileDisabledDo( function() {
                     self._childElement.destroyed = true;
@@ -210,7 +210,7 @@ class ElementCreationCommand<ChildElement extends elements.IModelElement>
         this._modelElementRegistry.unregisterModelElement( this._childElement );
 
         // error handling: undo the deletion
-        function revert( reason : any ) {
+        var revert = function( reason : any ) {
             self._childElement.parentContainer.childElementAddedEvent.whileDisabledDo( function() {
                 self._childElement.elementDestroyedEvent.whileDisabledDo( function() {
                     self._childElement.destroyed = false;
@@ -278,7 +278,7 @@ class ElementDeletionCommand<ChildElement extends elements.IModelElement>
         self._modelElementRegistry.unregisterModelElement( self._childElement );
 
         // error handling: can't delete it
-        function revert( reason : any ) {
+        var revert = function( reason : any ) {
             self._childElement.parentContainer.childElementAddedEvent.whileDisabledDo( function() {
                 self._childElement.elementDestroyedEvent.whileDisabledDo( function() {
                     self._childElement.destroyed = false;
@@ -324,7 +324,7 @@ class ElementDeletionCommand<ChildElement extends elements.IModelElement>
         this._modelElementRegistry.registerModelElement( this._childElement );
 
         // error handling: redo the deletion
-        function revert( reason : any ) {
+        var revert = function( reason : any ) {
             self._childElement.parentContainer.childElementRemovedEvent.whileDisabledDo( function() {
                 self._childElement.elementDestroyedEvent.whileDisabledDo( function() {
                     self._childElement.destroyed = true;
