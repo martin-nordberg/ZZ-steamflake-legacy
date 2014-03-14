@@ -43,7 +43,7 @@ class MetamodelSupervisor<RootElement extends elements.IRootContainerElement>
         commandHistory : commands.ICommandHistory
     ) {
         var codeElementRegistry = registry.makeInMemoryModelElementRegistry();
-        codeElementRegistry = listeners.makeUpdateListeningCodeElementRegistry( codeElementRegistry, persistentStore.updater, commandHistory );
+        codeElementRegistry = listeners.makeUpdateListeningCodeElementRegistry( codeElementRegistry, persistentStore.creator, persistentStore.updater, persistentStore.deleter, commandHistory );
         codeElementRegistry = registry.makeChildRegisteringModelElementRegistry( codeElementRegistry );
 
         this._commandHistory = commandHistory;

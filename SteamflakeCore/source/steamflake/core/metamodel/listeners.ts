@@ -22,16 +22,28 @@ class UpdateListener {
      * Constructs a new update listener.
      */
     constructor(
+        creator : persistence.IPersistentStoreCreator,
         updater : persistence.IPersistentStoreUpdater,
+        deleter : persistence.IPersistentStoreDeleter,
         commandHistory : commands.ICommandHistory
     ) {
         var self = this;
 
         self._commandHistory = commandHistory;
-        self._updater = updater;
 
-        self._attributeChangeListener = function( modelElement : elements.IModelElement, change : elements.IAttributeChangeEventData ) {
-            var cmd = corecommands.makeAttributeChangeCommand( self._updater, modelElement, change.attributeName, change.oldValue )
+        self._attributeChangeListener = function(
+            modelElement : elements.IModelElement,
+            change : elements.IAttributeChangeEventData
+        ) {
+            var cmd = corecommands.makeAttributeChangeCommand( updater, modelElement, change.attributeName, change.oldValue );
+            self._commandHistory.queue( cmd );
+        }
+
+        self._childElementAddedListener = function(
+            containerElement : elements.IContainerElement,
+            childElement : elements.IModelElement
+        ) {
+            var cmd = corecommands.makeElementCreationCommand( creator, deleter, undefined/*TBD*/, childElement );
             self._commandHistory.queue( cmd );
         }
     }
@@ -62,9 +74,9 @@ class UpdateListener {
 
     private _attributeChangeListener : ( modelElement : elements.IModelElement, change : elements.IAttributeChangeEventData ) => void;
 
-    private _commandHistory : commands.ICommandHistory;
+    private _childElementAddedListener : ( containerElement : elements.IContainerElement, childElement : elements.IModelElement ) => void;
 
-    private _updater : persistence.IPersistentStoreUpdater;
+    private _commandHistory : commands.ICommandHistory;
 
 }
 
@@ -73,7 +85,7 @@ class UpdateListener {
 /**
  * A code element registry that also registers code elements with a persistent store updater to track changes.
  */
-export class UpdateListeningCodeElementRegistry
+class UpdateListeningCodeElementRegistry
     implements registry.IModelElementRegistry
 {
 
@@ -82,11 +94,13 @@ export class UpdateListeningCodeElementRegistry
      */
     constructor(
         modelElementRegistry : registry.IModelElementRegistry,
+        creator : persistence.IPersistentStoreCreator,
         updater : persistence.IPersistentStoreUpdater,
+        deleter : persistence.IPersistentStoreDeleter,
         commandHistory : commands.ICommandHistory
     ) {
         this._modelElementRegistry = modelElementRegistry;
-        this._updateListener = new UpdateListener( updater, commandHistory );
+        this._updateListener = new UpdateListener( creator, updater, deleter, commandHistory );
     }
 
     /**
@@ -104,7 +118,6 @@ export class UpdateListeningCodeElementRegistry
     public registerModelElement( modelElement : elements.IModelElement ) : void {
         this._modelElementRegistry.registerModelElement( modelElement );
         this._updateListener.startListening( modelElement );
-        console.log( "Code element registered; listening for code element changes: ", modelElement.uuid );
     }
 
     /**
@@ -126,10 +139,12 @@ export class UpdateListeningCodeElementRegistry
 
 export function makeUpdateListeningCodeElementRegistry(
     modelElementRegistry : registry.IModelElementRegistry,
+    creator : persistence.IPersistentStoreCreator,
     updater : persistence.IPersistentStoreUpdater,
+    deleter : persistence.IPersistentStoreDeleter,
     commandHistory : commands.ICommandHistory = commands.makeNullCommandHistory()
 ) : registry.IModelElementRegistry {
-    return new UpdateListeningCodeElementRegistry( modelElementRegistry, updater, commandHistory );
+    return new UpdateListeningCodeElementRegistry( modelElementRegistry, creator, updater, deleter, commandHistory );
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
