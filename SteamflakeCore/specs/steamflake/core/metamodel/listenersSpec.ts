@@ -12,14 +12,15 @@ import listeners = require( '../../../../source/steamflake/core/metamodel/listen
 import persistence = require( '../../../../source/steamflake/core/metamodel/persistence' );
 import promises = require( '../../../../source/steamflake/core/concurrency/promises' );
 import registry = require( '../../../../source/steamflake/core/metamodel/registry' );
+import sampleElements = require( './sampleElements' );
 import uuids = require( '../../../../source/steamflake/core/utilities/uuids' );
 
 
 describe( "Listeners", function() {
 
-    var modelElement1 : elements.IModelElement;
-    var modelElement2 : elements.IModelElement;
-    var modelElement3 : elements.IModelElement;
+    var modelElement1 : sampleElements.ISampleRootContainer;
+    var modelElement2 : sampleElements.ISampleContainer;
+    var modelElement3 : sampleElements.ISampleElement;
     var elementRegistry : registry.IModelElementRegistry;
 
     var updater /*: persistence.IPersistentStoreUpdater*/ = {
@@ -35,41 +36,19 @@ describe( "Listeners", function() {
     };
 
     beforeEach( function() {
-        modelElement1 = new elements_impl.ModelElement( null, "One", uuids.makeUuid(), "Sample element one" );
-        modelElement2 = new elements_impl.ModelElement( null, "Two", uuids.makeUuid(), "Sample element two" );
-        modelElement3 = new elements_impl.ModelElement( null, "Three", uuids.makeUuid(), "Sample element three" );
+        modelElement1 = sampleElements.makeSampleRootContainer( uuids.makeUuid() );
+        modelElement2 = modelElement1.makeSampleContainer( uuids.makeUuid(), { name: "Two" } );
+        modelElement3 = modelElement2.makeSampleElement( uuids.makeUuid(), { name: "Three" } );
 
         var cmdHistory = commands.makeNullCommandHistory();
 
         elementRegistry = registry.makeInMemoryModelElementRegistry();
-        elementRegistry = listeners.makeUpdateListeningCodeElementRegistry( elementRegistry, undefined, updater, undefined, cmdHistory );
-    } );
-
-    it( "Registers and retrieves elements", function() {
-        elementRegistry.registerModelElement( modelElement1 );
-        elementRegistry.registerModelElement( modelElement2 );
-        elementRegistry.registerModelElement( modelElement3 );
-
-        expect( elementRegistry.lookUpModelElementByUuid( modelElement1.uuid ) ).toBe( modelElement1 );
-        expect( elementRegistry.lookUpModelElementByUuid( modelElement2.uuid ) ).toBe( modelElement2 );
-        expect( elementRegistry.lookUpModelElementByUuid( modelElement3.uuid ) ).toBe( modelElement3 );
-    } );
-
-    it( "Unregisters elements correctly", function() {
-        elementRegistry.registerModelElement( modelElement1 );
-        elementRegistry.registerModelElement( modelElement2 );
-        elementRegistry.registerModelElement( modelElement3 );
-        elementRegistry.unregisterModelElement( modelElement2 );
-
-        expect( elementRegistry.lookUpModelElementByUuid( modelElement1.uuid ) ).toBe( modelElement1 );
-        expect( elementRegistry.lookUpModelElementByUuid( modelElement2.uuid ) ).toBeUndefined();
-        expect( elementRegistry.lookUpModelElementByUuid( modelElement3.uuid ) ).toBe( modelElement3 );
+        listeners.addAutomaticUpdatePersistence( elementRegistry, undefined, updater, undefined, cmdHistory );
+        registry.addAutomaticChildElementRegistration( elementRegistry );
     } );
 
     it( "Listens for updates", function() {
         elementRegistry.registerModelElement( modelElement1 );
-        elementRegistry.registerModelElement( modelElement2 );
-        elementRegistry.registerModelElement( modelElement3 );
 
         modelElement1.summary = "Revised element one";
         modelElement2.summary = "Revised element two";

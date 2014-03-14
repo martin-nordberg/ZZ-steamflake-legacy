@@ -4,6 +4,7 @@
  */
 
 import elements = require( './elements' );
+import events = require( '../utilities/events' );
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -31,15 +32,61 @@ export interface IModelElementRegistry {
      */
     unregisterModelElement( modelElement : elements.IModelElement ) : void;
 
+  ////
+
+    /** Event triggered after an element has been registered. */
+    elementRegisteredEvent : events.IStatefulEvent<IModelElementRegistry,elements.IModelElement>;
+
+    /** Event triggered after an element has been unregistered. */
+    elementUnregisteredEvent : events.IStatefulEvent<IModelElementRegistry,elements.IModelElement>;
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class AbstractModelElementRegistry
+    /*implements IModelElementRegistry*/
+{
+
+    constructor() {
+        this._elementRegisteredEvent = events.makeStatefulEvent( this );
+        this._elementUnregisteredEvent = events.makeStatefulEvent( this );
+    }
+
+
+    /** Event triggered after an element has been registered. */
+    public get elementRegisteredEvent() {
+        return this._elementRegisteredEvent;
+    }
+    public set elementRegisteredEvent( value : events.IStatefulEvent<IModelElementRegistry,elements.IModelElement> ) {
+        throw new Error( "Attempted to change read only event - elementRegisteredEvent." );
+    }
+
+    /** Event triggered after an element has been unregistered. */
+    public get elementUnregisteredEvent() {
+        return this._elementUnregisteredEvent;
+    }
+    public set elementUnregisteredEvent( value : events.IStatefulEvent<IModelElementRegistry,elements.IModelElement> ) {
+        throw new Error( "Attempted to change read only event - elementUnregisteredEvent." );
+    }
+
+  ////
+
+    /** Event triggered after an element has been registered. */
+    private _elementRegisteredEvent : events.IStatefulEvent<IModelElementRegistry,elements.IModelElement>;
+
+    /** Event triggered after an element has been unregistered. */
+    private _elementUnregisteredEvent : events.IStatefulEvent<IModelElementRegistry,elements.IModelElement>;
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
  * A no-op registry of model elements.
  */
 class NullModelElementRegistry
+    extends AbstractModelElementRegistry
     implements IModelElementRegistry
 {
 
@@ -56,7 +103,8 @@ class NullModelElementRegistry
      * Adds a model element to this registry.
      */
     public registerModelElement( modelElement : elements.IModelElement ) : void {
-        // do nothing
+        // do nothing except trigger event
+        this.elementRegisteredEvent.trigger( modelElement );
     }
 
     /**
@@ -64,7 +112,8 @@ class NullModelElementRegistry
      * @param modelElement The model element to remove.
      */
     public unregisterModelElement( modelElement : elements.IModelElement ) : void {
-        // do nothing
+        // do nothing except trigger event
+        this.elementUnregisteredEvent.trigger( modelElement );
     }
 
 }
@@ -75,6 +124,7 @@ class NullModelElementRegistry
  * A model element registry that tracks model elements by UUID broken into two pieces.
  */
 class InMemoryModelElementRegistry
+    extends AbstractModelElementRegistry
     implements IModelElementRegistry
 {
 
@@ -82,6 +132,7 @@ class InMemoryModelElementRegistry
      * Constructs a model element registry.
      */
     constructor() {
+        super();
         this._registry = {};
     }
 
@@ -103,26 +154,40 @@ class InMemoryModelElementRegistry
      * Adds a model element to this registry.
      */
     public registerModelElement( modelElement : elements.IModelElement ) : void {
+
         var uuid = modelElement.uuid;
         var uuidSegments = this.splitUuid( uuid );
+
         var subregistry = this._registry[ uuidSegments[0] ];
         if ( typeof subregistry === 'undefined' ) {
             subregistry = {};
             this._registry[ uuidSegments[0] ] = subregistry;
         }
-        subregistry[ uuidSegments[1] ] = modelElement;
+
+        if ( typeof subregistry[ uuidSegments[1] ] === 'undefined' ) {
+            subregistry[ uuidSegments[1] ] = modelElement;
+            this.elementRegisteredEvent.trigger( modelElement );
+        }
+
     }
 
     /**
      * Removes a model element from this registry.
      */
     public unregisterModelElement( modelElement : elements.IModelElement ) : void {
+
         var uuid = modelElement.uuid;
         var uuidSegments = this.splitUuid( uuid );
+
         var subregistry = this._registry[ uuidSegments[0] ];
         if ( typeof subregistry !== 'undefined' ) {
-            delete subregistry[ uuidSegments[1] ];
+
+            if ( subregistry[ uuidSegments[1] ] === modelElement ) {
+                delete subregistry[ uuidSegments[1] ];
+                this.elementUnregisteredEvent.trigger( modelElement );
+            }
         }
+
     }
 
     /**
@@ -144,53 +209,41 @@ class InMemoryModelElementRegistry
 /**
  * A model element registry that also registers model elements with a persistent store updater to track changes.
  */
-class ChildRegisteringModelElementRegistry
-    implements IModelElementRegistry
-{
+class ChildRegisteringModelElementRegistryListener {
 
     /**
-     * Constructs a registry from an inner registry and an updater.
+     * Constructs a listener for a given registry.
      */
     constructor(
         modelElementRegistry : IModelElementRegistry
     ) {
-        this._modelElementRegistry = modelElementRegistry;
-    }
 
-    /**
-     * Finds the model element with given UUID.
-     * @param uuid The unique ID of the model element to find.
-     * @returns the model element found or null if not registered.
-     */
-    public lookUpModelElementByUuid( uuid : string ) : elements.IModelElement {
-        return this._modelElementRegistry.lookUpModelElementByUuid( uuid );
-    }
+        // responds when an element is registered
+        var registrationListener = function( registry : IModelElementRegistry, modelElement : elements.IModelElement ) {
+            if ( modelElement.isContainer ) {
+                var container = <elements.IContainerElement>modelElement;
 
-    /**
-     * Adds a model element to this registry. Also registers the elements children if any.
-     */
-    public registerModelElement( modelElement : elements.IModelElement ) : void {
-        var self = this;
-
-        self._modelElementRegistry.registerModelElement( modelElement );
-
-        if ( modelElement.isContainer ) {
-            var container = <elements.IContainerElement>modelElement;
-
-            container.childElements.forEach( function( childElement : elements.IModelElement ) {
-                self.registerModelElement( childElement );
-            } );
+                container.childElements.forEach( function( childElement : elements.IModelElement ) {
+                    modelElementRegistry.registerModelElement( childElement );
+                } );
+            }
         }
-    }
 
-    /**
-     * Removes a model element from this registry.
-     */
-    public unregisterModelElement( modelElement : elements.IModelElement ) : void {
-        this._modelElementRegistry.unregisterModelElement( modelElement );
-    }
+        // responds when an element is unregistered
+        var unregistrationListener = function( registry : IModelElementRegistry, modelElement : elements.IModelElement ) {
+            if ( modelElement.isContainer ) {
+                var container = <elements.IContainerElement>modelElement;
 
-    private _modelElementRegistry : IModelElementRegistry;
+                container.childElements.forEach( function( childElement : elements.IModelElement ) {
+                    modelElementRegistry.unregisterModelElement( childElement );
+                } );
+            }
+        }
+
+        modelElementRegistry.elementRegisteredEvent.registerListener( registrationListener );
+        modelElementRegistry.elementUnregisteredEvent.registerListener( unregistrationListener );
+
+    }
 
 }
 
@@ -214,13 +267,12 @@ export function makeInMemoryModelElementRegistry() : IModelElementRegistry {
 }
 
 /**
- * Constructs a new model element registry wrapper that automatically registers the child elements of every model
- * element registered.
- * @param modelElementRegistry The inner registry to be wrapped with child registration
- * @returns a new model element registry wrapping the given one
+ * Adds event listening to the given registry such that child elements are automatically registered and unregistered
+ * when a container is registered or unregistered.
+ * @param modelElementRegistry The inner registry to be configured with automatic child registration.
  */
-export function makeChildRegisteringModelElementRegistry( modelElementRegistry : IModelElementRegistry ) : IModelElementRegistry {
-    return new ChildRegisteringModelElementRegistry( modelElementRegistry );
+export function addAutomaticChildElementRegistration( modelElementRegistry : IModelElementRegistry ) {
+    new ChildRegisteringModelElementRegistryListener( modelElementRegistry );
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

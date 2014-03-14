@@ -31,6 +31,7 @@ class UpdateListener {
 
         self._commandHistory = commandHistory;
 
+        // respond to attribute changes
         self._attributeChangeListener = function(
             modelElement : elements.IModelElement,
             change : elements.IAttributeChangeEventData
@@ -39,6 +40,7 @@ class UpdateListener {
             self._commandHistory.queue( cmd );
         }
 
+        // respond to added child elements (i.e. element creation)
         self._childElementAddedListener = function(
             containerElement : elements.IContainerElement,
             childElement : elements.IModelElement
@@ -55,9 +57,15 @@ class UpdateListener {
     public startListening(
         modelElement : elements.IModelElement
     ) : void {
+
         modelElement.attributeChangeEvent.registerListener( this._attributeChangeListener );
-        // TBD: model element creation
+
+        if ( modelElement.isContainer ) {
+            ( <elements.IContainerElement> modelElement ).childElementAddedEvent.registerListener( this._childElementAddedListener );
+        }
+
         // TBD: model element deletion
+
     }
 
     /**
@@ -67,9 +75,15 @@ class UpdateListener {
     public stopListening(
         modelElement : elements.IModelElement
     ) : void {
-        modelElement.attributeChangeEvent.unregisterListener( this._attributeChangeListener );
-        // TBD: model element creation
+
         // TBD: model element deletion
+
+        if ( modelElement.isContainer ) {
+            ( <elements.IContainerElement> modelElement ).childElementAddedEvent.unregisterListener( this._childElementAddedListener );
+        }
+
+        modelElement.attributeChangeEvent.unregisterListener( this._attributeChangeListener );
+
     }
 
     private _attributeChangeListener : ( modelElement : elements.IModelElement, change : elements.IAttributeChangeEventData ) => void;
@@ -83,68 +97,59 @@ class UpdateListener {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * A code element registry that also registers code elements with a persistent store updater to track changes.
+ * A model element registry that adds or removes persistence update listening when elements are registered
+ * or unregistered.
  */
-class UpdateListeningCodeElementRegistry
-    implements registry.IModelElementRegistry
-{
+class UpdatePersistingModelElementRegistryListener {
 
     /**
      * Constructs a registry from an inner registry and an updater.
      */
     constructor(
         modelElementRegistry : registry.IModelElementRegistry,
-        creator : persistence.IPersistentStoreCreator,
-        updater : persistence.IPersistentStoreUpdater,
-        deleter : persistence.IPersistentStoreDeleter,
-        commandHistory : commands.ICommandHistory
+        updateListener : UpdateListener
     ) {
-        this._modelElementRegistry = modelElementRegistry;
-        this._updateListener = new UpdateListener( creator, updater, deleter, commandHistory );
+
+        // responds when an element is registered
+        var registrationListener = function( r : registry.IModelElementRegistry, modelElement : elements.IModelElement ) {
+            updateListener.startListening( modelElement );
+        }
+
+        // responds when an element is unregistered
+        var unregistrationListener = function( r : registry.IModelElementRegistry, modelElement : elements.IModelElement ) {
+            updateListener.stopListening( modelElement );
+        }
+
+        modelElementRegistry.elementRegisteredEvent.registerListener( registrationListener );
+        modelElementRegistry.elementUnregisteredEvent.registerListener( unregistrationListener );
+
     }
-
-    /**
-     * Finds the code element with given UUID.
-     * @param uuid The unique ID of the code element to find.
-     * @returns the code element found or null if not registered.
-     */
-    public lookUpModelElementByUuid( uuid : string ) : elements.IModelElement {
-        return this._modelElementRegistry.lookUpModelElementByUuid( uuid );
-    }
-
-    /**
-     * Adds a code element to this registry. Also adds the code element to the updater.
-     */
-    public registerModelElement( modelElement : elements.IModelElement ) : void {
-        this._modelElementRegistry.registerModelElement( modelElement );
-        this._updateListener.startListening( modelElement );
-    }
-
-    /**
-     * Removes a code element from this registry.
-     */
-    public unregisterModelElement( modelElement : elements.IModelElement ) : void {
-        this._updateListener.stopListening( modelElement );
-        this._modelElementRegistry.unregisterModelElement( modelElement );
-    }
-
-    private _modelElementRegistry : registry.IModelElementRegistry;
-
-    private _updateListener : UpdateListener;
 
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export function makeUpdateListeningCodeElementRegistry(
+/**
+ * Creates a new model element registry that also maintains update listening to persist model changes.
+ * @param modelElementRegistry The inner model element registry to wrap with update listening.
+ * @param creator The persistence creation service.
+ * @param updater The persistence update service.
+ * @param deleter The persistence deletion service.
+ * @param commandHistory The command history to maintain with update commands.
+ * @returns {UpdateListeningCodeElementRegistry}
+ */
+export function addAutomaticUpdatePersistence(
     modelElementRegistry : registry.IModelElementRegistry,
     creator : persistence.IPersistentStoreCreator,
     updater : persistence.IPersistentStoreUpdater,
     deleter : persistence.IPersistentStoreDeleter,
     commandHistory : commands.ICommandHistory = commands.makeNullCommandHistory()
-) : registry.IModelElementRegistry {
-    return new UpdateListeningCodeElementRegistry( modelElementRegistry, creator, updater, deleter, commandHistory );
+) {
+
+    var updateListener = new UpdateListener( creator, updater, deleter, commandHistory );
+
+    new UpdatePersistingModelElementRegistryListener( modelElementRegistry, updateListener );
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

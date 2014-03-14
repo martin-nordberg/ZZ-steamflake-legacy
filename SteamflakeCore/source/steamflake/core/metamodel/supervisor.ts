@@ -42,12 +42,22 @@ class MetamodelSupervisor<RootElement extends elements.IRootContainerElement>
         persistentStore : persistence.IPersistentStore<RootElement>,
         commandHistory : commands.ICommandHistory
     ) {
+
         var codeElementRegistry = registry.makeInMemoryModelElementRegistry();
-        codeElementRegistry = listeners.makeUpdateListeningCodeElementRegistry( codeElementRegistry, persistentStore.creator, persistentStore.updater, persistentStore.deleter, commandHistory );
-        codeElementRegistry = registry.makeChildRegisteringModelElementRegistry( codeElementRegistry );
+
+        listeners.addAutomaticUpdatePersistence(
+            codeElementRegistry,
+            persistentStore.creator,
+            persistentStore.updater,
+            persistentStore.deleter,
+            commandHistory
+        );
+
+        registry.addAutomaticChildElementRegistration( codeElementRegistry  );
 
         this._commandHistory = commandHistory;
         this._queryService = services.makeQueryService( persistentStore, codeElementRegistry );
+
     }
 
     /**

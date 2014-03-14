@@ -34,16 +34,19 @@ describe( "Events", function() {
             expect( listenCount ).toEqual( 4 );
         } );
 
-        it( "Registers multiple listeners and sends them all events", function() {
+        it( "Registers multiple listeners and sends them all events in correct order", function() {
             var listened = [false,false,false];
 
             event.registerListener( function( s : string ) {
                 listened[0] = true;
             } );
             event.registerListener( function( s : string ) {
+                expect( listened[0] ).toBeTruthy();
                 listened[1] = true;
             } );
             event.registerListener( function( s : string ) {
+                expect( listened[0] ).toBeTruthy();
+                expect( listened[1] ).toBeTruthy();
                 listened[2] = true;
             } );
 
@@ -77,12 +80,18 @@ describe( "Events", function() {
                 listened[0] = true;
             }
             function listener1( s : string ) {
+                expect( listened[0] ).toBeFalsy();
                 listened[1] = true;
             }
             function listener2( s : string ) {
+                expect( listened[0] ).toBeFalsy();
+                expect( listened[1] ).toBeTruthy();
                 listened[2] = true;
             }
             function listener3( s : string ) {
+                expect( listened[0] ).toBeFalsy();
+                expect( listened[1] ).toBeTruthy();
+                expect( listened[2] ).toBeFalsy();
                 listened[3] = true;
             }
 
