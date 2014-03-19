@@ -361,9 +361,7 @@ export class AbstractNamespace
         uuid: string,
         attributes: any
     ) : IModule {
-        var result = new Module( this, uuid, attributes.name, attributes.summary, attributes.version );
-        this.addChild( result );
-        return result;
+        return this.addChild( new Module( this, uuid, attributes.name, attributes.summary, attributes.version ) );
     }
 
     /**
@@ -376,9 +374,7 @@ export class AbstractNamespace
         uuid: string,
         attributes: any
     ) : INamespace {
-        var result = new Namespace( this, uuid, attributes.name, attributes.summary );
-        this.addChild( result );
-        return result;
+        return this.addChild( new Namespace( this, uuid, attributes.name, attributes.summary ) );
     }
 
 }
@@ -694,9 +690,7 @@ export class Component
         uuid: string,
         attributes: any
     ) : IClass {
-        var result = new Class( this, uuid, attributes.name, attributes.summary, attributes.isExported );
-        this.addChild( result );
-        return result;
+        return this.addChild( new Class( this, uuid, attributes.name, attributes.summary, attributes.isExported ) );
     }
 
 }
@@ -742,9 +736,7 @@ export class AbstractPackage
         uuid: string,
         attributes: any
     ) : IPackage {
-        var result = new Package( this, uuid, attributes.name, attributes.summary, attributes.isExported );
-        this.addChild( result );
-        return result;
+        return this.addChild( new Package( this, uuid, attributes.name, attributes.summary, attributes.isExported ) );
     }
 
 }

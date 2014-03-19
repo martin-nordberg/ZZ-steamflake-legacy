@@ -197,7 +197,7 @@ export interface IContainerElement
      * Adds a child model element to this container. Triggers childElementAddedEvent.
      * @param childElement The model element to add.
      */
-    addChild( childElement : IModelElement );
+    addChild<Element extends IModelElement>( childElement : Element ) : Element;
 
     /**
      * Removes a child element from this container.

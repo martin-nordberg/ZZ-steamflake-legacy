@@ -358,9 +358,10 @@ export class NamedContainerElement
      * Adds a child model element to this container. Triggers childElementAddedEvent.
      * @param childElement The model element to add.
      */
-    public addChild( childElement : elements.IModelElement ) {
+    public addChild<Element extends elements.IModelElement>( childElement : Element ) {
         this._childElements.push( childElement );
         this._childElementAddedEvent.trigger( childElement );
+        return childElement;
     }
 
     /** Event triggered when a new child element has been fully constructed and contained by this parent. */
