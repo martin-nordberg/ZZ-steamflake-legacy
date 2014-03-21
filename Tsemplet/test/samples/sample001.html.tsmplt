@@ -1,3 +1,4 @@
+%Tsemplet code-prefix="`" output-prefix="" code="Typescript" output="HTML"
 `
 `/** Sample template function constructs an HTML div element with given ID and content. */
 `export function sample001a( id : string, text : string ) {
