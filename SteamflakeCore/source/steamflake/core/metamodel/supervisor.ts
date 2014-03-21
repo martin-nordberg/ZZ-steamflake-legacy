@@ -33,7 +33,7 @@ export interface IMetamodelSupervisor<RootElement extends elements.IRootContaine
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * Interface to entry point facade over L-Zero Metamodel services.
+ * Implementation of entry point facade over L-Zero Metamodel services.
  */
 class MetamodelSupervisor<RootElement extends elements.IRootContainerElement>
     implements IMetamodelSupervisor<RootElement> {

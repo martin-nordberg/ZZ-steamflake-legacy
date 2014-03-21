@@ -15,13 +15,11 @@
 
     <!-- Folders -->
     <property name="core" value="../SteamflakeCore"/>
-    <property name="core.lib" value="${core}/lib"/>
     <property name="core.scripts" value="${core}/scripts"/>
     <property name="core.source" value="${core}/source"/>
     <property name="core.specs" value="${core}/specs"/>
 
     <property name="model" value="../SteamflakeModel"/>
-    <property name="model.lib" value="${model}/lib"/>
     <property name="model.scripts" value="${model}/scripts"/>
     <property name="model.source" value="${model}/source"/>
     <property name="model.specs" value="${model}/specs"/>
@@ -68,50 +66,24 @@
 
     <!-- Core -->
 
-    <!-- Check whether Steamflake Core code is up to date -->
-    <target name="check-core-uptodate"
-            description="Check whether the core is up to date">
-
-        <uptodate property="core.uptodate" targetfile="${core.scripts}/SteamflakeCore/source/builddate.txt" >
-            <srcfiles dir="${core.source}" includes="**/*.ts"/>
-            <srcfiles dir="${core.source}" includes="Compile.sh"/>
-        </uptodate>
-
-        <echo>Steamflake Core up to date: ${core.uptodate}</echo>
-
-    </target>
-
-    <!-- Compile Steamflake Core -->
-    <target name="compile-core"
-            description="Compile Steamflake Core"
-            depends="check-core-uptodate"
-            unless="core.uptodate">
-
-        <echo>Compiling Steamflake Core code ...</echo>
-        <exec dir="${core.source}" executable="sh" failonerror="true">
-            <arg value="Compile.sh"/>
-        </exec>
-
-    </target>
-
-    <!-- Check whether Steamflake Core specs are up to date -->
+    <!-- Check whether Steamflake Core specs and code are up to date -->
     <target name="check-core-specs-uptodate"
-            description="Check whether the core specs are up to date"
-            if="core.uptodate">
+            description="Check whether the core specs and code are up to date">
 
         <uptodate property="core.specs.uptodate" targetfile="${core.scripts}/SteamflakeCore/specs/builddate.txt" >
+            <srcfiles dir="${core.source}" includes="**/*.ts"/>
             <srcfiles dir="${core.specs}" includes="**/*.ts"/>
             <srcfiles dir="${core.specs}" includes="Compile.sh"/>
         </uptodate>
 
-        <echo>Steamflake Core specs up to date: ${core.specs.uptodate}</echo>
+        <echo>Steamflake Core specs and code up to date: ${core.specs.uptodate}</echo>
 
     </target>
 
     <!-- Compile Steamflake Core specs -->
     <target name="compile-core-specs"
             description="Run Steamflake Core specs"
-            depends="compile-core, check-core-specs-uptodate"
+            depends="check-core-specs-uptodate"
             unless="core.specs.uptodate">
 
         <echo>Compiling Core specifications ...</echo>
@@ -137,51 +109,25 @@
 
     <!-- Model -->
 
-    <!-- Check whether Steamflake Model code is up to date -->
-    <target name="check-model-uptodate"
-            description="Check whether the model is up to date"
-            if="core.uptodate">
-
-        <uptodate property="model.uptodate" targetfile="${model.scripts}/SteamflakeModel/source/builddate.txt" >
-            <srcfiles dir="${model.source}" includes="**/*.ts"/>
-            <srcfiles dir="${model.source}" includes="Compile.sh"/>
-        </uptodate>
-
-        <echo>Steamflake Model up to date: ${model.uptodate}</echo>
-
-    </target>
-
-    <!-- Compile Steamflake Model -->
-    <target name="compile-model"
-            description="Compile Steamflake Model"
-            depends="compile-core,check-model-uptodate"
-            unless="model.uptodate">
-
-        <echo>Compiling Steamflake Model code ...</echo>
-        <exec dir="${model.source}" executable="sh" failonerror="true">
-            <arg value="Compile.sh"/>
-        </exec>
-
-    </target>
-
     <!-- Check whether Steamflake Model specs are up to date -->
     <target name="check-model-specs-uptodate"
-            description="Check whether the model specs are up to date"
-            if="model.uptodate">
+            description="Check whether the model specs are up to date">
 
         <uptodate property="model.specs.uptodate" targetfile="${model.scripts}/SteamflakeModel/specs/builddate.txt" >
+            <srcfiles dir="${core.source}" includes="**/*.ts"/>
+            <srcfiles dir="${model.source}" includes="**/*.ts"/>
             <srcfiles dir="${model.specs}" includes="**/*.ts"/>
             <srcfiles dir="${model.specs}" includes="Compile.sh"/>
         </uptodate>
 
-        <echo>Steamflake Model specs up to date: ${model.specs.uptodate}</echo>
+        <echo>Steamflake Model specs and code up to date: ${model.specs.uptodate}</echo>
 
     </target>
 
     <!-- Compile Steamflake Model specs -->
     <target name="compile-model-specs"
             description="Run Steamflake Model specs"
-            depends="compile-model, check-model-specs-uptodate"
+            depends="check-model-specs-uptodate"
             unless="model.specs.uptodate">
 
         <echo>Compiling Model specifications ...</echo>

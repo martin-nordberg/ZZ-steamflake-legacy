@@ -4,24 +4,8 @@
 set -e
 
 
-pushd steamflake/core/utilities >/dev/null
-echo Utility Specs ...
-tsc -t ES5 --module commonjs *.ts --outDir ../../../../scripts/SteamflakeCore
-popd >/dev/null
-
-pushd steamflake/core/concurrency >/dev/null
-echo Concurrency Specs ...
-tsc -t ES5 --module commonjs *.ts --outDir ../../../../scripts/SteamflakeCore
-popd >/dev/null
-
-pushd steamflake/core/contracts >/dev/null
-echo Contracts Specs ...
-tsc -t ES5 --module commonjs *.ts --outDir ../../../../scripts/SteamflakeCore
-popd >/dev/null
-
-pushd steamflake/core/metamodel >/dev/null
-echo Metamodel Specs ...
-tsc -t ES5 --module commonjs *.ts --outDir ../../../../scripts/SteamflakeCore
+pushd steamflake/core >/dev/null
+tsc -t ES5 --module commonjs utilities/*.ts concurrency/*.ts contracts/*.ts metamodel/*.ts --outDir ../../../scripts/SteamflakeCore
 popd >/dev/null
 
 

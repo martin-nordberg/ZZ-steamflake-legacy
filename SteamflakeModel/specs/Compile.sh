@@ -5,6 +5,7 @@ set -e
 
 
 pushd steamflake/model >/dev/null
+echo Model Specs ...
 tsc -t ES5 --module commonjs *.ts --outDir ../../../scripts
 popd >/dev/null
 
