@@ -3,16 +3,16 @@
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
 
 /************************************************
-*                                               *
-*               Node.js v0.10.1 API              *
-*                                               *
-************************************************/
+ *                                               *
+ *               Node.js v0.10.1 API              *
+ *                                               *
+ ************************************************/
 
 /************************************************
-*                                               *
-*                   GLOBAL                      *
-*                                               *
-************************************************/
+ *                                               *
+ *                   GLOBAL                      *
+ *                                               *
+ ************************************************/
 declare var process: NodeProcess;
 declare var global: any;
 
@@ -66,10 +66,10 @@ declare var Buffer: {
 }
 
 /************************************************
-*                                               *
-*                   INTERFACES                  *
-*                                               *
-************************************************/
+ *                                               *
+ *                   INTERFACES                  *
+ *                                               *
+ ************************************************/
 
 interface ErrnoException extends Error {
     errno?: any;
@@ -143,22 +143,22 @@ interface NodeProcess extends NodeEventEmitter {
             libraries: string[];
         };
         variables: {
-        clang: number;
-        host_arch: string;
-        node_install_npm: boolean;
-        node_install_waf: boolean;
-        node_prefix: string;
-        node_shared_openssl: boolean;
-        node_shared_v8: boolean;
-        node_shared_zlib: boolean;
-        node_use_dtrace: boolean;
-        node_use_etw: boolean;
-        node_use_openssl: boolean;
-        target_arch: string;
-        v8_no_strict_aliasing: number;
-        v8_use_snapshot: boolean;
-        visibility: string;
-    };
+            clang: number;
+            host_arch: string;
+            node_install_npm: boolean;
+            node_install_waf: boolean;
+            node_prefix: string;
+            node_shared_openssl: boolean;
+            node_shared_v8: boolean;
+            node_shared_zlib: boolean;
+            node_use_dtrace: boolean;
+            node_use_etw: boolean;
+            node_use_openssl: boolean;
+            target_arch: string;
+            v8_no_strict_aliasing: number;
+            v8_use_snapshot: boolean;
+            visibility: string;
+        };
     };
     kill(pid: number, signal?: string): void;
     pid: number;
@@ -220,10 +220,10 @@ interface NodeTimer {
 }
 
 /************************************************
-*                                               *
-*                   MODULES                     *
-*                                               *
-************************************************/
+ *                                               *
+ *                   MODULES                     *
+ *                                               *
+ ************************************************/
 declare module "querystring" {
     export function stringify(obj: any, sep?: string, eq?: string): string;
     export function parse(str: string, sep?: string, eq?: string, options?: { maxKeys?: number; }): any;
@@ -243,7 +243,7 @@ declare module "events" {
         setMaxListeners(n: number): void;
         listeners(event: string): Function[];
         emit(event: string, ...args: any[]): boolean;
-   }
+    }
 }
 
 declare module "http" {
@@ -271,8 +271,11 @@ declare module "http" {
     }
     export interface ServerResponse extends NodeEventEmitter, WritableStream {
         // Extended base methods
-        write(str: string, encoding?: string, fd?: string): boolean;
         write(buffer: NodeBuffer): boolean;
+        write(buffer: NodeBuffer, cb?: Function): boolean;
+        write(str: string, cb?: Function): boolean;
+        write(str: string, encoding?: string, cb?: Function): boolean;
+        write(str: string, encoding?: string, fd?: string): boolean;
 
         writeContinue(): void;
         writeHead(statusCode: number, reasonPhrase?: string, headers?: any): void;
@@ -284,19 +287,34 @@ declare module "http" {
         removeHeader(name: string): void;
         write(chunk: any, encoding?: string): any;
         addTrailers(headers: any): void;
+
+        // Extended base methods
+        end(): void;
+        end(buffer: NodeBuffer, cb?: Function): void;
+        end(str: string, cb?: Function): void;
+        end(str: string, encoding?: string, cb?: Function): void;
         end(data?: any, encoding?: string): void;
     }
     export interface ClientRequest extends NodeEventEmitter, WritableStream {
         // Extended base methods
-        write(str: string, encoding?: string, fd?: string): boolean;
         write(buffer: NodeBuffer): boolean;
+        write(buffer: NodeBuffer, cb?: Function): boolean;
+        write(str: string, cb?: Function): boolean;
+        write(str: string, encoding?: string, cb?: Function): boolean;
+        write(str: string, encoding?: string, fd?: string): boolean;
 
         write(chunk: any, encoding?: string): void;
-        end(data?: any, encoding?: string): void;
         abort(): void;
         setTimeout(timeout: number, callback?: Function): void;
         setNoDelay(noDelay?: Function): void;
         setSocketKeepAlive(enable?: boolean, initialDelay?: number): void;
+
+        // Extended base methods
+        end(): void;
+        end(buffer: NodeBuffer, cb?: Function): void;
+        end(str: string, cb?: Function): void;
+        end(str: string, encoding?: string, cb?: Function): void;
+        end(data?: any, encoding?: string): void;
     }
     export interface ClientResponse extends NodeEventEmitter, ReadableStream {
         statusCode: number;
@@ -653,15 +671,17 @@ declare module "net" {
 
     export interface NodeSocket extends ReadWriteStream {
         // Extended base methods
-        write(str: string, encoding?: string, fd?: string): boolean;
         write(buffer: NodeBuffer): boolean;
+        write(buffer: NodeBuffer, cb?: Function): boolean;
+        write(str: string, cb?: Function): boolean;
+        write(str: string, encoding?: string, cb?: Function): boolean;
+        write(str: string, encoding?: string, fd?: string): boolean;
 
         connect(port: number, host?: string, connectionListener?: Function): void;
         connect(path: string, connectionListener?: Function): void;
         bufferSize: number;
         setEncoding(encoding?: string): void;
         write(data: any, encoding?: string, callback?: Function): void;
-        end(data?: any, encoding?: string): void;
         destroy(): void;
         pause(): void;
         resume(): void;
@@ -673,6 +693,13 @@ declare module "net" {
         remotePort: number;
         bytesRead: number;
         bytesWritten: number;
+
+        // Extended base methods
+        end(): void;
+        end(buffer: NodeBuffer, cb?: Function): void;
+        end(str: string, cb?: Function): void;
+        end(str: string, encoding?: string, cb?: Function): void;
+        end(data?: any, encoding?: string): void;
     }
 
     export var Socket: {
@@ -1164,7 +1191,7 @@ declare module "assert" {
             generatedMessage: boolean;
 
             constructor(options?: {message?: string; actual?: any; expected?: any;
-                                  operator?: string; stackStartFunction?: Function});
+                operator?: string; stackStartFunction?: Function});
         }
 
         export function fail(actual?: any, expected?: any, message?: string, operator?: string): void;
@@ -1192,7 +1219,7 @@ declare module "assert" {
         export function ifError(value: any): void;
     }
 
-    export = internal;
+export = internal;
 }
 
 declare module "tty" {
