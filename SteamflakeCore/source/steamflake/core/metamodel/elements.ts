@@ -189,7 +189,7 @@ export interface IContainerElement
     childElementRemovedEvent : events.IStatefulEvent<IContainerElement,IModelElement>;
 
     /** Event triggered after the child elements of this container have been loaded from a persistent store. */
-    childElementsLoadedEvent : events.IStatefulEvent<IContainerElement,IModelElement[]>
+    childElementsLoadedEvent : events.IStatefulEvent<IContainerElement,IModelElement[]>;
 
     ////
 

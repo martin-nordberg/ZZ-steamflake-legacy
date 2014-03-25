@@ -5,7 +5,7 @@ set -e
 
 
 pushd steamflake/core >/dev/null
-tsc -t ES5 --module commonjs utilities/*.ts concurrency/*.ts contracts/*.ts metamodel/*.ts --outDir ../../../scripts/SteamflakeCore
+tsc -t ES5 --module commonjs concurrency/*.ts contracts/*.ts io/*.ts metamodel/*.ts utilities/*.ts --outDir ../../../scripts/SteamflakeCore
 popd >/dev/null
 
 
