@@ -5,6 +5,7 @@
 ///<reference path='../../../thirdparty/node.d.ts'/>
 
 import events = require( '../utilities/events' );
+import platform = require( '../platform/platform' );
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -66,7 +67,8 @@ class BaseLineReader
  * Class that wraps a node.js readable stream to fire line-read events.
  */
 class ReadableStreamLineReader
-    extends BaseLineReader {
+    extends BaseLineReader
+{
 
     /**
      * Constructs a new readable stream line reader.
@@ -139,6 +141,60 @@ class ReadableStreamLineReader
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Class that wraps a string to fire line-read events.
+ */
+class StringLineReader
+    extends BaseLineReader
+{
+
+    /**
+     * Constructs a new readable stream line reader.
+     * @param inputString The underlying string to convert into lines.
+     */
+    constructor(
+        inputString : string
+    ) {
+
+        super();
+
+        var self = this;
+
+        // breaks a large string into individual lines sent out via events
+        var readLines = function() {
+
+            var lineStart = 0;
+            var lineEnd = inputString.indexOf( '\n', lineStart );
+
+            while ( lineEnd >= 0 ) {
+                var line = inputString.substring( lineStart, lineEnd );
+
+                self.lineReadEvent.trigger( line );
+
+                line = '';
+                lineStart = lineEnd + 1;
+                lineEnd = inputString.indexOf( '\n', lineStart );
+            }
+
+            line = inputString.substring( lineStart );
+
+            if ( line.length > 0 ) {
+                self.lineReadEvent.trigger( line );
+            }
+
+            self.eofReadEvent.trigger();
+        }
+
+        // emit
+        platform.doWhenIdle( readLines );
+
+    }
+
+
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -147,6 +203,16 @@ class ReadableStreamLineReader
  */
 export function makeReadableStreamLineReader( inputStream : ReadableStream ) : ILineReader {
     return new ReadableStreamLineReader( inputStream );
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Constructs a new line reader that breaks a given string into lines.
+ * @param inputString The input string to read.
+ */
+export function makeStringLineReader( inputString : string ) : ILineReader {
+    return new StringLineReader( inputString );
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
