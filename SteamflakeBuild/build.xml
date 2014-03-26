@@ -24,12 +24,17 @@
     <property name="model.source" value="${model}/source"/>
     <property name="model.specs" value="${model}/specs"/>
 
-<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+    <property name="tsemplet" value="../SteamflakeTsemplet"/>
+    <property name="tsemplet.scripts" value="${tsemplet}/scripts"/>
+    <property name="tsemplet.source" value="${tsemplet}/source"/>
+    <property name="tsemplet.specs" value="${tsemplet}/specs"/>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
     <!-- All -->
     <target name="all"
             description="Compile, test, and document all of Steamflake"
-            depends="all-model">
+            depends="all-model,all-tsemplet">
     </target>
 
     <!-- All Steamflake Core -->
@@ -44,25 +49,37 @@
             depends="test-model">
     </target>
 
-<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+    <!-- All Steamflake Tsemplet -->
+    <target name="all-tsemplet"
+            description="Compile, test, and document Steamflake Tsemplet"
+            depends="test-tsemplet">
+    </target>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
     <!-- Clean -->
     <target name="clean"
-            depends="clean-core,clean-model">
+            depends="clean-model,clean-tsemplet">
     </target>
 
-    <!-- Clean -->
+    <!-- Clean Core -->
     <target name="clean-core">
         <delete dir="${core.scripts}"/>
     </target>
 
-    <!-- Clean -->
+    <!-- Clean Model -->
     <target name="clean-model"
             depends="clean-core">
         <delete dir="${model.scripts}"/>
     </target>
 
-<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+    <!-- Clean Tsemplet -->
+    <target name="clean-tsemplet"
+            depends="clean-core">
+        <delete dir="${tsemplet.scripts}"/>
+    </target>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
     <!-- Core -->
 
@@ -144,6 +161,50 @@
 
         <echo>Running Model tests ...</echo>
         <exec dir="${model.specs}" executable="sh" failonerror="true">
+            <arg value="Test.sh"/>
+        </exec>
+
+    </target>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <!-- Tsemplet -->
+
+    <!-- Check whether Steamflake Tsemplet specs are up to date -->
+    <target name="check-tsemplet-specs-uptodate"
+            description="Check whether the Tsemplet specs are up to date">
+
+        <uptodate property="tsemplet.specs.uptodate" targetfile="${tsemplet.scripts}/SteamflakeTsemplet/specs/builddate.txt" >
+            <srcfiles dir="${core.source}" includes="**/*.ts"/>
+            <srcfiles dir="${tsemplet.source}" includes="**/*.ts"/>
+            <srcfiles dir="${tsemplet.specs}" includes="**/*.ts"/>
+            <srcfiles dir="${tsemplet.specs}" includes="Compile.sh"/>
+        </uptodate>
+
+        <echo>Steamflake Tsemplet specs and code up to date: ${tsemplet.specs.uptodate}</echo>
+
+    </target>
+
+    <!-- Compile Steamflake Tsemplet specs -->
+    <target name="compile-tsemplet-specs"
+            description="Run Steamflake Tsemplet specs"
+            depends="check-tsemplet-specs-uptodate"
+            unless="tsemplet.specs.uptodate">
+
+        <echo>Compiling Tsemplet specifications ...</echo>
+        <exec dir="${tsemplet.specs}" executable="sh" failonerror="true">
+            <arg value="Compile.sh"/>
+        </exec>
+
+    </target>
+
+    <!-- Run Steamflake Tsemplet tests -->
+    <target name="test-tsemplet"
+            description="Run Steamflake Tsemplet specs"
+            depends="test-core,compile-tsemplet-specs">
+
+        <echo>Running Tsemplet tests ...</echo>
+        <exec dir="${tsemplet.specs}" executable="sh" failonerror="true">
             <arg value="Test.sh"/>
         </exec>
 

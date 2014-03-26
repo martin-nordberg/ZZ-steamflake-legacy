@@ -20,12 +20,11 @@ export interface ILineReader {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
  * Abstract base class for line readers.
  */
-class BaseLineReader
+export class AbstractLineReader
     implements ILineReader
 {
 
@@ -62,12 +61,13 @@ class BaseLineReader
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
  * Class that wraps a node.js readable stream to fire line-read events.
  */
 class ReadableStreamLineReader
-    extends BaseLineReader
+    extends AbstractLineReader
 {
 
     /**
@@ -82,56 +82,47 @@ class ReadableStreamLineReader
 
         this._line = '';
 
-        this.readLines( inputStream );
+        // establish the event handling to get lines read out
+        inputStream.on( 'data', this.onStreamData.bind( this ) );
+        inputStream.on( 'end', this.onStreamEnd.bind( this ) );
 
     }
 
     /**
-     * Establishes the event handling to read the stream and break it into individual lines.
-     * @param inputStream
+     * Responds to the reading of the end of the stream.
      */
-    private readLines(
-        inputStream : ReadableStream
-    ) {
+    private onStreamEnd() {
 
-        var self = this;
-
-        // responds to the reading of a chunk of data from the input stream
-        var onData = function( chunkBuf : any ) {
-
-            var chunk = chunkBuf.toString();
-
-            var lineStart = 0;
-            var lineEnd = chunk.indexOf( '\n', lineStart );
-            while ( lineEnd >= 0 ) {
-                self._line += chunk.substring( lineStart, lineEnd );
-
-                self.lineReadEvent.trigger( self._line );
-
-                self._line = '';
-                lineStart = lineEnd + 1;
-                lineEnd = chunk.indexOf( '\n', lineStart );
-            }
-
-            self._line = chunk.substring( lineStart );
-
+        if ( this._line.length > 0 ) {
+            this.lineReadEvent.trigger( this._line );
+            this._line = '';
         }
 
-        // responds to the end of the input stream
-        var onEnd = function() {
+        this.eofReadEvent.trigger();
 
-            if ( self._line.length > 0 ) {
-                self.lineReadEvent.trigger( self._line );
-                self._line = '';
-            }
+    }
 
-            self.eofReadEvent.trigger();
+    /**
+     * Responds to the reading of one chunk of data from the stream.
+     * @param chunkBuf A buffer of data read.
+     */
+    private onStreamData( chunkBuf : any ) {
 
+        var chunk = chunkBuf.toString();
+
+        var lineStart = 0;
+        var lineEnd = chunk.indexOf( '\n', lineStart );
+        while ( lineEnd >= 0 ) {
+            this._line += chunk.substring( lineStart, lineEnd );
+
+            this.lineReadEvent.trigger( this._line );
+
+            this._line = '';
+            lineStart = lineEnd + 1;
+            lineEnd = chunk.indexOf( '\n', lineStart );
         }
 
-        // establish the event handling to get lines read out
-        inputStream.on( 'data', onData );
-        inputStream.on( 'end', onEnd );
+        this._line = chunk.substring( lineStart );
 
     }
 
@@ -146,7 +137,7 @@ class ReadableStreamLineReader
  * Class that wraps a string to fire line-read events.
  */
 class StringLineReader
-    extends BaseLineReader
+    extends AbstractLineReader
 {
 
     /**
@@ -159,38 +150,38 @@ class StringLineReader
 
         super();
 
-        var self = this;
-
-        // breaks a large string into individual lines sent out via events
-        var readLines = function() {
-
-            var lineStart = 0;
-            var lineEnd = inputString.indexOf( '\n', lineStart );
-
-            while ( lineEnd >= 0 ) {
-                var line = inputString.substring( lineStart, lineEnd );
-
-                self.lineReadEvent.trigger( line );
-
-                line = '';
-                lineStart = lineEnd + 1;
-                lineEnd = inputString.indexOf( '\n', lineStart );
-            }
-
-            line = inputString.substring( lineStart );
-
-            if ( line.length > 0 ) {
-                self.lineReadEvent.trigger( line );
-            }
-
-            self.eofReadEvent.trigger();
-        }
-
-        // emit
-        platform.doWhenIdle( readLines );
+        // emit the lines and eof when next idle
+        platform.doWhenIdle( this.readLines.bind( this, inputString ) );
 
     }
 
+    /**
+     * Reads the string, breaks it into lines, triggers events for each line and eof.
+     * @param inputString The input string to break into lines.
+     */
+    private readLines( inputString : string ) {
+
+        var lineStart = 0;
+        var lineEnd = inputString.indexOf( '\n', lineStart );
+
+        while ( lineEnd >= 0 ) {
+            var line = inputString.substring( lineStart, lineEnd );
+
+            this.lineReadEvent.trigger( line );
+
+            line = '';
+            lineStart = lineEnd + 1;
+            lineEnd = inputString.indexOf( '\n', lineStart );
+        }
+
+        line = inputString.substring( lineStart );
+
+        if ( line.length > 0 ) {
+            this.lineReadEvent.trigger( line );
+        }
+
+        this.eofReadEvent.trigger();
+    }
 
 }
 

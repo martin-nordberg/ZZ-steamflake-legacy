@@ -7,8 +7,8 @@
 
 import commands = require( '../../../../source/steamflake/core/concurrency/commands' );
 import commands_impl = require( '../../../../source/steamflake/core/concurrency/commands_impl' );
+import platform = require( '../../../../source/steamflake/core/platform/platform' );
 import promises = require( '../../../../source/steamflake/core/concurrency/promises' );
-import timing = require( '../../../../source/steamflake/core/concurrency/timing' );
 import values = require( '../../../../source/steamflake/core/utilities/values' );
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -77,7 +77,7 @@ class DeferredCommand
             result.fulfill( "executed" );
         }
 
-        timing.doWhenIdle( doIt );
+        platform.doWhenIdle( doIt );
 
         return result;
 
@@ -93,7 +93,7 @@ class DeferredCommand
             result.fulfill( values.nothing );
         }
 
-        timing.doWhenIdle( undoIt );
+        platform.doWhenIdle( undoIt );
 
         return result;
 
@@ -121,7 +121,7 @@ class ExecutionCheckingCommand
             result.fulfill( values.nothing );
         }
 
-        timing.doWhenIdle( doIt );
+        platform.doWhenIdle( doIt );
 
         return result;
 
@@ -137,7 +137,7 @@ class ExecutionCheckingCommand
             result.fulfill( values.nothing );
         }
 
-        timing.doWhenIdle( undoIt );
+        platform.doWhenIdle( undoIt );
 
         return result;
 

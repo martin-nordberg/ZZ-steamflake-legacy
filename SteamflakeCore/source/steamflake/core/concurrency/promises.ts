@@ -3,7 +3,7 @@
  * Module: steamflake/core/concurrency/promises
  */
 
-import timing = require( './timing' );
+import platform = require( '../platform/platform' );
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -200,7 +200,7 @@ class Promise<T>
                 self.onFulfilled();
             }
 
-            timing.doWhenIdle( fulfillRecursively );
+            platform.doWhenIdle( fulfillRecursively );
         }
 
     }
@@ -222,7 +222,7 @@ class Promise<T>
                 self.onRejected();
             }
 
-            timing.doWhenIdle( rejectRecursively );
+            platform.doWhenIdle( rejectRecursively );
         }
 
     }
