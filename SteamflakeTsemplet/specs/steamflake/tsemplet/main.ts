@@ -1,6 +1,7 @@
 
-///<reference path='../thirdparty/node.d.ts'/>
+//<reference path='../thirdparty/node.d.ts'/>
 
+/***
 import fs = require( 'fs' );
 import readline = require('readline');
 
@@ -85,3 +86,4 @@ inputFiles.forEach( function ( file : string, index : number, array : string[] )
 
 } );
 
+***/

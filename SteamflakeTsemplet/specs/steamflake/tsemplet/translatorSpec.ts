@@ -64,7 +64,19 @@ describe( "Translator", function() {
                 onEofRead,
                 6,
                 [ "Line 1", "", "", "Line 4", "", "Line 6" ],
-                done );
+                done
+            );
+        } );
+
+        it( "Translates simple default code", function( done : ()=>void ) {
+            check(
+                "`Line 1\n`Line 2\n`\n`Line 4\n`\n`Line 6",
+                onLineRead,
+                onEofRead,
+                6,
+                [ "Line 1", "Line 2", "", "Line 4", "", "Line 6" ],
+                done
+            );
         } );
 
     } );
