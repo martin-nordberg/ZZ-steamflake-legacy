@@ -57,17 +57,6 @@ describe( "Translator", function() {
             linesRead = 0;
         } );
 
-        it( "Translates a non-template string", function( done : ()=>void ) {
-            check(
-                "Line 1\n\n\nLine 4\n\nLine 6",
-                onLineRead,
-                onEofRead,
-                6,
-                [ "Line 1", "", "", "Line 4", "", "Line 6" ],
-                done
-            );
-        } );
-
         it( "Translates simple default code", function( done : ()=>void ) {
             check(
                 "`Line 1\n`Line 2\n`\n`Line 4\n`\n`Line 6",
@@ -75,6 +64,28 @@ describe( "Translator", function() {
                 onEofRead,
                 6,
                 [ "Line 1", "Line 2", "", "Line 4", "", "Line 6" ],
+                done
+            );
+        } );
+
+        it( "Translates a simple template within simple code", function( done : ()=>void ) {
+            check(
+                "`function returnStuff() {\nstuff\nand more stuff\n`}\n",
+                onLineRead,
+                onEofRead,
+                5,
+                [ "function returnStuff() {", "    var result = 'stuff';", "    result += 'and more stuff';", "    return result;", "}" ],
+                done
+            );
+        } );
+
+        it( "Translates a simple template within indented code", function( done : ()=>void ) {
+            check(
+                "`  function returnStuff() {\nstuff\nand more stuff\n`  }\n",
+                onLineRead,
+                onEofRead,
+                5,
+                [ "  function returnStuff() {", "      var result = 'stuff';", "      result += 'and more stuff';", "      return result;", "  }" ],
                 done
             );
         } );

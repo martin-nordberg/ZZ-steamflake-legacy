@@ -24,10 +24,24 @@ interface TranslatorConfig {
     /** The prefix designating a line of code. */
     codePrefix : string;
 
+    /** The prefix for a line of directives (only at the top of the file). */
+    directivePrefix : string;
+
+    /** The indent to use for template output compared to the latest code indentation. */
+    indent : string;
+
     /** The prefix for a line of template output. */
     templatePrefix : string;
 
 }
+
+/** The default configuration for a Tsemplet translator. */
+var DEFAULT_TRANSLATOR_CONFIG = {
+    codePrefix: '`',
+    directivePrefix: '%Tsemplet ',
+    indent: '    ',
+    templatePrefix: ''
+};
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -38,10 +52,16 @@ interface ITranslatorState {
 
     /**
      * Processes one line of input.
-     * @param line The input
-     * @return The new translator state.
+     * @param line The input line to be translated.
+     * @return The new translator state after processing the line.
      */
     process( line : string ) : ITranslatorState;
+
+    /**
+     * Processes the end of input (either end of file or end of a kind of input:directive/code/template) for
+     * this translator state.
+     */
+    processEof();
 
 }
 
@@ -77,6 +97,11 @@ class AbstractTranslatorState
         this._translator.lineReadEvent.trigger( line );
     }
 
+    /** Determines the indentation to use for a newly started template segment. */
+    public getTemplateIndentation() : string {
+        return "";
+    }
+
     /**
      * Determines whether a given line is code (starts with the code prefix).
      * @param line The line to test.
@@ -107,8 +132,9 @@ class AbstractTranslatorState
      * @return {ITranslatorState} The next translator state.
      */
     public process( line : string ) : ITranslatorState {
+
         if ( this.isDirective( line ) ) {
-            return this.processDirective( line )
+            return this.processDirective( line.substring( this._config.directivePrefix.length ) )
         }
         else if ( this.isCode( line ) ) {
             return this.processCode( line.substring( this._config.codePrefix.length ) );
@@ -120,6 +146,7 @@ class AbstractTranslatorState
             // TBD: error handling
             return this;
         }
+
     }
 
     /**
@@ -128,6 +155,7 @@ class AbstractTranslatorState
      * @return {ITranslatorState} The next translator state.
      */
     public processCode( codeLine : string ) : ITranslatorState {
+        this.processEof();
         return new CodeTranslatorState( this.translator, this.config ).processCode( codeLine );
     }
 
@@ -140,12 +168,28 @@ class AbstractTranslatorState
     }
 
     /**
+     * Processes the end of input for this translator state.
+     */
+    public processEof() {
+        // do nothing; override as needed
+    }
+
+    /**
      * Processes a line in a template.
      * @param templateLine The line of template out to process (stripped of its prefix).
      * @return {ITranslatorState} The next translator state.
      */
     public processTemplate( templateLine : string ) : ITranslatorState {
-        return new TemplateTranslatorState( this.translator, this.config ).processTemplate( templateLine );
+
+        this.processEof();
+
+        // start a template translator indented from the last seen line of code
+        return new TemplateTranslatorState(
+            this.translator,
+            this.config,
+            this.getTemplateIndentation()
+        ).processTemplate( templateLine );
+
     }
 
     /** The translator this state is for. */
@@ -153,8 +197,10 @@ class AbstractTranslatorState
         return this._translator;
     }
 
+    /** The current configuration of this translator state. */
     private _config : TranslatorConfig;
 
+    /** The translator we're the state of. */
     private _translator : ITsempletTranslator;
 
 }
@@ -179,14 +225,29 @@ class CodeTranslatorState
         super( translator, config );
     }
 
+    /** Determines the indentation to use for a newly started template segment - one indent from last seen code line. */
+    public getTemplateIndentation() : string {
+        return this._latestIndentation + this.config.indent;
+    }
+
     /**
      * Emits a line of code unmodified from the input.
      * @param codeLine The code to emit.
      */
     public processCode( codeLine : string ) : ITranslatorState {
+
+        // change the current indentation to match the actual line of code
+        this._latestIndentation = codeLine.match( /^\s*/ )[0];
+
+        // emit the line of code
         this.emitLine( codeLine );
+
         return this;
+
     }
+
+    /** The indentation seen in the latest line of code. */
+    private _latestIndentation : string;
 
 }
 
@@ -215,7 +276,7 @@ class DirectiveTranslatorState
      * @param line The line to check.
      */
     public isDirective( line : string ) : boolean {
-        return line.substring( 0, 9 ) === '%Tsemplet';
+        return line.lastIndexOf( this.config.directivePrefix, 0 ) === 0;
     }
 
     /**
@@ -223,9 +284,21 @@ class DirectiveTranslatorState
      * @param line The directive line to parse for new configuration.
      */
     public processDirective( line : string ) : ITranslatorState {
+
         // TBD: process directives into revised config ...
 
         return this;
+
+    }
+
+    /**
+     * Processes a line in a template.
+     * @param templateLine The line of template out to process (stripped of its prefix).
+     * @return {ITranslatorState} The next translator state.
+     */
+    public processTemplate( templateLine : string ) : ITranslatorState {
+        this.processEof();
+        return new TemplateTranslatorState( this.translator, this.config, '' ).processTemplate( templateLine );
     }
 
 }
@@ -245,19 +318,25 @@ class TemplateTranslatorState
      */
     constructor(
         translator : ITsempletTranslator,
-        config : TranslatorConfig
+        config : TranslatorConfig,
+        extraIndentation : string
     ) {
         super( translator, config );
+
+        this._extraIndentation = extraIndentation;
+        this._outputStarted = false;
+    }
+
+    /** Sends one line of output out through the translator; prepends the extra indentation for the template. */
+    public emitLine( line : string ) {
+        super.emitLine( this._extraIndentation + line );
     }
 
     /**
-     * Processes a line of code - closes up the prior template output, then forwards to a new code translator.
-     * @param codeLine
+     * Processes the end of the template - closes up the prior template output.
      */
-    public processCode( codeLine : string ) : ITranslatorState {
-        // TBD: return the string result ...
-
-        return new CodeTranslatorState( this.translator, this.config ).processCode( codeLine );
+    public processEof() {
+        this.emitLine( "return result;" );
     }
 
     /**
@@ -265,14 +344,38 @@ class TemplateTranslatorState
      * @param templateLine The input line of the template.
      */
     public processTemplate( templateLine : string ) : ITranslatorState {
-        // TBD: wrap the template pieces in a string concatenation sequence ...
+
+        // declare or concatenate to the output variable
+        var outputLine = "result += ";
+        if ( !this._outputStarted ) {
+            outputLine = "var result = ";
+            this._outputStarted = true;
+        }
+
         // TBD: split out ${} pieces as code ...
-        this.emitLine( templateLine );
+
+        if ( templateLine.indexOf( "'" ) < 0 ) {
+            outputLine += "'" + templateLine + "';"
+        }
+        else if ( templateLine.indexOf( '"' ) < 0 ) {
+            outputLine += '"' + templateLine + '";'
+        }
+        else {
+            outputLine += "'" + templateLine.replace( "'", "\\'" ); + "';";
+        }
+
+        this.emitLine( outputLine );
 
         return this;
+
     }
 
-    // TBD: boolean to flag the first line of output needing start of join
+    /** Current indentation to use for each emitted line. */
+    private _extraIndentation : string;
+
+    // flag telling whether the first line of template output has already been emitted
+    private _outputStarted : boolean;
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -293,12 +396,16 @@ class TsempletTranslator
     constructor(
         lineReader : streams.ILineReader
     ) {
+
         super();
 
-        this._state = new DirectiveTranslatorState( this, { codePrefix: "`", templatePrefix: "" } );
+        // set the default configuration and start out looking for directive lines
+        this._state = new DirectiveTranslatorState( this, DEFAULT_TRANSLATOR_CONFIG );
 
+        // listen for input
         lineReader.lineReadEvent.registerListener( this.onReadLine.bind( this ) );
         lineReader.eofReadEvent.registerListener( this.onReadEof.bind( this ) );
+
     }
 
     /**
@@ -306,6 +413,7 @@ class TsempletTranslator
      * @param source The source of the EOF event.
      */
     private onReadEof( source : ITsempletTranslator ) {
+        this._state.processEof();
         this.eofReadEvent.trigger();
     }
 
@@ -318,6 +426,7 @@ class TsempletTranslator
         this._state = this._state.process( line );
     }
 
+    /** The current state of this translator (directive/code/template). */
     private _state : ITranslatorState;
 
 }
