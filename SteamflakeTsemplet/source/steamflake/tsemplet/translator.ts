@@ -30,6 +30,12 @@ interface TranslatorConfig {
     /** The indent to use for template output compared to the latest code indentation. */
     indent : string;
 
+    /** Character(s) denoting the end of a dynamic slot in a template. */
+    slotEndDelimiter : string;
+
+    /** Character(s) denoting the start of a dynamic slot in a template. */
+    slotStartDelimiter : string;
+
     /** The prefix for a line of template output. */
     templatePrefix : string;
 
@@ -40,6 +46,8 @@ var DEFAULT_TRANSLATOR_CONFIG = {
     codePrefix: '`',
     directivePrefix: '%Tsemplet ',
     indent: '    ',
+    slotEndDelimiter: '}',
+    slotStartDelimiter: '${',
     templatePrefix: ''
 };
 
@@ -315,6 +323,7 @@ class TemplateTranslatorState
      * Constructs a new translator state.
      * @param translator The translator.
      * @param config The configuration of the translator.
+     * @param extraIndentation The string of indentation to use before each line of output template code.
      */
     constructor(
         translator : ITsempletTranslator,
@@ -345,6 +354,45 @@ class TemplateTranslatorState
      */
     public processTemplate( templateLine : string ) : ITranslatorState {
 
+        var escapeRegExp = function( regexStr : string ) {
+            return regexStr.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+        }
+
+        var slotPattern = escapeRegExp( this.config.slotStartDelimiter ) +
+                          "[a-zA-Z_$][0-9a-zA-Z_$]*" +
+                          "(\.[a-zA-Z_$][0-9a-zA-Z_$]*)*" +
+                          escapeRegExp( this.config.slotEndDelimiter );
+
+        var slotRegex = new RegExp( slotPattern );
+
+        var match = slotRegex.exec( templateLine );
+
+        while ( match ) {
+            var slotStart = match.index;
+
+            if ( match.index > 0 ) {
+                this.processTemplateSegment( templateLine.substring( 0, match.index ) );
+
+                var slotContent = match[0].substring(
+                    this.config.slotStartDelimiter.length,
+                    match[0].length - this.config.slotEndDelimiter.length
+                );
+                this.processTemplateSegment( slotContent, true );
+            }
+
+            templateLine = templateLine.substring( match.index + match[0].length );
+
+            match = slotRegex.exec( templateLine );
+        }
+
+        this.processTemplateSegment( templateLine );
+
+        return this;
+
+    }
+
+    private processTemplateSegment( templateSegment : string, isSlotContent : boolean = false ) {
+
         // declare or concatenate to the output variable
         var outputLine = "result += ";
         if ( !this._outputStarted ) {
@@ -352,21 +400,20 @@ class TemplateTranslatorState
             this._outputStarted = true;
         }
 
-        // TBD: split out ${} pieces as code ...
-
-        if ( templateLine.indexOf( "'" ) < 0 ) {
-            outputLine += "'" + templateLine + "';"
+        if ( isSlotContent ) {
+            outputLine += templateSegment + ";";
         }
-        else if ( templateLine.indexOf( '"' ) < 0 ) {
-            outputLine += '"' + templateLine + '";'
+        else if ( templateSegment.indexOf( "'" ) < 0 ) {
+            outputLine += "'" + templateSegment + "';"
+        }
+        else if ( templateSegment.indexOf( '"' ) < 0 ) {
+            outputLine += '"' + templateSegment + '";'
         }
         else {
-            outputLine += "'" + templateLine.replace( "'", "\\'" ); + "';";
+            outputLine += "'" + templateSegment.replace( /'/g, "\\'" ) + "';";
         }
 
         this.emitLine( outputLine );
-
-        return this;
 
     }
 

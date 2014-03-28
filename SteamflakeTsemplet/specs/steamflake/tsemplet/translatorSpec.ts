@@ -90,6 +90,57 @@ describe( "Translator", function() {
             );
         } );
 
+        it( "Translates a template with single quotation marks", function( done : ()=>void ) {
+            check(
+                "`  function returnStuff() {\nst'uff\nand 'more' stuff\n`  }\n",
+                onLineRead,
+                onEofRead,
+                5,
+                [ "  function returnStuff() {", "      var result = \"st'uff\";", "      result += \"and 'more' stuff\";", "      return result;", "  }" ],
+                done
+            );
+        } );
+
+        it( "Translates a template with double quotation marks", function( done : ()=>void ) {
+            check(
+                "`  function returnStuff() {\nst\"uff\nand \"more\" stuff\n`  }\n",
+                onLineRead,
+                onEofRead,
+                5,
+                [ "  function returnStuff() {", "      var result = 'st\"uff';", "      result += 'and \"more\" stuff';", "      return result;", "  }" ],
+                done
+            );
+        } );
+
+        it( "Translates a template with single and double quotation marks", function( done : ()=>void ) {
+            check(
+                "`  function returnStuff() {\n'st\"uff'\nand \'more\' \"stuff\"\n`  }\n",
+                onLineRead,
+                onEofRead,
+                5,
+                [ "  function returnStuff() {", "      var result = '\\'st\"uff\\'';", "      result += 'and \\'more\\' \"stuff\"';", "      return result;", "  }" ],
+                done
+            );
+        } );
+
+        it( "Translates a template with a simple slot", function( done : ()=>void ) {
+            check(
+                "`  function returnStuff() {\nstuff\nand ${more} stuff\n`  }\n",
+                onLineRead,
+                onEofRead,
+                7,
+                [
+                    "  function returnStuff() {",
+                    "      var result = 'stuff';",
+                    "      result += 'and ';",
+                    "      result += more;",
+                    "      result += ' stuff';",
+                    "      return result;",
+                    "  }" ],
+                done
+            );
+        } );
+
     } );
 
 } );
