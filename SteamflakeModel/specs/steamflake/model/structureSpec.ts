@@ -2,7 +2,7 @@
  * Spec Module: steamflake/model/structureSpec
  */
 
-///<reference path='../../../../SteamflakeCore/specs/thirdparty/jasmine/jasmine.d.ts'/>
+///<reference path='../../../../SteamflakeCore/specs/../../ThirdParty/lib/testing/jasmine.d.ts'/>
 
 
 import structure = require( '../../../source/steamflake/model/structure' );

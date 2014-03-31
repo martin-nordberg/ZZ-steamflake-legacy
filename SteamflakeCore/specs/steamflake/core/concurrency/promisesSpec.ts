@@ -2,7 +2,7 @@
  * Spec Module: steamflake/core/concurrency/promisesSpec
  */
 
-///<reference path='../../../thirdparty/jasmine/jasmine.d.ts'/>
+///<reference path='../../../../../ThirdParty/lib/testing/jasmine.d.ts'/>
 
 
 import promises = require( '../../../../source/steamflake/core/concurrency/promises' );

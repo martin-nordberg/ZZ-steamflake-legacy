@@ -2,7 +2,7 @@
  * Spec Module: steamflake/core/metamodel/persistenceSpec
  */
 
-///<reference path='../../../thirdparty/jasmine/jasmine.d.ts'/>
+///<reference path='../../../../../ThirdParty/lib/testing/jasmine.d.ts'/>
 
 
 import elements = require( '../../../../source/steamflake/core/metamodel/elements' );

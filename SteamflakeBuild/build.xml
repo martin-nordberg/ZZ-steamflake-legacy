@@ -29,12 +29,17 @@
     <property name="tsemplet.source" value="${tsemplet}/source"/>
     <property name="tsemplet.specs" value="${tsemplet}/specs"/>
 
+    <property name="webserver" value="../SteamflakeWebServer"/>
+    <property name="webserver.scripts" value="${webserver}/scripts"/>
+    <property name="webserver.source" value="${webserver}/source"/>
+    <property name="webserver.specs" value="${webserver}/specs"/>
+
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
     <!-- All -->
     <target name="all"
             description="Compile, test, and document all of Steamflake"
-            depends="all-model,all-tsemplet">
+            depends="all-model,all-tsemplet,all-webserver">
     </target>
 
     <!-- All Steamflake Core -->
@@ -55,11 +60,17 @@
             depends="test-tsemplet">
     </target>
 
+    <!-- All Steamflake Web Server -->
+    <target name="all-webserver"
+            description="Compile, test, and document Steamflake Web Server"
+            depends="test-webserver">
+    </target>
+
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
     <!-- Clean -->
     <target name="clean"
-            depends="clean-model,clean-tsemplet">
+            depends="clean-model,clean-tsemplet,clean-webserver">
     </target>
 
     <!-- Clean Core -->
@@ -77,6 +88,12 @@
     <target name="clean-tsemplet"
             depends="clean-core">
         <delete dir="${tsemplet.scripts}"/>
+    </target>
+
+    <!-- Clean Web Server -->
+    <target name="clean-webserver"
+            depends="clean-model">
+        <delete dir="${webserver.scripts}"/>
     </target>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -205,6 +222,51 @@
 
         <echo>Running Tsemplet tests ...</echo>
         <exec dir="${tsemplet.specs}" executable="sh" failonerror="true">
+            <arg value="Test.sh"/>
+        </exec>
+
+    </target>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <!-- Web Server -->
+
+    <!-- Check whether Steamflake Web Server specs are up to date -->
+    <target name="check-webserver-specs-uptodate"
+            description="Check whether the Web Server specs are up to date">
+
+        <uptodate property="webserver.specs.uptodate" targetfile="${webserver.scripts}/SteamflakeWebServer/specs/builddate.txt" >
+            <srcfiles dir="${core.source}" includes="**/*.ts"/>
+            <srcfiles dir="${model.source}" includes="**/*.ts"/>
+            <srcfiles dir="${webserver.source}" includes="**/*.ts"/>
+            <srcfiles dir="${webserver.specs}" includes="**/*.ts"/>
+            <srcfiles dir="${webserver.specs}" includes="Compile.sh"/>
+        </uptodate>
+
+        <echo>Steamflake Web Server specs and code up to date: ${webserver.specs.uptodate}</echo>
+
+    </target>
+
+    <!-- Compile Steamflake Web Server specs -->
+    <target name="compile-webserver-specs"
+            description="Run Steamflake Web Server specs"
+            depends="check-webserver-specs-uptodate"
+            unless="webserver.specs.uptodate">
+
+        <echo>Compiling Web Server specifications ...</echo>
+        <exec dir="${webserver.specs}" executable="sh" failonerror="true">
+            <arg value="Compile.sh"/>
+        </exec>
+
+    </target>
+
+    <!-- Run Steamflake Web Server tests -->
+    <target name="test-webserver"
+            description="Run Steamflake Web Server specs"
+            depends="test-model,compile-webserver-specs">
+
+        <echo>Running Web Server tests ...</echo>
+        <exec dir="${webserver.specs}" executable="sh" failonerror="true">
             <arg value="Test.sh"/>
         </exec>
 

@@ -2,7 +2,7 @@
  * Spec Module: steamflake/core/utilities/uuidsSpec
  */
 
-///<reference path='../../../thirdparty/jasmine/jasmine.d.ts'/>
+///<reference path='../../../../../ThirdParty/lib/testing/jasmine.d.ts'/>
 
 
 import uuids = require( '../../../../source/steamflake/core/utilities/uuids' );

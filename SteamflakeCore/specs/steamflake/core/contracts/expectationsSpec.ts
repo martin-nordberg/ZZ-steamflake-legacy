@@ -2,7 +2,7 @@
  * Spec Module: steamflake/core/contracts/expectationsSpec
  */
 
-///<reference path='../../../thirdparty/jasmine/jasmine.d.ts'/>
+///<reference path='../../../../../ThirdParty/lib/testing/jasmine.d.ts'/>
 
 
 import outcomes = require( '../../../../source/steamflake/core/contracts/outcomes' );

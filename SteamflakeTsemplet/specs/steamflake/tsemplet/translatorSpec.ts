@@ -2,8 +2,8 @@
  * Spec Module: steamflake/tsemplet/translator
  */
 
-///<reference path='../../../../SteamflakeCore/source/thirdparty/node.d.ts'/>
-///<reference path='../../../../SteamflakeCore/specs/thirdparty/jasmine/jasmine.d.ts'/>
+///<reference path='../../../../ThirdParty/lib/server/node.d.ts'/>
+///<reference path='../../../../ThirdParty/lib/testing/jasmine.d.ts'/>
 
 import streams = require( '../../../../SteamflakeCore/source/steamflake/core/io/streams' );
 import translator = require( '../../../source/steamflake/tsemplet/translator' );
@@ -59,73 +59,150 @@ describe( "Translator", function() {
 
         it( "Translates simple default code", function( done : ()=>void ) {
             check(
-                "`Line 1\n`Line 2\n`\n`Line 4\n`\n`Line 6",
+                [
+                    "`Line 1",
+                    "`Line 2",
+                    "`",
+                    "`Line 4",
+                    "`",
+                    "`Line 6"
+                ].join( "\n" ),
                 onLineRead,
                 onEofRead,
                 6,
-                [ "Line 1", "Line 2", "", "Line 4", "", "Line 6" ],
+                [
+                    "Line 1",
+                    "Line 2",
+                    "",
+                    "Line 4",
+                    "",
+                    "Line 6"
+                ],
                 done
             );
         } );
 
         it( "Translates a simple template within simple code", function( done : ()=>void ) {
             check(
-                "`function returnStuff() {\nstuff\nand more stuff\n`}\n",
+                [
+                    "`function returnStuff() {",
+                    "stuff",
+                    "and more stuff",
+                    "`}"
+                ].join( "\n" ),
                 onLineRead,
                 onEofRead,
                 5,
-                [ "function returnStuff() {", "    var result = 'stuff';", "    result += 'and more stuff';", "    return result;", "}" ],
+                [
+                    "function returnStuff() {",
+                    "    var result = 'stuff';",
+                    "    result += 'and more stuff';",
+                    "    return result;",
+                    "}"
+                ],
                 done
             );
         } );
 
         it( "Translates a simple template within indented code", function( done : ()=>void ) {
             check(
-                "`  function returnStuff() {\nstuff\nand more stuff\n`  }\n",
+                [
+                    "`  function returnStuff() {",
+                    "stuff",
+                    "and more stuff",
+                    "`  }"
+                ].join( "\n" ),
                 onLineRead,
                 onEofRead,
                 5,
-                [ "  function returnStuff() {", "      var result = 'stuff';", "      result += 'and more stuff';", "      return result;", "  }" ],
+                [
+                    "  function returnStuff() {",
+                    "      var result = 'stuff';",
+                    "      result += 'and more stuff';",
+                    "      return result;",
+                    "  }"
+                ],
                 done
             );
         } );
 
         it( "Translates a template with single quotation marks", function( done : ()=>void ) {
             check(
-                "`  function returnStuff() {\nst'uff\nand 'more' stuff\n`  }\n",
+                [
+                    "`  function returnStuff() {",
+                    "st'uff",
+                    "and 'more' stuff",
+                    "`  }",
+                    ""
+                ].join( "\n" ),
                 onLineRead,
                 onEofRead,
                 5,
-                [ "  function returnStuff() {", "      var result = \"st'uff\";", "      result += \"and 'more' stuff\";", "      return result;", "  }" ],
+                [
+                    "  function returnStuff() {",
+                    "      var result = \"st'uff\";",
+                    "      result += \"and 'more' stuff\";",
+                    "      return result;",
+                    "  }"
+                ],
                 done
             );
         } );
 
         it( "Translates a template with double quotation marks", function( done : ()=>void ) {
             check(
-                "`  function returnStuff() {\nst\"uff\nand \"more\" stuff\n`  }\n",
+                [
+                    "`  function returnStuff() {",
+                    "st\"uff",
+                    "and \"more\" stuff",
+                    "`  }",
+                    ""
+                ].join( "\n" ),
                 onLineRead,
                 onEofRead,
                 5,
-                [ "  function returnStuff() {", "      var result = 'st\"uff';", "      result += 'and \"more\" stuff';", "      return result;", "  }" ],
+                [
+                    "  function returnStuff() {",
+                    "      var result = 'st\"uff';",
+                    "      result += 'and \"more\" stuff';",
+                    "      return result;",
+                    "  }"
+                ],
                 done
             );
         } );
 
         it( "Translates a template with single and double quotation marks", function( done : ()=>void ) {
             check(
-                "`  function returnStuff() {\n'st\"uff'\nand \'more\' \"stuff\"\n`  }\n",
+                [
+                    "`  function returnStuff() {",
+                    "'st\"uff'",
+                    "and \'more\' \"stuff\"",
+                    "`  }",
+                    ""
+                ].join( "\n" ),
                 onLineRead,
                 onEofRead,
                 5,
-                [ "  function returnStuff() {", "      var result = '\\'st\"uff\\'';", "      result += 'and \\'more\\' \"stuff\"';", "      return result;", "  }" ],
+                [
+                    "  function returnStuff() {",
+                    "      var result = '\\'st\"uff\\'';",
+                    "      result += 'and \\'more\\' \"stuff\"';",
+                    "      return result;",
+                    "  }"
+                ],
                 done
             );
         } );
 
         it( "Translates a template with a simple slot", function( done : ()=>void ) {
             check(
-                "`  function returnStuff() {\nstuff\nand ${more} stuff\n`  }\n",
+                [
+                    "`  function returnStuff() {",
+                    "stuff",
+                    "and ${more} stuff",
+                    "`  }"
+                ].join( "\n" ),
                 onLineRead,
                 onEofRead,
                 7,
@@ -136,7 +213,32 @@ describe( "Translator", function() {
                     "      result += more;",
                     "      result += ' stuff';",
                     "      return result;",
-                    "  }" ],
+                    "  }"
+                ],
+                done
+            );
+        } );
+
+        it( "Translates a template with a nested slot", function( done : ()=>void ) {
+            check(
+                [
+                    "`  function returnStuff() {",
+                    "stuff",
+                    "and ${lots.more.and.more} stuff",
+                    "`  }"
+                ].join( "\n" ),
+                onLineRead,
+                onEofRead,
+                7,
+                [
+                    "  function returnStuff() {",
+                    "      var result = 'stuff';",
+                    "      result += 'and ';",
+                    "      result += lots.more.and.more;",
+                    "      result += ' stuff';",
+                    "      return result;",
+                    "  }"
+                ],
                 done
             );
         } );

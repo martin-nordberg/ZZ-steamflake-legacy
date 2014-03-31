@@ -2,8 +2,8 @@
  * Spec Module: steamflake/core/io/streamsSpec
  */
 
-///<reference path='../../../../source/thirdparty/node.d.ts'/>
-///<reference path='../../../thirdparty/jasmine/jasmine.d.ts'/>
+///<reference path='../../../../../ThirdParty/lib/server/node.d.ts'/>
+///<reference path='../../../../../ThirdParty/lib/testing/jasmine.d.ts'/>
 
 import fs = require( 'fs' );
 

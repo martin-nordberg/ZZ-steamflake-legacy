@@ -2,7 +2,7 @@
  * Spec Module: steamflake/utilities/commandsSpec
  */
 
-///<reference path='../../../thirdparty/jasmine/jasmine.d.ts'/>
+///<reference path='../../../../../ThirdParty/lib/testing/jasmine.d.ts'/>
 
 
 import commands = require( '../../../../source/steamflake/core/concurrency/commands' );

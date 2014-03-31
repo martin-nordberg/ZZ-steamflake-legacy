@@ -2,7 +2,7 @@
  * Module: steamflake/core/io/streams
  */
 
-///<reference path='../../../thirdparty/node.d.ts'/>
+///<reference path='../../../../../ThirdParty/lib/server/node.d.ts'/>
 
 import events = require( '../utilities/events' );
 import platform = require( '../platform/platform' );

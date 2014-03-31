@@ -3,7 +3,7 @@
  * Module: steamflake/core/platform/platform_node
  */
 
-///<reference path='../../../thirdparty/node.d.ts'/>
+///<reference path='../../../../../ThirdParty/lib/server/node.d.ts'/>
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

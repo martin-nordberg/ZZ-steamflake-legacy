@@ -2,7 +2,7 @@
  * Spec Module: steamflake/core/metamodel/supervisorSpec
  */
 
-///<reference path='../../../thirdparty/jasmine/jasmine.d.ts'/>
+///<reference path='../../../../../ThirdParty/lib/testing/jasmine.d.ts'/>
 
 
 import persistence = require( '../../../../source/steamflake/core/metamodel/persistence' );

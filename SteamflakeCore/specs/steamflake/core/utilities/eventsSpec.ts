@@ -2,7 +2,7 @@
  * Spec Module: steamflake/utilities/eventsSpec
  */
 
-///<reference path='../../../thirdparty/jasmine/jasmine.d.ts'/>
+///<reference path='../../../../../ThirdParty/lib/testing/jasmine.d.ts'/>
 
 
 import events = require( '../../../../source/steamflake/core/utilities/events' );
