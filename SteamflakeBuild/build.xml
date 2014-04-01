@@ -272,6 +272,18 @@
 
     </target>
 
-<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+    <!-- Run Steamflake Web Server tests -->
+    <target name="run-webserver"
+            description="Run Steamflake Web Server"
+            depends="test-webserver">
+
+        <echo>Starting Web Server ...</echo>
+        <exec dir="${webserver}" executable="sh" failonerror="true">
+            <arg value="Run.sh"/>
+        </exec>
+
+    </target>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 </project>
