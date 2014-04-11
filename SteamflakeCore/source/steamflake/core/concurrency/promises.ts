@@ -191,6 +191,7 @@ class Promise<T>
         var self = this;
 
         self._onRejected = [];
+
         if ( self._onFulfilled.length > 0 ) {
             var fulfill = self._onFulfilled[0];
             self._onFulfilled.splice( 0, 1 );

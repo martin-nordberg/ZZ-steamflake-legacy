@@ -368,7 +368,7 @@ export class NamedContainerElement
     public get childElementAddedEvent() {
         return this._childElementAddedEvent;
     }
-    public set childElementAddedEvent( value : events.IStatefulEvent<elements.IModelElement,elements.IModelElement> ) {
+    public set childElementAddedEvent( value : events.IStatefulEvent<elements.IContainerElement,elements.IModelElement> ) {
         throw new Error( "Attempted to change read only event - childElementAddedEvent." );
     }
 
@@ -376,7 +376,7 @@ export class NamedContainerElement
     public get childElementRemovedEvent() {
         return this._childElementRemovedEvent;
     }
-    public set childElementRemovedEvent( value : events.IStatefulEvent<elements.IModelElement,elements.IModelElement> ) {
+    public set childElementRemovedEvent( value : events.IStatefulEvent<elements.IContainerElement,elements.IModelElement> ) {
         throw new Error( "Attempted to change read only event - childElementRemovedEvent." );
     }
 
@@ -403,7 +403,7 @@ export class NamedContainerElement
     public get childElementsLoadedEvent() {
         return this._childElementsLoadedEvent;
     }
-    public set childElementsLoadedEvent( value : events.IStatefulEvent<elements.IModelElement,elements.IModelElement[]> ) {
+    public set childElementsLoadedEvent( value : events.IStatefulEvent<elements.IContainerElement,elements.IModelElement[]> ) {
         throw new Error( "Attempted to change read only event - childElementsLoadedEvent." );
     }
 
