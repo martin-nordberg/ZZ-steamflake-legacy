@@ -25,9 +25,14 @@ export interface IMongoDbPersistenceStore<RootElement extends elements.IRootCont
      * @param loadSampleData Whether to load some sample data for testing.
      */
     connect(
-        dropCollections : boolean,
-        loadSampleData : boolean
+        dropCollections? : boolean,
+        loadSampleData? : boolean
     ) : promises.IPromise<boolean>;
+
+    /**
+     * Disconnects from MongoDB.
+     */
+    disconnect();
 
 }
 
@@ -39,12 +44,68 @@ class MongoDbPersistentStoreCreator
     implements persistence.IPersistentStoreCreator
 {
 
+    /**
+     * Constructs a new MongoDB creation service.
+     * @param db The encapsulated MongoDB instance.
+     */
+    constructor( db : mongodb.Db ) {
+        this._db = db;
+    }
+
+    /**
+     * Saves a newly created model element.
+     * @param modelElement The just created model element to store.
+     */
     public createModelElement<Element extends elements.IModelElement>(
         modelElement : Element
     ) : promises.IPromise<Element> {
-        throw Error( "TBD - not yet implemented" );
-        return promises.makeImmediatelyFulfilledPromise( modelElement );
+
+        var result = promises.makePromise<Element>();
+
+        // serialize
+        var json : any = modelElement.toJson( elements.EJsonDetailLevel.Attributes|elements.EJsonDetailLevel.ParentIdentity );
+
+        // MondoDB uses _id instead of uuid
+        json._id = json.uuid;
+        delete json.uuid;
+
+        // code element type is the collection name
+        var collectionName = json.type;
+        delete json.type;
+
+        // need just the parent ID
+        json.parent_id = json.parentContainer.uuid;
+        delete json.parentContainer;
+
+        // complete the insert
+        this._db.collection(
+            collectionName,
+            function( err : any, collection : mongodb.Collection ) {
+                if ( err ) {
+                    result.reject( "Failed to open collection " + collectionName + ". " + err );
+                    return;
+                }
+
+                collection.insert(
+                    json,
+                    function ( err : any, inserted ) {
+                        if ( err ) {
+                            result.reject( "Failed to insert model element. " + err );
+                            return;
+                        }
+
+                        result.fulfill( modelElement );
+                    }
+                );
+            }
+        );
+
+        return result;
     }
+
+    /** The encapsulated database instance. */
+    private _db : mongodb.Db;
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -53,6 +114,14 @@ class MongoDbPersistentStoreCreator
 class MongoDbPersistentStoreReader<RootElement extends elements.IRootContainerElement>
     implements persistence.IPersistentStoreReader<RootElement>
 {
+
+    /**
+     * Constructs a new MongoDB reader service.
+     * @param db The encapsulated MongoDB instance.
+     */
+    constructor( db : mongodb.Db ) {
+        this._db = db;
+    }
 
     public loadModelElementContents<Element extends elements.IContainerElement>(
         containerElement : Element
@@ -64,6 +133,9 @@ class MongoDbPersistentStoreReader<RootElement extends elements.IRootContainerEl
         throw Error( "TBD - not yet implemented" );
     }
 
+    /** The encapsulated database instance. */
+    private _db : mongodb.Db;
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -73,12 +145,23 @@ class MongoDbPersistentStoreUpdater
     implements persistence.IPersistentStoreUpdater
 {
 
+    /**
+     * Constructs a new MongoDB update service.
+     * @param db The encapsulated MongoDB instance.
+     */
+    constructor( db : mongodb.Db ) {
+        this._db = db;
+    }
+
     public updateModelElement<Element extends elements.IModelElement>(
         modelElement : Element
     ) : promises.IPromise<Element> {
         throw Error( "TBD - not yet implemented" );
         return promises.makeImmediatelyFulfilledPromise( modelElement );
     }
+
+    /** The encapsulated database instance. */
+    private _db : mongodb.Db;
 
 }
 
@@ -89,12 +172,50 @@ class MongoDbPersistentStoreDeleter
     implements persistence.IPersistentStoreDeleter
 {
 
+    /**
+     * Constructs a new MongoDB deletion service.
+     * @param db The encapsulated MongoDB instance.
+     */
+    constructor( db : mongodb.Db ) {
+        this._db = db;
+    }
+
     public deleteModelElement<Element extends elements.IModelElement>(
         modelElement : Element
     ) : promises.IPromise<Element> {
-        throw Error( "TBD - not yet implemented" );
-        return promises.makeImmediatelyFulfilledPromise( modelElement );
+
+        var result = promises.makePromise<Element>();
+
+        // code element type is the collection name
+        var collectionName = modelElement.typeName;
+
+        this._db.collection(
+            collectionName,
+            function( err, collection : mongodb.Collection ) {
+                if ( err ) {
+                    result.reject( "Failed to open collection " + collectionName + ". " + err );
+                    return;
+                }
+
+                collection.remove(
+                    { _id: modelElement.uuid },
+                    function ( err, inserted ) {
+                        if ( err ) {
+                            result.reject( "Failed to delete model element. " + err );
+                            return;
+                        }
+
+                        result.fulfill( modelElement );
+                    }
+                );
+            }
+        );
+
+        return result;
     }
+
+    /** The encapsulated database instance. */
+    private _db : mongodb.Db;
 
 }
 
@@ -259,36 +380,43 @@ class MongoDbPersistentStore<RootElement extends elements.IRootContainerElement>
     implements IMongoDbPersistenceStore<RootElement>
 {
 
+    /**
+     * Constructs a new MongoDB persistent store.
+     * TBD: configurable externally
+     */
     constructor() {
-        this._creator = new MongoDbPersistentStoreCreator();
-        this._deleter = new MongoDbPersistentStoreDeleter();
-        this._reader = new MongoDbPersistentStoreReader<RootElement>();
-        this._updater = new MongoDbPersistentStoreUpdater();
+        this._dbUri = "mongodb://localhost:27017/steamflake";
     }
 
+    /**
+     * The creator service associated with this persistent store.
+     */
     public get creator() {
         return this._creator;
     }
 
+    /**
+     * The deleter service associated with this persistent store.
+     */
     public get deleter() {
         return this._deleter;
     }
 
     /**
-     * Establishes the connection to MongoDB.
+     * Establishes the connection to MongoDB. Nothing will be ready for use until the returned promise is fulfilled.
      * @param initializeSchema Whether to drop and recreate the tables.
      * @param loadSampleData Whether to load some sample data for testing.
      */
     public connect(
-        dropCollections : boolean,
-        loadSampleData : boolean
+        dropCollections : boolean = false,
+        loadSampleData : boolean = false
     ) : promises.IPromise<boolean> {
         var self = this;
 
-        var result = promises.makePromise();
+        var result = promises.makePromise<boolean>();
 
         // connect to the database
-        mongodb.MongoClient.connect( "mongodb://localhost:27017/steamflake", function(err:any, db:mongodb.Db) {
+        mongodb.MongoClient.connect( self._dbUri, function(err:any, db:mongodb.Db) {
             if ( err ) {
                 console.log( "FAILED TO CONNECT: ", err );
                 result.reject( "Failed to connect. " + err );
@@ -296,27 +424,26 @@ class MongoDbPersistentStore<RootElement extends elements.IRootContainerElement>
             }
 
             // link to the database
-//            self.db = db;
-
-            // create the CRUD services
-//            self._creator = new MongoDbCreator( db );
-//            self._reader = new MongoDbReader( db );
-//            self._updater = new MongoDbUpdater( db );
-//            self._deleter = new MongoDbDeleter( db );
+            self._db = db;
 
             var schema = new MongoDbSchemaInitializer( db );
 
             if ( dropCollections ) {
-                console.log( "DROPPING COLLECTIONS ... " );
                 schema.dropCollections().then(
                     function( dropped : boolean ) {
-                        console.log( "ESTABLISHING COLLECTIONS ... " );
                         schema.establishCollections().then(
                             function( established : boolean ) {
-//                                 self.loadSampleData( function() {
-                                       self._dbInitialized = true;
-                                       result.fulfill( true );
-//                                 } );
+//                              self.loadSampleData( function() {
+
+                                    // create the CRUD services
+                                    self._creator = new MongoDbPersistentStoreCreator( db );
+                                    self._reader = new MongoDbPersistentStoreReader<RootElement>( db );
+                                    self._updater = new MongoDbPersistentStoreUpdater( db );
+                                    self._deleter = new MongoDbPersistentStoreDeleter( db );
+
+                                    self._dbInitialized = true;
+                                    result.fulfill( true );
+//                              } );
                             }
                         );
                     }
@@ -336,23 +463,60 @@ class MongoDbPersistentStore<RootElement extends elements.IRootContainerElement>
         return result;
     }
 
+    /**
+     * Disconnects from MongoDB.
+     */
+    public disconnect() {
+        var self = this;
+
+        var result = promises.makePromise<boolean>();
+
+        this._db.close( true, function(err:Error,unused:any){
+            if ( err ) {
+                result.reject( "Failed to disconnect. " + err );
+            }
+            else {
+                result.fulfill( true );
+            }
+        } );
+
+        return result;
+    }
+
+
+    /**
+     * The reader service associated with this store.
+     */
     public get reader() {
         return this._reader;
     }
 
+    /**
+     * The updater service associated with this store.
+     */
     public get updater() {
         return this._updater;
     }
 
+    /** The encapsulated database instance. */
+    private _db : mongodb.Db;
+
     /** Flag set when MongoDB is ready for queries. */
     private _dbInitialized : boolean = false;
 
+    /** The URI for the database connection. */
+    private _dbUri : string;
+
+    /** Creator service. */
     private _creator : MongoDbPersistentStoreCreator;
 
+    /** Deleter service. */
     private _deleter : MongoDbPersistentStoreDeleter;
 
+    /** Reader service. */
     private _reader : MongoDbPersistentStoreReader<RootElement>;
 
+    /** Updater service. */
     private _updater : MongoDbPersistentStoreUpdater;
 
 }
