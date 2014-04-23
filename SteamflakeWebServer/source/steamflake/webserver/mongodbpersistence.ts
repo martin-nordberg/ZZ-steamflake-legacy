@@ -8,6 +8,7 @@
 import elements = require( '../../../../SteamflakeCore/source/steamflake/core/metamodel/elements' );
 import persistence = require( '../../../../SteamflakeCore/source/steamflake/core/metamodel/persistence' );
 import promises = require( '../../../../SteamflakeCore/source/steamflake/core/concurrency/promises' );
+import structure = require( '../../../../SteamflakeModel/source/steamflake/model/structure' );
 
 import mongodb = require( 'mongodb' );
 
@@ -154,10 +155,173 @@ class MongoDbPersistentStoreUpdater
     }
 
     public updateModelElement<Element extends elements.IModelElement>(
-        modelElement : Element
+        modelElement : Element,
+        options : persistence.IPersistentStoreUpdaterOptions
     ) : promises.IPromise<Element> {
-        throw Error( "TBD - not yet implemented" );
-        return promises.makeImmediatelyFulfilledPromise( modelElement );
+
+        var result = promises.makePromise<Element>();
+
+        var changes = modelElement.acceptVisitor( this, "determineChangesIn", options.changedAttributeNames );
+
+        this._db.collection( modelElement.typeName, function( err, collection ) {
+            collection.update(
+                { _id: modelElement.uuid },
+                { $set: changes },
+                function( err, result ) {
+                    if ( err ) {
+                        result.reject( "Failed to update model element. " + err );
+                        return;
+                    }
+
+                    result.fulfill( modelElement );
+                }
+            );
+        } );
+
+        return result;
+    }
+
+    /**
+     * Builds the changes needed to make an update to the database for a changed class.
+     * @param cclass The class to keep up to date.
+     */
+    public determineChangesInClass( cclass : structure.IClass, changedAttributeNames : string[ ] ) {
+        return this.determineChangesInComponent( cclass, changedAttributeNames );
+    }
+
+    /**
+     * Builds the changes needed to make an update to the database for a changed module.
+     * @param mmodule The module to keep up to date.
+     */
+    public determineChangesInModule( mmodule : structure.IModule, changedAttributeNames : string[ ] ) : any {
+        var result : any = this.determineChangesInAbstractPackage( mmodule, changedAttributeNames );
+
+        if ( changedAttributeNames.indexOf( "version" ) >= 0 ) {
+            result.version = mmodule.version;
+        }
+
+        return result;
+    }
+
+    /**
+     * Registers a listener to make updates to the database when a namespace changes.
+     * @param namespace The namespace to keep up to date.
+     */
+    public determineChangesInNamespace( namespace : structure.INamespace, changedAttributeNames : string[ ] ) {
+        return this.determineChangesInAbstractNamespace( namespace, changedAttributeNames );
+    }
+
+    /**
+     * Registers a listener to make updates to the database when a package changes.
+     * @param ppackage The package to keep up to date.
+     */
+    public determineChangesInPackage( ppackage : structure.IPackage, changedAttributeNames : string[ ] ) {
+        return this.determineChangesInAbstractPackage( ppackage, changedAttributeNames );
+    }
+
+    /**
+     * Registers a listener to make updates to the database when the root package changes.
+     * @param rootPackage The root package to keep up to date.
+     */
+    public determineChangesInRootPackage( rootPackage : structure.IRootPackage, changedAttributeNames : string[ ] ) {
+        // changes to root package are ignored; invalid really
+        return {};
+    }
+
+    /**
+     * Registers a listener to make updates to the database when an abstract namespace changes.
+     * @param namespace The abstract namespace to keep up to date.
+     */
+    private determineChangesInAbstractNamespace( namespace : structure.IAbstractNamespace, changedAttributeNames : string[ ] ) {
+        return this.determineChangesInNamedContainerElement( namespace, changedAttributeNames );
+    }
+
+    /**
+     * Registers a listener to make updates to the database when an abstract package changes.
+     * @param ppackage The abstract package to keep up to date.
+     */
+    private determineChangesInAbstractPackage( ppackage : structure.IAbstractPackage, changedAttributeNames : string[ ] ) {
+        return this.determineChangesInComponent( ppackage, changedAttributeNames );
+    }
+
+    /**
+     * Registers a listener to make updates to the database when a model element changes.
+     * @param modelElement The code element to keep up to date.
+     */
+    private determineChangesInModelElement( modelElement : elements.IModelElement, changedAttributeNames : string[ ] ) {
+        var result : any = {};
+
+        if ( changedAttributeNames.indexOf( "summary" ) >= 0 ) {
+            result.summary = modelElement.summary;
+        }
+
+        return result;
+    }
+
+    /**
+     * Registers a listener to make updates to the database when a component changes.
+     * @param component The component to keep up to date.
+     */
+    private determineChangesInComponent( component : structure.IComponent, changedAttributeNames : string[ ] ) {
+        return this.determineChangesInFunction( component, changedAttributeNames );
+    }
+
+    /**
+     * Registers a listener to make updates to the database when a container changes.
+     * @param container The container to keep up to date.
+     */
+    private determineChangesInContainerElement( container : elements.IContainerElement, changedAttributeNames : string[ ] ) {
+        return this.determineChangesInModelElement( container, changedAttributeNames );
+    }
+
+    /**
+     * Registers a listener to make updates to the database when a function changes.
+     * @param ffunction The function to keep up to date.
+     */
+    private determineChangesInFunction( ffunction : structure.IFunction, changedAttributeNames : string[ ] ) {
+        return this.determineChangesInFunctionSignature( ffunction, changedAttributeNames );
+    }
+
+    /**
+     * Registers a listener to make updates to the database when a function changes.
+     * @param functionSignature The function to keep up to date.
+     */
+    private determineChangesInFunctionSignature( functionSignature : structure.IFunctionSignature, changedAttributeNames : string[ ] ) {
+        var result : any = this.determineChangesInNamedContainerElement( functionSignature, changedAttributeNames );
+
+        if ( changedAttributeNames.indexOf( "isExported" ) >= 0 ) {
+            result.isExported = functionSignature.isExported;
+        }
+
+        return result;
+    }
+
+    /**
+     * Registers a listener to make updates to the database when a container changes.
+     * @param namedContainer The container to keep up to date.
+     */
+    private determineChangesInNamedContainerElement( namedContainer : elements.INamedContainerElement, changedAttributeNames : string[ ] ) {
+        var result : any = this.determineChangesInContainerElement( namedContainer, changedAttributeNames );
+
+        if ( changedAttributeNames.indexOf( "name" ) >=0 ) {
+            result.name = namedContainer.name;
+        }
+
+        return result;
+    }
+
+    /**
+     * Registers a listener to make updates to the database when a named element changes.
+     * @param namedElement The named element to keep up to date.
+     */
+    private determineChangesInNamedElement( namedElement : elements.INamedElement, changedAttributeNames : string[ ] ) {
+        var result : any = this.determineChangesInModelElement( namedElement, changedAttributeNames );
+
+        if ( changedAttributeNames.indexOf( "name" ) >=0 ) {
+            result.name = namedElement.name;
+        }
+
+        return result;
     }
 
     /** The encapsulated database instance. */

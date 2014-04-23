@@ -30,9 +30,10 @@ describe( "MongoDB Persistence", function() {
 
     } );
 
-    it( "Creates and deletes a model element", function( done : ()=>void ) {
+    it( "Creates, updates, and deletes a model element", function( done : ()=>void ) {
 
-        var sampleElement = structure.makeRootPackage( uuids.makeUuid() );
+        var rootElement = structure.makeRootPackage( uuids.makeUuid() );
+        var sampleElement = rootElement.makeNamespace( uuids.makeUuid(), { name: "TestNamespace", summary: "Namespace created for testing only" } );
 
         var onError = function( msg : string ) {
             console.log( "FAILED: ", msg );
@@ -50,9 +51,16 @@ describe( "MongoDB Persistence", function() {
             store.disconnect().then( onDisconnected, onError );
         }
 
-        var onCreated = function( modelElement : structure.IRootPackage ) {
+        var onUpdated = function( modelElement : structure.IRootPackage ) {
             expect( modelElement ).toBe( sampleElement );
             store.deleter.deleteModelElement( modelElement ).then( onDeleted, onError );
+        }
+
+        var onCreated = function( modelElement : structure.IRootPackage ) {
+            expect( modelElement ).toBe( sampleElement );
+            modelElement.name = "ChangedNamespace";
+            modelElement.summary = "Namespace edited for testing only.";
+            store.updater.updateModelElement( modelElement, { changedAttributeNames:['name','summary'] } ).then( onUpdated, onError );
         }
 
         var onConnected = function( connected ) {

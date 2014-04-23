@@ -163,7 +163,8 @@ class NullPersistentStoreUpdater
 {
 
     public updateModelElement<Element extends elements.IModelElement>(
-        modelElement : Element
+        modelElement : Element,
+        options : IPersistentStoreUpdaterOptions
     ) : promises.IPromise<Element> {
         return promises.makeImmediatelyFulfilledPromise( modelElement );
     }

@@ -42,7 +42,7 @@ export interface IVariable
  * than the root package.
  */
 export interface IAbstractNamespace
-    extends elements.IContainerElement
+    extends elements.INamedContainerElement
 {
 
     /**
@@ -78,7 +78,7 @@ export interface IAbstractNamespace
  * A function signature represents the name and parameters of a function.
  */
 export interface IFunctionSignature
-    extends elements.IContainerElement
+    extends elements.INamedContainerElement
 {
 
     /**
@@ -94,7 +94,7 @@ export interface IFunctionSignature
  * An interface represents the behavior of a component.
  */
 export interface IInterface
-    extends elements.IContainerElement
+    extends elements.INamedContainerElement
 {
 
     /** Whether this interface is visible outside its parent container. */
@@ -399,7 +399,7 @@ export class FunctionSignature
      * @param isExported Whether this function signature is accessible outside its container.
      */
     constructor(
-        parentContainer: elements.IContainerElement,
+        parentContainer: elements.INamedContainerElement,
         typeName: string,
         uuid: string,
         name: string,
@@ -575,7 +575,7 @@ export class Function
      * @param isExported Whether this function is accessible outside its container.
      */
     constructor(
-        parentContainer: elements.IContainerElement,
+        parentContainer: elements.INamedContainerElement,
         typeName: string,
         uuid: string,
         name: string,
@@ -669,7 +669,7 @@ export class Component
      * @param isExported Whether this component is accessible outside its container.
      */
     constructor(
-        parentContainer: elements.IContainerElement,
+        parentContainer: elements.INamedContainerElement,
         typeName: string,
         uuid: string,
         name: string,
@@ -715,7 +715,7 @@ export class AbstractPackage
      * @param isExported Whether this package is accessible outside its parent package.
      */
     constructor(
-        parentContainer: elements.IContainerElement,
+        parentContainer: elements.INamedContainerElement,
         typeName: string,
         uuid: string,
         name: string,
