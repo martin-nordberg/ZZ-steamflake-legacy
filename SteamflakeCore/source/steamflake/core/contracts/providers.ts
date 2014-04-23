@@ -159,8 +159,8 @@ class BooleanContracts
 
     constructor() {
         super();
-        this._thatIsFalse = contracts.makeAdjectivalContract( (actualValue:boolean) => !actualValue, "false" )
-        this._thatIsTrue = contracts.makeAdjectivalContract( (actualValue:boolean) => actualValue, "true" )
+        this._thatIsFalse = contracts.makeAdjectivalContract( (actualValue:boolean) => !actualValue, "false" );
+        this._thatIsTrue = contracts.makeAdjectivalContract( (actualValue:boolean) => actualValue, "true" );
     }
 
     /** Contract enforcing a false value for a boolean. */

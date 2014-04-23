@@ -38,7 +38,7 @@ class UpdateListener {
         ) {
             var cmd = corecommands.makeAttributeChangeCommand( updater, modelElement, change.attributeName, change.oldValue );
             self._commandHistory.queue( cmd );
-        }
+        };
 
         // respond to added child elements (i.e. element creation)
         self._childElementAddedListener = function(
@@ -47,7 +47,7 @@ class UpdateListener {
         ) {
             var cmd = corecommands.makeElementCreationCommand( creator, deleter, undefined/*TBD*/, childElement );
             self._commandHistory.queue( cmd );
-        }
+        };
     }
 
     /**
@@ -113,12 +113,12 @@ class UpdatePersistingModelElementRegistryListener {
         // responds when an element is registered
         var registrationListener = function( r : registry.IModelElementRegistry, modelElement : elements.IModelElement ) {
             updateListener.startListening( modelElement );
-        }
+        };
 
         // responds when an element is unregistered
         var unregistrationListener = function( r : registry.IModelElementRegistry, modelElement : elements.IModelElement ) {
             updateListener.stopListening( modelElement );
-        }
+        };
 
         modelElementRegistry.elementRegisteredEvent.registerListener( registrationListener );
         modelElementRegistry.elementUnregisteredEvent.registerListener( unregistrationListener );

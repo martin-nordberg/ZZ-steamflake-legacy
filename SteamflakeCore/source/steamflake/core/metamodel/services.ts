@@ -82,7 +82,7 @@ class QueryService<RootElement extends elements.IRootContainerElement>
                 self._modelElementRegistry.registerModelElement( childElement );
             } );
             return containerElement;
-        }
+        };
 
         // delegate to the reader; register in the callback
         return self._reader.loadModelElementContents( containerElement ).then( registerContents );
@@ -100,7 +100,7 @@ class QueryService<RootElement extends elements.IRootContainerElement>
         var register = function( element : RootElement ) {
             self._modelElementRegistry.registerModelElement( element );
             return element;
-        }
+        };
 
         return self._reader.loadRootModelElement().then( register );
 

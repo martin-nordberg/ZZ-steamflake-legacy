@@ -58,12 +58,12 @@ describe( "Streams", function() {
             expect( source ).toBe( lineReader );
             linesRead += 1;
             expect( line ).toEqual( "Line " + linesRead );
-        }
+        };
 
         var onLineRead2 = function( source : streams.ILineReader, line : string ) {
             expect( source ).toBe( lineReader );
             linesRead += 1;
-        }
+        };
 
         var onEofRead = function( source : streams.ILineReader ) {
             expect( source ).toBe( lineReader );
@@ -71,7 +71,7 @@ describe( "Streams", function() {
             lineReader.eofReadEvent.unregisterListener( onEofRead );
             lineReader.lineReadEvent.unregisterListener( onLineRead );
             done();
-        }
+        };
 
         var check = function(
             initInput,
@@ -90,7 +90,7 @@ describe( "Streams", function() {
             // register for line events
             lineReader.lineReadEvent.registerListener( initOnLineRead );
             lineReader.eofReadEvent.registerListener( initOnEofRead );
-        }
+        };
 
         beforeEach( function() {
             linesRead = 0;

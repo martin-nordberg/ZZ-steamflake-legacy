@@ -83,7 +83,7 @@ export interface ICommand<T>
      * Executes this command.
      * @returns The promise of an arbitrary value resulting from the command execution.
      */
-    do() : promises.IPromise<T>;
+    doit() : promises.IPromise<T>;
 
 }
 
@@ -182,13 +182,13 @@ class NullCommandHistory
          */
         function doCommand( value : values.ENothing ) {
             self._isExecutingCommand = true;
-            command.do().then( maintainHistory, handleError );
+            command.doit().then( maintainHistory, handleError );
             return values.nothing;
         }
 
         promises.makeImmediatelyFulfilledPromise( values.nothing ).then( doCommand );
 
-        return command.do().then( maintainHistory, handleError );
+        return command.doit().then( maintainHistory, handleError );
     }
 
     /**
@@ -307,7 +307,7 @@ class CommandHistory
          */
         function doCommand( value : values.ENothing ) {
             self._isExecutingCommand = true;
-            command.do().then( maintainHistory, handleError );
+            command.doit().then( maintainHistory, handleError );
             return values.nothing;
         }
 

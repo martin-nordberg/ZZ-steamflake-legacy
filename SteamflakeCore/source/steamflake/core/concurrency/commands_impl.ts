@@ -49,7 +49,7 @@ export class AbstractCommand<T>
      * Executes this command.
      * @returns An arbitrary value resulting from the command execution.
      */
-    public do() : promises.IPromise<T> {
+    public doit() : promises.IPromise<T> {
 
         var self = this;
 
@@ -70,13 +70,13 @@ export class AbstractCommand<T>
                 self._state = commands.ECommandState.Done;
             }
             return value;
-        }
+        };
 
         /** Callback updates the state of this command after an error. */
         var errorCommandState = function( reason : any ) {
             self._state = commands.ECommandState.Error;
             return reason;
-        }
+        };
 
         return result.then( updateCommandState, errorCommandState );
     }
@@ -105,13 +105,13 @@ export class AbstractCommand<T>
                 self._state = commands.ECommandState.Done;
             }
             return values.nothing;
-        }
+        };
 
         /** Callback updates the state of this command after an error. */
         var errorCommandState = function( reason : any ) {
             self._state = commands.ECommandState.Error;
             return reason;
-        }
+        };
 
         return result.then( updateCommandState, errorCommandState );
 
@@ -161,13 +161,13 @@ export class AbstractCommand<T>
                 self._state = commands.ECommandState.Undone;
             }
             return values.nothing;
-        }
+        };
 
         /** Callback updates the state of this command after an error. */
         var errorCommandState = function( reason : any ) {
             self._state = commands.ECommandState.Error;
             return reason;
-        }
+        };
 
         return result.then( updateCommandState, errorCommandState );
     }
@@ -190,7 +190,7 @@ export class AbstractCommand<T>
 
         var ignore = function( value : T ) {
             return values.nothing;
-        }
+        };
 
         return this.execute().then( ignore );
     }

@@ -132,7 +132,7 @@ class Promise<T>
             catch ( err ) {
                 result.reject( err );
             }
-        }
+        };
 
         // wrapper passes rejection of this promise on to the resulting promise
         var chainedOnRejected = function( reason : any ) {
@@ -149,7 +149,7 @@ class Promise<T>
                 chainedReason = reason;
             }
             result.reject( chainedReason );
-        }
+        };
 
         // queue the two callbacks
         this._onFulfilled.push( chainedOnFulfilled );
@@ -199,7 +199,7 @@ class Promise<T>
             var fulfillRecursively = function() {
                 fulfill( self._value );
                 self.onFulfilled();
-            }
+            };
 
             platform.doWhenIdle( fulfillRecursively );
         }
@@ -221,7 +221,7 @@ class Promise<T>
             var rejectRecursively = function() {
                 reject( self._reason );
                 self.onRejected();
-            }
+            };
 
             platform.doWhenIdle( rejectRecursively );
         }

@@ -40,7 +40,6 @@ export interface IPersistentStoreReader<RootElement extends elements.IRootContai
 
     /**
      * Queries this store for a root container plus its (application-defined) immediate contents.
-     * @param options Callbacks to receive the exception that occurred or the successfully found result.
      */
     loadRootModelElement() : promises.IPromise<RootElement>;
 

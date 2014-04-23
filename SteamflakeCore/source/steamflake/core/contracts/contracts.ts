@@ -230,15 +230,15 @@ class AdjectivalContract<T>
     ) {
         var makeSuccessMessage = function( valueName : string ) {
             return "Verified " + valueName + " to be " + adjective + ".";
-        }
+        };
 
         var makeFailureMessage = function( actualValue : T, valueName : string ) {
             return "Expected " + valueName + " to be " + adjective + ", but was " + this.valueToString(actualValue) + ".";
-        }
+        };
 
         var makeExceptionMessage = function( actualValue : T, valueName : string ) {
             return "An exception occurred while checking whether " + valueName + " is " + adjective + ".";
-        }
+        };
 
         super(
             enforceCondition,

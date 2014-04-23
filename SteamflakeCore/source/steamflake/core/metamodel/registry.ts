@@ -227,7 +227,7 @@ class ChildRegisteringModelElementRegistryListener {
                     modelElementRegistry.registerModelElement( childElement );
                 } );
             }
-        }
+        };
 
         // responds when an element is unregistered
         var unregistrationListener = function( registry : IModelElementRegistry, modelElement : elements.IModelElement ) {
@@ -238,7 +238,7 @@ class ChildRegisteringModelElementRegistryListener {
                     modelElementRegistry.unregisterModelElement( childElement );
                 } );
             }
-        }
+        };
 
         modelElementRegistry.elementRegisteredEvent.registerListener( registrationListener );
         modelElementRegistry.elementUnregisteredEvent.registerListener( unregistrationListener );
