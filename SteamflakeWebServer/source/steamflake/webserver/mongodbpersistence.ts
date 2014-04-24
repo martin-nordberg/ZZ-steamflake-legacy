@@ -17,8 +17,8 @@ import mongodb = require( 'mongodb' );
 /**
  * Interface to a MongoDB persistent store.
  */
-export interface IMongoDbPersistenceStore<RootElement extends elements.IRootContainerElement>
-    extends persistence.IPersistentStore<RootElement> {
+export interface IMongoDbPersistenceStore
+    extends persistence.IPersistentStore<structure.IRootPackage> {
 
     /**
      * Establishes the connection to MongoDB.
@@ -112,8 +112,8 @@ class MongoDbPersistentStoreCreator
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /** MongoDB reader. */
-class MongoDbPersistentStoreReader<RootElement extends elements.IRootContainerElement>
-    implements persistence.IPersistentStoreReader<RootElement>
+class MongoDbPersistentStoreReader
+    implements persistence.IPersistentStoreReader<structure.IRootPackage>
 {
 
     /**
@@ -130,8 +130,42 @@ class MongoDbPersistentStoreReader<RootElement extends elements.IRootContainerEl
         throw Error( "TBD - not yet implemented" );
     }
 
-    public loadRootModelElement() : promises.IPromise<RootElement> {
-        throw Error( "TBD - not yet implemented" );
+    public loadRootModelElement() : promises.IPromise<structure.IRootPackage> {
+
+        var result = promises.makePromise<structure.IRootPackage>();
+
+        this._db.collection(
+            "RootPackage",
+            function( err : any, collection : mongodb.Collection ) {
+                if ( err ) {
+                    result.reject( "Failed to open RootPackage collection. " + err );
+                    return;
+                }
+
+                collection.find(
+                    {},
+                    function( err : any, cursor : mongodb.Cursor ) {
+                        if ( err ) {
+                            result.reject( "Failed to find root model element." );
+                        }
+
+                        cursor.nextObject(
+                            function( err : any, item : any ) {
+                                if ( err ) {
+                                    result.reject( "Failed to find root model element." );
+                                }
+
+                                var rootPackage = structure.makeRootPackage( item._id );
+                                result.fulfill( rootPackage );
+                            }
+                        );
+                    }
+                );
+            }
+        );
+
+        return result;
+
     }
 
     /** The encapsulated database instance. */
@@ -540,8 +574,8 @@ class MongoDbSchemaInitializer {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /** MongoDB persistent store. */
-class MongoDbPersistentStore<RootElement extends elements.IRootContainerElement>
-    implements IMongoDbPersistenceStore<RootElement>
+class MongoDbPersistentStore
+    implements IMongoDbPersistenceStore
 {
 
     /**
@@ -601,7 +635,7 @@ class MongoDbPersistentStore<RootElement extends elements.IRootContainerElement>
 
                                     // create the CRUD services
                                     self._creator = new MongoDbPersistentStoreCreator( db );
-                                    self._reader = new MongoDbPersistentStoreReader<RootElement>( db );
+                                    self._reader = new MongoDbPersistentStoreReader( db );
                                     self._updater = new MongoDbPersistentStoreUpdater( db );
                                     self._deleter = new MongoDbPersistentStoreDeleter( db );
 
@@ -678,7 +712,7 @@ class MongoDbPersistentStore<RootElement extends elements.IRootContainerElement>
     private _deleter : MongoDbPersistentStoreDeleter;
 
     /** Reader service. */
-    private _reader : MongoDbPersistentStoreReader<RootElement>;
+    private _reader : MongoDbPersistentStoreReader;
 
     /** Updater service. */
     private _updater : MongoDbPersistentStoreUpdater;
@@ -692,8 +726,8 @@ class MongoDbPersistentStore<RootElement extends elements.IRootContainerElement>
  * Constructs a MongoDB-backed persistent store.
  * @returns the newly created store
  */
-export function makeMongoDbPersistentStore<RootElement extends elements.IRootContainerElement>() : IMongoDbPersistenceStore<RootElement> {
-    return new MongoDbPersistentStore<RootElement>();
+export function makeMongoDbPersistentStore() : IMongoDbPersistenceStore {
+    return new MongoDbPersistentStore();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

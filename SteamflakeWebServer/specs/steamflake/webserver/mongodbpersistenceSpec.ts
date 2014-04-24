@@ -30,6 +30,47 @@ describe( "MongoDB Persistence", function() {
 
     } );
 
+    it( "Creates, reads, and deletes a root model element", function( done : ()=>void ) {
+
+        var rootElement = structure.makeRootPackage( uuids.makeUuid() );
+
+        var onError = function( msg : string ) {
+            console.log( "FAILED: ", msg );
+            expect( msg ).toBeNull();
+            done();
+        };
+
+        var onDisconnected = function( disconnected ) {
+            expect( disconnected ).toBeTruthy();
+            done();
+        };
+
+        var onDeleted = function( modelElement : structure.IRootPackage ) {
+            expect( modelElement ).toBe( rootElement );
+            store.disconnect().then( onDisconnected, onError );
+        }
+
+        var onRead = function( modelElement : structure.IRootPackage ) {
+            expect( modelElement ).toEqual( rootElement );
+            store.deleter.deleteModelElement( modelElement ).then( onDeleted, onError );
+        }
+
+        var onCreated = function( modelElement : structure.IRootPackage ) {
+            expect( modelElement ).toBe( rootElement );
+            store.reader.loadRootModelElement().then( onRead, onError );
+        }
+
+        var onConnected = function( connected ) {
+            expect( connected ).toBeTruthy();
+            store.creator.createModelElement( rootElement ).then( onCreated, onError );
+        };
+
+        var store = mongodbpersistence.makeMongoDbPersistentStore();
+
+        store.connect( true, true ).then( onConnected, onError );
+
+    } );
+
     it( "Creates, updates, and deletes a model element", function( done : ()=>void ) {
 
         var rootElement = structure.makeRootPackage( uuids.makeUuid() );
@@ -46,17 +87,17 @@ describe( "MongoDB Persistence", function() {
             done();
         };
 
-        var onDeleted = function( modelElement : structure.IRootPackage ) {
+        var onDeleted = function( modelElement : structure.INamespace ) {
             expect( modelElement ).toBe( sampleElement );
             store.disconnect().then( onDisconnected, onError );
         }
 
-        var onUpdated = function( modelElement : structure.IRootPackage ) {
+        var onUpdated = function( modelElement : structure.INamespace ) {
             expect( modelElement ).toBe( sampleElement );
             store.deleter.deleteModelElement( modelElement ).then( onDeleted, onError );
         }
 
-        var onCreated = function( modelElement : structure.IRootPackage ) {
+        var onCreated = function( modelElement : structure.INamespace ) {
             expect( modelElement ).toBe( sampleElement );
             modelElement.name = "ChangedNamespace";
             modelElement.summary = "Namespace edited for testing only.";
