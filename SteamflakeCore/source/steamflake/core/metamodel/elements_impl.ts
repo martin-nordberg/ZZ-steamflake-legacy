@@ -143,6 +143,14 @@ export class ModelElement
         throw new Error( "Attempted to change read only attribute - parentContainer." );
     }
 
+    /** The path of a model element relative to its parent (the same as its uuid). */
+    public get path() : string {
+        return this._uuid;
+    }
+    public set path( value : string ) {
+        throw new Error( "Attempted to change read only attribute - path." );
+    }
+
     /**
      * Updates the attributes of this code element from the given plain (JSON-derived) object.
      * @param jsonObject Plain object with attributes to be merged into this code element.
@@ -297,6 +305,12 @@ export class NamedElement
         this._name = value;
         this.attributeChangeEvent.trigger( change );
     }
+
+    /** The path of a model element relative to its parent (the same as its name). */
+    public get path() : string {
+        return this._name;
+    }
+
     /**
      * Updates the attributes of this code element from the given plain (JSON-derived) object.
      * @param jsonObject Plain object with attributes to be merged into this code element.

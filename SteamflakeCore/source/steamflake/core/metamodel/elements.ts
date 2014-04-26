@@ -72,6 +72,9 @@ export interface IModelElement {
     /** The parent container of this model element. NOTE: read only. */
     parentContainer : IContainerElement;
 
+    /** The path of a model element relative to its parent (usually the same as its name). NOTE: read only. */
+    path : string;
+
     /** A short description of this model element. */
     summary : string;
 
