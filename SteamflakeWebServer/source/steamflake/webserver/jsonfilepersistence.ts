@@ -20,6 +20,73 @@ import fs = require( 'fs' );
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * Helper class determines the folder and file names for model elements.
+ */
+class JsonFileFolderHierarchy {
+
+    /**
+     * Constructs a new file hierarchy service.
+     * @param rootFolder The rot folder of the repository.
+     */
+    constructor( rootFolder : string ) {
+        this._rootFolder = rootFolder;
+    }
+
+    /**
+     * Determines the file for a given model element.
+     * @param modelElement The model element to be read or written.
+     * @return {*} The name of the file for the model element.
+     */
+    public determineFile(
+        modelElement : elements.IModelElement
+    ) : string {
+        return modelElement.typeName + ".json";
+    }
+
+    /**
+     * Determines the folder of a given model element.
+     * @param modelElement The model element to be read or written.
+     * @return {*} The ful path of the folder for the model element.
+     */
+    public determineFolder(
+        modelElement : elements.IModelElement
+    ) : string {
+
+        if ( modelElement.typeName === "RootPackage" ) {
+            return this._rootFolder;
+        }
+
+        var result = this.determineFolder( modelElement.parentContainer );
+        result += "/";
+        result += modelElement.path;
+
+        return result;
+    }
+
+    /**
+     * Determines the file for the root package.
+     * @return {*} The name of the file for the root package.
+     */
+    public determineRootPackageFile() : string {
+        return "RootPackage.json";
+    }
+
+    /**
+     * Determines the folder of the root package.
+     * @return {*} The full path of the folder for the root package.
+     */
+    public determineRootPackageFolder() : string {
+        return this._rootFolder;
+    }
+
+    /** The root of the folder structure to read and write. */
+    private _rootFolder : string;
+
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 /** JSON file creator implementation. */
 class JsonFilePersistentStoreCreator
     implements persistence.IPersistentStoreCreator
@@ -30,7 +97,7 @@ class JsonFilePersistentStoreCreator
      * @param rootFolder The root folder for the repository.
      */
     constructor( rootFolder : string ) {
-        this._rootFolder = rootFolder;
+        this._folderHierarchy = new JsonFileFolderHierarchy( rootFolder );
     }
 
     /**
@@ -46,21 +113,13 @@ class JsonFilePersistentStoreCreator
         // serialize
         var json : any = modelElement.toJson( elements.EJsonDetailLevel.Attributes|elements.EJsonDetailLevel.ParentIdentity );
 
-        // code element type is the collection name
-        var collectionName = json.type;
-
         // determine the folder
-        var folder = this.determineFolder( modelElement );
-        if ( folder.length === 0 ) {
-            folder = this._rootFolder;
-        }
-        else {
-            folder = this._rootFolder + folder;
-        }
+        var folder = this._folderHierarchy.determineFolder( modelElement );
+        var file = folder + "/" + this._folderHierarchy.determineFile( modelElement );
 
         var writeJson = function( value : values.ENothing ) {
             files.writeWholeFile(
-                folder + "/" + modelElement.typeName + ".json",
+                file,
                 JSON.stringify( json, null, 2 )
             ).then (
                 function( value : values.ENothing ) {
@@ -77,23 +136,8 @@ class JsonFilePersistentStoreCreator
         return result;
     }
 
-    private determineFolder(
-        modelElement : elements.IModelElement
-    ) {
-
-        if ( modelElement.typeName === "RootPackage" ) {
-            return "";
-        }
-
-        var result = this.determineFolder( modelElement.parentContainer );
-        result += "/";
-        result += modelElement.path;
-
-        return result;
-    }
-
-    /** The root of the folder structure to read and write. */
-    private _rootFolder : string;
+    /** The logic for determining folder and file names. */
+    private _folderHierarchy : JsonFileFolderHierarchy;
 
 }
 
@@ -109,12 +153,12 @@ class JsonFilePersistentStoreReader
      * @param rootFolder The root folder for the repository.
      */
     constructor( rootFolder : string ) {
-        this._rootFolder = rootFolder;
+        this._folderHierarchy = new JsonFileFolderHierarchy( rootFolder );
     }
 
     public loadModelElementContents<Element extends elements.IContainerElement>(
         containerElement : Element
-        ) : promises.IPromise<Element> {
+    ) : promises.IPromise<Element> {
         throw Error( "TBD - not yet implemented" );
     }
 
@@ -122,14 +166,27 @@ class JsonFilePersistentStoreReader
 
         var result = promises.makePromise<structure.IRootPackage>();
 
-        // TBD
+        // determine the folder
+        var folder = this._folderHierarchy.determineRootPackageFolder();
+        var file = folder + "/" + this._folderHierarchy.determineRootPackageFile();
+
+        files.readWholeFile( file ).then(
+            function( contents : string ) {
+                var json = JSON.parse( contents );
+                var rootPkg = structure.makeRootPackage( json.uuid );
+                result.fulfill( rootPkg );
+            },
+            function( reason : any ) {
+                result.reject( "Failed to load root package. " + reason );
+            }
+        );
 
         return result;
 
     }
 
-    /** The root of the folder structure to read and write. */
-    private _rootFolder : string;
+    /** The logic for determining folder and file names. */
+    private _folderHierarchy : JsonFileFolderHierarchy;
 
 }
 
@@ -142,26 +199,29 @@ class JsonFilePersistentStoreUpdater
 
     /**
      * Constructs a new JSON file update service.
-     * @param rootFolder The root folder for the repository.
+     * @param creator The creator for the store (updates implemented as creates).
      */
-    constructor( rootFolder : string ) {
-        this._rootFolder = rootFolder;
+    constructor( creator : persistence.IPersistentStoreCreator ) {
+        this._creator = creator;
     }
 
+    /**
+     * Saves a changed model element.
+     * @param modelElement The changed model element to save persistently.
+     * @param options The attributes that have changed.
+     */
     public updateModelElement<Element extends elements.IModelElement>(
         modelElement : Element,
         options : persistence.IPersistentStoreUpdaterOptions
-        ) : promises.IPromise<Element> {
+    ) : promises.IPromise<Element> {
 
-        var result = promises.makePromise<Element>();
+        // update by overwriting
+        return this._creator.createModelElement( modelElement );
 
-        // TBD
-
-        return result;
     }
 
-    /** The root of the folder structure to read and write. */
-    private _rootFolder : string;
+    /** The logic for determining folder and file names. */
+    private _creator : persistence.IPersistentStoreCreator;
 
 }
 
@@ -177,7 +237,7 @@ class JsonFilePersistentStoreDeleter
      * @param rootFolder The root folder for the repository.
      */
     constructor( rootFolder : string ) {
-        this._rootFolder = rootFolder;
+        this._folderHierarchy = new JsonFileFolderHierarchy( rootFolder );
     }
 
     public deleteModelElement<Element extends elements.IModelElement>(
@@ -186,16 +246,13 @@ class JsonFilePersistentStoreDeleter
 
         var result = promises.makePromise<Element>();
 
-        // code element type is the collection name
-        var collectionName = modelElement.typeName;
-
         // TBD
 
         return result;
     }
 
-    /** The root of the folder structure to read and write. */
-    private _rootFolder : string;
+    /** The logic for determining folder and file names. */
+    private _folderHierarchy : JsonFileFolderHierarchy;
 
 }
 
@@ -214,7 +271,7 @@ class JsonFilePersistentStore
         this._creator = new JsonFilePersistentStoreCreator( rootFolder );
         this._deleter = new JsonFilePersistentStoreDeleter( rootFolder );
         this._reader = new JsonFilePersistentStoreReader( rootFolder );
-        this._updater = new JsonFilePersistentStoreUpdater( rootFolder );
+        this._updater = new JsonFilePersistentStoreUpdater( this._creator );
     }
 
     /**

@@ -20,7 +20,7 @@ import fs = require( 'fs' );
 /**
  * Creates the given folder.
  * @param path The full path to a folder to create.
- * @return {IPromiseResult<T>} Promise fulfilled when the folder has been created.
+ * @return Promise fulfilled when the folder has been created.
  */
 function makeFolder( path : string ) : promises.IPromise<values.ENothing> {
 
@@ -39,13 +39,26 @@ function makeFolder( path : string ) : promises.IPromise<values.ENothing> {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export function deleteFile( path : string ) : promises.IPromise<values.ENothing> {
+
+    var result = promises.makePromise<values.ENothing>();
+
+    // TBD
+
+    return result;
+
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
  * Recursively ensures the existence of a folder and all its parents.
  * @param path The path of the folder to create.
- * @return {IPromiseResult<T>} Promise fulfilled when the folder exists.
+ * @return Promise fulfilled when the folder exists.
  */
-function recursivelyEstablishFolder( path : string ) : promises.IPromise<values.ENothing> {
+export function establishFolder( path : string ) : promises.IPromise<values.ENothing> {
 
     // set up the promise & helper functions
     var result = promises.makePromise<values.ENothing>();
@@ -55,7 +68,7 @@ function recursivelyEstablishFolder( path : string ) : promises.IPromise<values.
     };
     var onReject = function( reason : any ) {
         result.reject( reason );
-    }
+    };
 
     // see if the folder already exists
     fs.stat( path, function( err : ErrnoException, stats : NodeJs.Fs.Stats ) {
@@ -69,7 +82,7 @@ function recursivelyEstablishFolder( path : string ) : promises.IPromise<values.
 
                 var parentPath = path.substring( 0, lastSlash );
 
-                recursivelyEstablishFolder( parentPath ).then(
+                establishFolder( parentPath ).then(
                     function( value : values.ENothing ) {
                         makeFolder( path ).then( onFulfill, onReject );
                     },
@@ -105,16 +118,25 @@ function recursivelyEstablishFolder( path : string ) : promises.IPromise<values.
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * Recursively creates a new folder.
- * @param path The path to the folder to create
+ * Reads the entire contents of a file.
+ * @param path The path to the file.
+ * @return Promised fulfilled with the contents of the file.
  */
-export function establishFolder( path : string ) : promises.IPromise<values.ENothing> {
+export function readWholeFile( path : string ) : promises.IPromise<string> {
 
-    return recursivelyEstablishFolder( path );
+    var result = promises.makePromise<string>();
 
+    fs.readFile( path, function( err : ErrnoException, buffer : NodeBuffer ) {
+        if ( err ) {
+            result.reject( "Failed to read file " + path + ". " + err );
+        }
+
+        result.fulfill( buffer.toString() );
+    } );
+
+    return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -123,7 +145,7 @@ export function establishFolder( path : string ) : promises.IPromise<values.ENot
  * Writes or rewrites a file with given contents.
  * @param path The path to the file.
  * @param contents The contents to write to the file.
- * @return {IPromiseResult<T>} Promise fulfilled when the file has been written.
+ * @return Promise fulfilled when the file has been written.
  */
 export function writeWholeFile( path : string, contents : string ) : promises.IPromise<values.ENothing> {
 
@@ -136,7 +158,7 @@ export function writeWholeFile( path : string, contents : string ) : promises.IP
         }
 
         result.fulfill( values.nothing );
-    } )
+    } );
 
     return result;
 

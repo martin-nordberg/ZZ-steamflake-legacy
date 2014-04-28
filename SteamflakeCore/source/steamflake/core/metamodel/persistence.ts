@@ -66,6 +66,7 @@ export interface IPersistentStoreUpdater {
     /**
      * Saves a changed model element.
      * @param modelElement The changed model element to save persistently.
+     * @param options The attributes that have changed.
      */
     updateModelElement<Element extends elements.IModelElement>(
         modelElement : Element,

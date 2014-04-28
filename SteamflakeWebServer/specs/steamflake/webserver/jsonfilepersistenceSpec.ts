@@ -16,9 +16,14 @@ describe( "JSON File Persistence", function() {
             done();
         };
 
+        var onRead = function( modelElement : structure.IRootPackage ) {
+            expect( modelElement ).toEqual( rootElement );
+            done();
+        };
+
         var onCreated = function( modelElement : structure.IRootPackage ) {
             expect( modelElement ).toBe( rootElement );
-            done();
+            store.reader.loadRootModelElement().then( onRead, onError );
         };
 
         var store = jsonfilepersistence.makeJsonFilePersistentStore( "/tmp/steamflake/a" );
