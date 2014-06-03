@@ -11,24 +11,32 @@ describe( "JSON File Persistence", function() {
         var rootElement = structure.makeRootPackage( uuids.makeUuid() );
 
         var onError = function( msg : string ) {
-            console.log( "FAILED: ", msg );
             expect( msg ).toBeNull();
             done();
         };
 
-        var onRead = function( modelElement : structure.IRootPackage ) {
-            expect( modelElement ).toEqual( rootElement );
-            done();
+        var load = function( modelElement : structure.IRootPackage ) {
+            expect( modelElement ).toBe( rootElement );
+            return store.reader.loadRootModelElement();
         };
 
-        var onCreated = function( modelElement : structure.IRootPackage ) {
-            expect( modelElement ).toBe( rootElement );
-            store.reader.loadRootModelElement().then( onRead, onError );
+        var remove = function( modelElement : structure.IRootPackage ) {
+            expect( modelElement ).toEqual( rootElement );
+            return store.deleter.deleteModelElement( modelElement );
+        };
+
+        var finish = function( modelElement : structure.IRootPackage ) {
+            expect( modelElement.uuid ).toEqual( rootElement.uuid );
+            done();
         };
 
         var store = jsonfilepersistence.makeJsonFilePersistentStore( "/tmp/steamflake/a" );
 
-        store.creator.createModelElement( rootElement ).then( onCreated, onError );
+        store.creator.createModelElement( rootElement )
+             .then_p( load )
+             .then_p( remove )
+             .then( finish )
+             .then( null, onError );
 
     } );
 
@@ -41,7 +49,6 @@ describe( "JSON File Persistence", function() {
         var namespace2 = namespace1.makeNamespace( uuids.makeUuid(), { name: "sample" } );
 
         var onError = function( msg : string ) {
-            console.log( "FAILED: ", msg );
             expect( msg ).toBeNull();
             done();
         };
@@ -63,7 +70,11 @@ describe( "JSON File Persistence", function() {
 
         store.creator.createModelElement( rootElement ).then( onRootCreated, onError );
 
+        // TBD: Change to promise chain
+        // TBD: delete after created
+
     } );
 
 } );
+
 

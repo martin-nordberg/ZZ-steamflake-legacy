@@ -66,7 +66,7 @@ describe( "Promises", function() {
             function f( value : string ) {
             }
             function r( reason : string ) {
-                expect( reason ).toEqual( "bad" )
+                expect( reason ).toEqual( "bad" );
                 done();
             }
             promise.then( f, r );
@@ -188,7 +188,7 @@ describe( "Promises", function() {
             function f( value : string ) {
             }
             function r( reason : string ) {
-                expect( reason ).toEqual( "bad" )
+                expect( reason ).toEqual( "bad" );
                 done();
             }
             promise.then( f, r );
@@ -319,7 +319,7 @@ describe( "Promises", function() {
             function f( value : string ) {
             }
             function r( reason : string ) {
-                expect( reason ).toEqual( "bad" )
+                expect( reason ).toEqual( "bad" );
                 done();
             }
             promise.then( f, r );
@@ -375,6 +375,84 @@ describe( "Promises", function() {
             }
             promise.then( f, r1 ).then( f, r2 );
             setTimeout( function(){ promise.reject( "bad" ); }, 1 );
+        } );
+
+    } );
+
+    describe( "Promise-Fulfilled Immediate Promise", function()  {
+        var promise : promises.IPromise<string>;
+
+        beforeEach( function() {
+            promise = promises.makeImmediatelyFulfilledPromise<string>( "done" );
+        } );
+
+        it( "Supports chained calls", function( done : ()=>void ) {
+            function f1( value : string ) {
+                expect( value ).toEqual( "done" );
+                var result = promises.makePromise<string>();
+                setTimeout( function(){ result.fulfill( "chained" ); }, 1 );
+                return result;
+            }
+            function f2( value : string ) {
+                expect( value ).toEqual( "chained" );
+                done();
+            }
+            promise.then_p( f1 ).then( f2 );
+        } );
+
+        it( "Handles callback exceptions", function( done : ()=>void ) {
+            function f1( value : string ) {
+                expect( value ).toEqual( "done" );
+                throw new Error( "failed" );
+                return promises.makeImmediatelyFulfilledPromise( "never" );
+            }
+            function f2( value : string ) {
+            }
+            function r2( value : any ) {
+                expect( value ).toEqual( new Error( "failed" ) );
+                done();
+            }
+            promise.then_p( f1 ).then( f2, r2 );
+        } );
+
+    } );
+
+    describe( "Promise-Fulfilled Promise", function()  {
+        var promise : promises.IPromiseResult<string>;
+
+        beforeEach( function() {
+            promise = promises.makePromise<string>();
+        } );
+
+        it( "Supports chained calls", function( done : ()=>void ) {
+            function f1( value : string ) {
+                expect( value ).toEqual( "done" );
+                var result = promises.makePromise<string>();
+                setTimeout( function(){ result.fulfill( "chained" ); }, 1 );
+                return result;
+            }
+            function f2( value : string ) {
+                expect( value ).toEqual( "chained" );
+                done();
+            }
+            promise.then_p( f1 ).then( f2 );
+            setTimeout( function(){ promise.fulfill( "done" ); }, 1 );
+        } );
+
+        it( "Handles callback exceptions", function( done : ()=>void ) {
+            function f1( value : string ) {
+                expect( value ).toEqual( "done" );
+                throw new Error( "failed" );
+                return promises.makeImmediatelyFulfilledPromise( "never" );
+            }
+            function f2( value : string ) {
+            }
+            function r2( value : any ) {
+                expect( value ).toEqual( new Error( "failed" ) );
+                done();
+            }
+            promise.then_p( f1 ).then( f2, r2 );
+            setTimeout( function(){ promise.fulfill( "done" ); }, 1 );
         } );
 
     } );

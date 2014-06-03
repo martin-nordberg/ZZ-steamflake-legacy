@@ -27,10 +27,10 @@ class JsonFileFolderHierarchy {
 
     /**
      * Constructs a new file hierarchy service.
-     * @param rootFolder The rot folder of the repository.
+     * @param rootFolderStr The root folder of the repository.
      */
-    constructor( rootFolder : string ) {
-        this._rootFolder = rootFolder;
+    constructor( rootFolderStr : string ) {
+        this._rootFolder = files.makePath( rootFolderStr );
     }
 
     /**
@@ -38,10 +38,10 @@ class JsonFileFolderHierarchy {
      * @param modelElement The model element to be read or written.
      * @return {*} The name of the file for the model element.
      */
-    public determineFile(
+    public determineFilePath(
         modelElement : elements.IModelElement
-    ) : string {
-        return modelElement.typeName + ".json";
+    ) : files.IPath {
+        return files.makePath( modelElement.typeName + ".json" );
     }
 
     /**
@@ -49,39 +49,37 @@ class JsonFileFolderHierarchy {
      * @param modelElement The model element to be read or written.
      * @return {*} The ful path of the folder for the model element.
      */
-    public determineFolder(
+    public determineFolderPath(
         modelElement : elements.IModelElement
-    ) : string {
+    ) : files.IPath {
 
         if ( modelElement.typeName === "RootPackage" ) {
             return this._rootFolder;
         }
 
-        var result = this.determineFolder( modelElement.parentContainer );
-        result += "/";
-        result += modelElement.path;
+        var result = this.determineFolderPath( modelElement.parentContainer );
 
-        return result;
+        return result.append( files.makePath( modelElement.path ) );
     }
 
     /**
      * Determines the file for the root package.
      * @return {*} The name of the file for the root package.
      */
-    public determineRootPackageFile() : string {
-        return "RootPackage.json";
+    public determineRootPackageFilePath() : files.IPath {
+        return files.makePath( "RootPackage.json" );
     }
 
     /**
      * Determines the folder of the root package.
      * @return {*} The full path of the folder for the root package.
      */
-    public determineRootPackageFolder() : string {
+    public determineRootPackageFolderPath() : files.IPath {
         return this._rootFolder;
     }
 
     /** The root of the folder structure to read and write. */
-    private _rootFolder : string;
+    private _rootFolder : files.IPath;
 
 }
 
@@ -108,32 +106,33 @@ class JsonFilePersistentStoreCreator
         modelElement : Element
     ) : promises.IPromise<Element> {
 
-        var result = promises.makePromise<Element>();
-
         // serialize
         var json : any = modelElement.toJson( elements.EJsonDetailLevel.Attributes|elements.EJsonDetailLevel.ParentIdentity );
+        var jsonStr = JSON.stringify( json, null, 2 );
 
         // determine the folder
-        var folder = this._folderHierarchy.determineFolder( modelElement );
-        var file = folder + "/" + this._folderHierarchy.determineFile( modelElement );
+        var folderPath = this._folderHierarchy.determineFolderPath( modelElement );
+        var filePath = folderPath.append( this._folderHierarchy.determineFilePath( modelElement ) );
 
-        var writeJson = function( value : values.ENothing ) {
-            files.writeWholeFile(
-                file,
-                JSON.stringify( json, null, 2 )
-            ).then (
-                function( value : values.ENothing ) {
-                    result.fulfill( modelElement );
-                },
-                function( reason : any ) {
-                    result.reject( "Failed to write JSON file. " + reason );
-                }
-            );
+        // function that writes the JSON output
+        var writeJson = function( file : files.IFileResource ) {
+            if ( file.isNonexistent ) {
+                return (<files.INonexistentFileResource> file).establishFile( jsonStr );
+            }
+            if ( file.isFile ) {
+                return (<files.IFile> file).writeWholeContents( jsonStr );
+            }
+
+            throw new Error( "Not a file: " + filePath.asString );
         };
 
-        files.establishFolder( folder ).then( writeJson );
+        // function that passes back the created model element
+        var returnModelElement = function( file : files.IFile ) {
+            return modelElement;
+        };
 
-        return result;
+        return filePath.findResource().then_p( writeJson ).then( returnModelElement );
+
     }
 
     /** The logic for determining folder and file names. */
@@ -164,24 +163,26 @@ class JsonFilePersistentStoreReader
 
     public loadRootModelElement() : promises.IPromise<structure.IRootPackage> {
 
-        var result = promises.makePromise<structure.IRootPackage>();
-
         // determine the folder
-        var folder = this._folderHierarchy.determineRootPackageFolder();
-        var file = folder + "/" + this._folderHierarchy.determineRootPackageFile();
+        var folderPath = this._folderHierarchy.determineRootPackageFolderPath();
+        var filePath = folderPath.append( this._folderHierarchy.determineRootPackageFilePath() );
 
-        files.readWholeFile( file ).then(
-            function( contents : string ) {
-                var json = JSON.parse( contents );
-                var rootPkg = structure.makeRootPackage( json.uuid );
-                result.fulfill( rootPkg );
-            },
-            function( reason : any ) {
-                result.reject( "Failed to load root package. " + reason );
+        // function that reads a whole file
+        var readWholeFile = function( file : files.IFileResource ) {
+            if ( !file.isFile ) {
+                throw new Error( "Not a file: " + filePath.asString );
             }
-        );
 
-        return result;
+            return (<files.IFile> file).readWholeContents();
+        };
+
+        // function that parses the JSON in a file
+        var parseJson = function( jsonStr : string ) {
+            var json = JSON.parse( jsonStr );
+            return structure.makeRootPackage( json.uuid );
+        };
+
+        return filePath.findResource().then_p( readWholeFile ).then( parseJson );
 
     }
 
@@ -244,11 +245,22 @@ class JsonFilePersistentStoreDeleter
         modelElement : Element
     ) : promises.IPromise<Element> {
 
-        var result = promises.makePromise<Element>();
+        // determine the folder
+        var folderPath = this._folderHierarchy.determineFolderPath( modelElement );
 
-        // TBD
+        // function that removes a folder
+        var removeFolder = function( folder : files.IFileResource ) {
+            return folder.remove();
+        };
 
-        return result;
+        // function that passes back the deleted model element
+        var returnModelElement = function( folder : files.IFileResource ) {
+            return modelElement;
+        };
+
+        // delete it recursively
+        return folderPath.findResource().then_p( removeFolder ).then( returnModelElement );
+
     }
 
     /** The logic for determining folder and file names. */
