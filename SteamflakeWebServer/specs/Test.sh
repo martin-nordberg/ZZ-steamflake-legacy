@@ -13,7 +13,7 @@ cp platform_node.js platform.js
 popd >/dev/null
 
 # Kill any remnants of prior run
-rm -r /tmp/steamflake
+rm -rf /tmp/steamflake
 
 # Run Jasmine on all specs
 jasmine-node --verbose scripts/SteamflakeWebServer/specs

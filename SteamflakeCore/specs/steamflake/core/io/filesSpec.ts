@@ -22,6 +22,14 @@ describe( "Files", function() {
 
         } );
 
+        it( "Removes double dots", function () {
+
+            var path = files.makePath( "/tmp/nowhere/../somewhere/../anywhere/stuff.txt" );
+
+            expect( path.asString ).toEqual( "/tmp/anywhere/stuff.txt" );
+
+        } );
+
         it( "Finds the parent of an absolute path", function () {
 
             var path = files.makePath( "/tmp/nowhere/stuff.txt" );

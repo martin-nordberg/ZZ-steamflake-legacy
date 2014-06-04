@@ -557,9 +557,16 @@ class Path
         // TBD: convert \ to /
         // TBD: exception for bad chars
 
+        // remove unneeded double dots
+        var doubleDotsRegex = /\/[^\/]+\/\.\.\//;
+        while ( doubleDotsRegex.test( pathStr ) ) {
+            pathStr = pathStr.replace( doubleDotsRegex, "/" )
+        }
+
         this._pathStr = pathStr;
     }
 
+    /** This path converted to a string. */
     public get asString() {
         return this._pathStr;
     }
@@ -577,6 +584,7 @@ class Path
         return new Path( this.asString + "/" + subPath.asString );
     }
 
+    /** An array containing the individual elements of this path. */
     public get elements() {
         return this._pathStr.split( "/" );
     }
@@ -623,6 +631,7 @@ class Path
         return result;
     }
 
+    /** True if the path is an absolute path. */
     public get isAbsolute() {
         return this._pathStr.charAt(0) === '/';
     }
