@@ -189,6 +189,13 @@ class Promise<T1>
 
     }
 
+    /**
+     * Adds a pair of completion callbacks to this promise.
+     * NOTE: Typescript type system does not really handle the Promises/A+ model faithfully. Really want
+     *       just one "then" with an onFulfilled parameter that can return either a value or a promise.
+     * @param onFulfilled Function to be called when the promise is fulfilled (returns a promise to be resolved).
+     * @param onRejected Function to be called when the promise is rejected.
+     */
     public then_p<T2>(
         onFulfilled: ( value : T1 ) => IPromise<T2>,
         onRejected?: ( reason: any ) => any
