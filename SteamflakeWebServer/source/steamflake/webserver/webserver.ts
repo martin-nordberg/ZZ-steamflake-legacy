@@ -103,9 +103,33 @@ class SteamflakeWebServer
      * Creates a sample model for experimentation.
      */
     private buildModel() {
-        var rootElement = structure.makeRootPackage( uuids.makeUuid() );
+        var rootPackage = structure.makeRootPackage( uuids.makeUuid() );
+         var steamflakeNamespace = rootPackage.makeNamespace( uuids.makeUuid(), {name:"steamflake", summary:"Steamflake"} );
+          var languageNamespace = steamflakeNamespace.makeNamespace( uuids.makeUuid(), {name:"language", summary:"Steamflake Language"} );
+           var metamodelNamespace = languageNamespace.makeNamespace( uuids.makeUuid(), {name:"metamodel", summary:"Steamflake Language Metamodel"} );
+            var commandsModule = metamodelNamespace.makeModule( uuids.makeUuid(), {name:"commands", summary:"L-Zero Language Metamodel Commands", version:"0.1"} );
 
-        this._store.creator.createModelElement( rootElement );
+//        var foundationcommandsPackage = commandsModule.addPackage( uuids.makeUuid(), {name:"foundationcommands", summary:"L-Zero Language Metamodel Foundation Commands", isExported:true} );
+//        var structurecommandsPackage = commandsModule.addPackage( uuids.makeUuid(), {name:"structurecommands", summary:"L-Zero Language Metamodel Structure Commands", isExported:true} );
+//        var elementsModule = metamodelNamespace.addModule( uuids.makeUuid(), {name:"elements", summary:"L-Zero Language Metamodel Elements", version:"0.1"} );
+//        var foundationPackage = elementsModule.addPackage( uuids.makeUuid(), {name:"foundation", summary:"L-Zero Language Metamodel Foundation Elements", isExported:true} );
+//        var codeElementClass = foundationPackage.addClass( uuids.makeUuid(), {name:"CodeElement", summary:"Top-level code element", isExported:true} );
+//        var structurePackage = elementsModule.addPackage( uuids.makeUuid(), {name:"structure", summary:"L-Zero Language Metamodel Structure Elements", isExported:true} );
+//        var persistenceModule = metamodelNamespace.addModule( uuids.makeUuid(), {name:"persistence", summary:"L-Zero Language Metamodel Persistence", version:"0.1"} );
+//        var servicesModule = metamodelNamespace.addModule( uuids.makeUuid(), {name:"services", summary:"L-Zero Language Metamodel Services", version:"0.1"} );
+//        var collectionsNamespace = languageNamespace.addNamespace( uuids.makeUuid(), {name:"collections", summary:"L-Zero Language Collections"} );
+//        var utilitiesNamespace = steamflakeNamespace.makeNamespace( uuids.makeUuid(), {name:"utilities", summary:"L-Zero Utilities"} );
+//        var concurrencyModule = utilitiesNamespace.addModule( uuids.makeUuid(), {name:"concurrency", summary:"Concurrency", version:"0.1"} );
+//        var tasksPackage = concurrencyModule.addPackage( uuids.makeUuid(), {name:"tasks", summary:"Concurrent Task Utilities", isExported:true} );
+//        var tasksimplementationPackage = tasksPackage.addPackage( uuids.makeUuid(), {name:"tasksimplementation", summary:"Concurrent Task Utilities Implementation", isExported:false} );
+//        var synchronizationPackage = concurrencyModule.addPackage( uuids.makeUuid(), {name:"synchronization", summary:"Concurrent Task Synchronization Utilities", isExported:true} );
+//        var regularexpressionsModule = utilitiesNamespace.addModule( uuids.makeUuid(), {name:"regularexpressions", summary:"Regular Expressions", version:"0.1"} );
+
+        this._store.creator.createModelElement( rootPackage )
+            .then_p( function( modelElement : elements.IModelElement ) { console.log( 'steamflake' ); return this._store.creator.createModelElement( steamflakeNamespace ); } )
+            .then_p( function( modelElement : elements.IModelElement ) { console.log( 'language' ); return this._store.creator.createModelElement( languageNamespace ); } )
+            .then_p( function( modelElement : elements.IModelElement ) { console.log( 'metamodel' ); return this._store.creator.createModelElement( metamodelNamespace ); } )
+            .then_p( function( modelElement : elements.IModelElement ) { console.log( 'commands' ); return this._store.creator.createModelElement( commandsModule ); } );
     }
 
     /**
