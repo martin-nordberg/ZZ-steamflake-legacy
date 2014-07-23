@@ -10,12 +10,7 @@ import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.Resource;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher;
 
 /**
  * Created by mnordberg on 7/21/14.
@@ -28,52 +23,43 @@ public class WebServer {
         Server server = new Server();
 
         // configure the server connection
-        ServerConnector connector = new ServerConnector(server);
-        connector.setPort(8080);
-        server.setConnectors(new Connector[] { connector } );
+        ServerConnector connector = new ServerConnector( server );
+        connector.setPort( 8080 );
+        server.setConnectors( new Connector[]{ connector } );
 
 
         // set the context for static content
-        ContextHandler context0 = new ContextHandler();
-        context0.setContextPath("/steamflake");
+        ContextHandler fileServerContext = new ContextHandler();
+        fileServerContext.setContextPath( "/steamflake" );
 
         // set the source for static content
-        ResourceHandler rh0 = new ResourceHandler();
-        rh0.setBaseResource(Resource.newResource("/home/mnordberg/Workspace/steamflake/SteamflakeWebClient"));
-        context0.setHandler(rh0);
+        ResourceHandler fileResourceHandler = new ResourceHandler();
+        fileResourceHandler.setBaseResource( Resource.newResource( "/home/mnordberg/Workspace/steamflake/SteamflakeWebClient" ) );
+        fileServerContext.setHandler( fileResourceHandler );
 
 
         // set the context for dynamic content
-        ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
-        context.setContextPath("/steamflakedata");
+        ServletContextHandler webServiceContext = new ServletContextHandler( ServletContextHandler.SESSIONS );
+        webServiceContext.setContextPath( "/steamflakedata" );
 
-        // add a servlet for the dynamic content -- TBD: RESTEasy Servlet here
-        context.addServlet(new ServletHolder(new HelloServlet()), "/*");
+        // add a RESTEasy servlet for the dynamic content
+        ServletHolder servletHolder = new ServletHolder( new HttpServletDispatcher() );
+        servletHolder.setInitParameter( "javax.ws.rs.Application", "org.steamflake.webserver.ApplicationServices" );
+
+        webServiceContext.addServlet( servletHolder, "/*" );
 
 
         // combine the two contexts
         ContextHandlerCollection contexts = new ContextHandlerCollection();
-        contexts.setHandlers(new Handler[] {context0, context});
+        contexts.setHandlers( new Handler[]{ fileServerContext, webServiceContext } );
 
         // configure the server for the two contexts
-        server.setHandler(contexts);
+        server.setHandler( contexts );
 
         // start the server
         server.start();
         server.join();
 
-    }
-
-    @SuppressWarnings("serial")
-    public static class HelloServlet extends HttpServlet
-    {
-        @Override
-        protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
-        {
-            response.setContentType("text/html");
-            response.setStatus(HttpServletResponse.SC_OK);
-            response.getWriter().println("<h1>Hello SimpleServlet</h1>");
-        }
     }
 
 }

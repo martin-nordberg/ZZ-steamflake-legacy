@@ -9,7 +9,7 @@ import java.util.logging.Logger;
  */
 public class Application {
 
-    public static void main(String[] args) throws Exception {
+    public static void main( String[] args ) throws Exception {
         Application.updateDatabaseSchema();
 
         new WebServer().run();
@@ -20,22 +20,19 @@ public class Application {
      */
     private static void updateDatabaseSchema() {
 
-        LOGGER.info("Updating database schema...");
+        LOGGER.info( "Updating database schema..." );
 
         // Create the Flyway instance
         Flyway flyway = new Flyway();
 
         // Point it to the database
-        flyway.setDataSource(
-                "jdbc:h2:./target/example/database",
-                "sa",
-                "sa" );
+        flyway.setDataSource( "jdbc:h2:./target/example/database", "sa", "sa" );
 
         // Start the migration
         flyway.migrate();
 
     }
 
-    private static final Logger LOGGER = Logger.getLogger(Application.class.getName());
+    private static final Logger LOGGER = Logger.getLogger( Application.class.getName() );
 
 }
