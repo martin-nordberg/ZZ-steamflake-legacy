@@ -11,6 +11,9 @@ public class ApplicationServices
         // register RESTful services
         singletons.add( new HelloService() );
 
+        // register filters
+        singletons.add( new CacheControlFilter() );
+
         // register mappers
         singletons.add( new StuffMapper() );
     }

@@ -34,6 +34,7 @@ public class WebServer {
 
         // set the source for static content
         ResourceHandler fileResourceHandler = new ResourceHandler();
+        fileResourceHandler.setCacheControl( "max-age=3600,public" );
         fileResourceHandler.setBaseResource( Resource.newResource( "/home/mnordberg/Workspace/steamflake/SteamflakeWebClient" ) );
         fileServerContext.setHandler( fileResourceHandler );
 
