@@ -13,7 +13,7 @@ import org.eclipse.jetty.util.resource.Resource;
 import org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher;
 
 /**
- * Created by mnordberg on 7/21/14.
+ * Jetty web server initial configuration and start up.
  */
 public class WebServer {
 

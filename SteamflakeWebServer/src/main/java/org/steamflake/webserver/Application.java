@@ -5,7 +5,7 @@ import org.flywaydb.core.Flyway;
 import java.util.logging.Logger;
 
 /**
- * Created by mnordberg on 7/21/14.
+ * Steamflake main program.
  */
 public class Application {
 

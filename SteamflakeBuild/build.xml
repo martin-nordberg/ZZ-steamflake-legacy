@@ -29,7 +29,7 @@
     <property name="tsemplet.source" value="${tsemplet}/source"/>
     <property name="tsemplet.specs" value="${tsemplet}/specs"/>
 
-    <property name="webserver" value="../SteamflakeWebServer"/>
+    <property name="webserver" value="../SteamflakeNodeWebServer"/>
     <property name="webserver.scripts" value="${webserver}/scripts"/>
     <property name="webserver.source" value="${webserver}/source"/>
     <property name="webserver.specs" value="${webserver}/specs"/>

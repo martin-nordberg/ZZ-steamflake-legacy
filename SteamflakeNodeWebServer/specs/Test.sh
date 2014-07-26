@@ -16,9 +16,9 @@ popd >/dev/null
 rm -rf /tmp/steamflake
 
 # Run Jasmine on all specs
-jasmine-node --verbose scripts/SteamflakeWebServer/specs
+jasmine-node --verbose scripts/SteamflakeNodeWebServer/specs
 
 
-echo "Last test: $(date)" > scripts/SteamflakeWebServer/specs/testdate.txt
+echo "Last test: $(date)" > scripts/SteamflakeNodeWebServer/specs/testdate.txt
 
 

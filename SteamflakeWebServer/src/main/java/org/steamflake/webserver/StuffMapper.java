@@ -14,7 +14,7 @@ import java.lang.reflect.Type;
 import java.util.logging.Logger;
 
 /**
- * Created by mnordberg on 7/21/14.
+ * Hello world domain entity JSON mapper.
  */
 @Provider
 public class StuffMapper

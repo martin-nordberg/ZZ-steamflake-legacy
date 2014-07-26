@@ -1,7 +1,7 @@
 package org.steamflake.webserver;
 
 /**
- * Created by mnordberg on 7/21/14.
+ * Sample domain entity.
  */
 public class Stuff {
 

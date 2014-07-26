@@ -7,7 +7,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
 /**
- * Created by mnordberg on 7/21/14.
+ * Simple hello world REST service.
  */
 @Path("/hello")
 public class HelloService {

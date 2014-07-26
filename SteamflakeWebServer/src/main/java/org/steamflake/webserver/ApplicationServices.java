@@ -4,6 +4,9 @@ import javax.ws.rs.core.Application;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Registry of services for RESTEasy.
+ */
 public class ApplicationServices
     extends Application {
 
