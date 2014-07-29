@@ -1,0 +1,8 @@
+rootProject.name = 'SteamflakeServer'
+
+include 'SteamflakePersistence'
+
+include 'SteamflakeMetamodel'
+
+include 'SteamflakeRestServer'
+

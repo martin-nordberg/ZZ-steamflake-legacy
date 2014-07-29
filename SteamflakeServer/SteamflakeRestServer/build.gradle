@@ -1,0 +1,26 @@
+
+buildDir = '../build/SteamflakeRestServer'
+
+dependencies {
+
+    // Other Modules
+    compile project( ':SteamflakePersistence' )
+
+    // Jetty
+    def jettyVersion = '9.2.1.v20140609'
+    compile( group: 'org.eclipse.jetty', name: 'jetty-server', version: jettyVersion )
+    compile( group: 'org.eclipse.jetty', name: 'jetty-servlet', version: jettyVersion )
+
+    // RESTEasy (server only)
+    compile( group: 'org.jboss.resteasy', name: 'resteasy-jaxrs', version: '3.0.8.Final' ) {
+        exclude module: 'org.apache.httpcomponents'
+    }
+
+    // JSON-P
+    compile( group: 'org.glassfish', name: 'javax.json', version: '1.0.4' )
+
+}
+
+
+
+

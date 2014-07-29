@@ -1,0 +1,18 @@
+
+buildDir = '../build/SteamflakePersistence'
+
+dependencies {
+
+    // Other Modules
+    compile project( ':SteamflakeMetamodel' )
+
+    // H2
+    compile( group: 'com.h2database', name: 'h2', version: '1.4.180' )
+
+    // Dalesbred
+    compile( group: 'fi.evident.dalesbred', name: 'dalesbred', version: '0.7.0' )
+
+    // Flyway
+    compile( group: 'org.flywaydb', name: 'flyway-core', version: '3.0' )
+
+}
