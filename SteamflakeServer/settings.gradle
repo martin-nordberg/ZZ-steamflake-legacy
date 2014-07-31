@@ -6,3 +6,5 @@ include 'SteamflakeMetamodel'
 
 include 'SteamflakeRestServer'
 
+include 'SteamflakeUtilities'
+

@@ -12,12 +12,14 @@ dependencies {
     compile( group: 'org.eclipse.jetty', name: 'jetty-servlet', version: jettyVersion )
 
     // RESTEasy (server only)
-    compile( group: 'org.jboss.resteasy', name: 'resteasy-jaxrs', version: '3.0.8.Final' ) {
+    def resteasyVersion = '3.0.8.Final'
+    compile( group: 'org.jboss.resteasy', name: 'resteasy-jaxrs', version: resteasyVersion ) {
         exclude module: 'org.apache.httpcomponents'
     }
 
     // JSON-P
-    compile( group: 'org.glassfish', name: 'javax.json', version: '1.0.4' )
+    def jsonpVersion = '1.0.4'
+    compile( group: 'org.glassfish', name: 'javax.json', version: jsonpVersion )
 
 }
 

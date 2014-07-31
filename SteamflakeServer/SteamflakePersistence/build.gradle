@@ -7,12 +7,15 @@ dependencies {
     compile project( ':SteamflakeMetamodel' )
 
     // H2
-    compile( group: 'com.h2database', name: 'h2', version: '1.4.180' )
+    def h2Version = '1.4.180'
+    compile( group: 'com.h2database', name: 'h2', version: h2Version )
 
     // Dalesbred
-    compile( group: 'fi.evident.dalesbred', name: 'dalesbred', version: '0.7.0' )
+    def dalesbredVersion = '0.7.0'
+    compile( group: 'fi.evident.dalesbred', name: 'dalesbred', version: dalesbredVersion )
 
     // Flyway
-    compile( group: 'org.flywaydb', name: 'flyway-core', version: '3.0' )
+    def flywayVersion = '3.0'
+    compile( group: 'org.flywaydb', name: 'flyway-core', version: flywayVersion )
 
 }

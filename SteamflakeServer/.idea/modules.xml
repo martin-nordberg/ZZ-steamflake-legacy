@@ -6,6 +6,7 @@
       <module fileurl="file://$PROJECT_DIR$/SteamflakePersistence/SteamflakePersistence.iml" filepath="$PROJECT_DIR$/SteamflakePersistence/SteamflakePersistence.iml" />
       <module fileurl="file://$PROJECT_DIR$/SteamflakeRestServer/SteamflakeRestServer.iml" filepath="$PROJECT_DIR$/SteamflakeRestServer/SteamflakeRestServer.iml" />
       <module fileurl="file://$PROJECT_DIR$/SteamflakeServer.iml" filepath="$PROJECT_DIR$/SteamflakeServer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/SteamflakeUtilities/SteamflakeUtilities.iml" filepath="$PROJECT_DIR$/SteamflakeUtilities/SteamflakeUtilities.iml" />
     </modules>
   </component>
 </project>
