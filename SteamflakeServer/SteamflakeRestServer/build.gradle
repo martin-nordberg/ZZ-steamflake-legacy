@@ -22,5 +22,7 @@ dependencies {
 }
 
 
+apply plugin:'application'
 
+mainClassName = "org.steamflake.restserver.Application"
 

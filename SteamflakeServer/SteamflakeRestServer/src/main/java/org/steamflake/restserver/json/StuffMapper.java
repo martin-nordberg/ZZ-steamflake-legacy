@@ -34,7 +34,7 @@ public class StuffMapper
         LOGGER.info( "media type: " + mediaType.getType() );
         LOGGER.info( "media subtype: " + mediaType.getSubtype() );
 
-        boolean result = "org.steamflake.webserver".equals( clazz.getPackage().getName() );
+        boolean result = "org.steamflake.restserver.services".equals( clazz.getPackage().getName() );
         result = result && mediaType.getType().equals( "application" );
         result = result && mediaType.getSubtype().matches( "(vnd\\.steamflake\\.org\\.v1\\..*\\+)?json" );
         return result;
