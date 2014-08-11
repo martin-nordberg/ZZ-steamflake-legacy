@@ -27,10 +27,6 @@
     <orderEntry type="library" exported="" name="Gradle: jaxrs-api-3.0.8.Final" level="project" />
     <orderEntry type="library" exported="" name="Gradle: jboss-annotations-api_1.1_spec-1.0.1.Final" level="project" />
     <orderEntry type="library" exported="" name="Gradle: activation-1.1" level="project" />
-    <orderEntry type="library" exported="" name="Gradle: httpcore-4.2.1" level="project" />
-    <orderEntry type="library" exported="" name="Gradle: commons-logging-1.1.1" level="project" />
-    <orderEntry type="library" exported="" name="Gradle: commons-codec-1.6" level="project" />
-    <orderEntry type="library" exported="" name="Gradle: httpclient-4.2.1" level="project" />
     <orderEntry type="library" exported="" name="Gradle: commons-io-2.1" level="project" />
     <orderEntry type="library" exported="" name="Gradle: jcip-annotations-1.0" level="project" />
     <orderEntry type="library" exported="" name="Gradle: jsr305-3.0.0" level="project" />

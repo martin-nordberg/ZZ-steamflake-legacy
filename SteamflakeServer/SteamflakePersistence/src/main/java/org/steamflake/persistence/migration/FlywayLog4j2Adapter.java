@@ -1,4 +1,4 @@
-package org.steamflake.persistence;
+package org.steamflake.persistence.migration;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

@@ -14,7 +14,7 @@ dependencies {
     // RESTEasy (server only)
     def resteasyVersion = '3.0.8.Final'
     compile( group: 'org.jboss.resteasy', name: 'resteasy-jaxrs', version: resteasyVersion ) {
-        exclude module: 'org.apache.httpcomponents'
+        exclude group: 'org.apache.httpcomponents', module: 'httpclient'
     }
 
     // JSON-P

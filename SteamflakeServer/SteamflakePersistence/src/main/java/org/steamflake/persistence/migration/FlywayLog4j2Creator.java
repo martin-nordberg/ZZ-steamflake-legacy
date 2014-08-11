@@ -1,4 +1,4 @@
-package org.steamflake.persistence;
+package org.steamflake.persistence.migration;
 
 import org.flywaydb.core.internal.util.logging.Log;
 import org.flywaydb.core.internal.util.logging.LogCreator;
