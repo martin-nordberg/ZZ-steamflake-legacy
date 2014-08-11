@@ -7,7 +7,7 @@ dependencies {
     compile project( ':SteamflakeMetamodel' )
 
     // H2
-    def h2Version = '1.4.180'
+    def h2Version = '1.4.181'
     compile( group: 'com.h2database', name: 'h2', version: h2Version )
 
     // Dalesbred

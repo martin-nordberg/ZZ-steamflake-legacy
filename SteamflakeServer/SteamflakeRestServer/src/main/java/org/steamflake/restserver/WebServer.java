@@ -1,5 +1,7 @@
 package org.steamflake.restserver;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
@@ -12,8 +14,9 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.Resource;
 import org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher;
 
+import javax.servlet.DispatcherType;
 import java.net.MalformedURLException;
-import java.util.logging.Logger;
+import java.util.EnumSet;
 
 /**
  * Jetty web server initial configuration and start up.
@@ -26,6 +29,9 @@ public class WebServer {
      */
     public static synchronized void run() throws Exception {
 
+        // capture Jetty logging
+        org.eclipse.jetty.util.log.Log.setLog( new JettyToLog4J2Logger( "Jetty" ) );
+
         // build the app server
         WebServer.appServer = makeAppServer();
 
@@ -33,14 +39,16 @@ public class WebServer {
         WebServer.adminServer = makeAdminServer();
 
         // start the servers
+        LOG.info( "Starting application server ..." );
         WebServer.appServer.start();
+        LOG.info( "Starting admin server ..." );
         WebServer.adminServer.start();
 
-        // graceful shut down
+        // set up graceful shut down
         WebServer.appServer.setStopTimeout( 5000 );
         WebServer.adminServer.setStopTimeout( 5000 );
 
-        // hang out until app server is stopped
+        // hang out until the app server is stopped
         WebServer.appServer.join();
 
     }
@@ -50,14 +58,14 @@ public class WebServer {
      */
     public static void stop() {
 
-        LOGGER.info( "Preparing to shut down ..." );
+        LOG.info( "Preparing to shut down ..." );
 
         Runnable stopAppServer = () -> {
             try {
                 Thread.sleep( 1000 );
                 WebServer.appServer.stop();
             } catch ( Exception e ) {
-                LOGGER.severe( "Failed shutdown." + e.getMessage() );
+                LOG.error( "Failed shutdown.", e );
             }
         };
 
@@ -66,7 +74,7 @@ public class WebServer {
                 Thread.sleep( 1000 );
                 WebServer.adminServer.stop();
             } catch ( Exception e ) {
-                LOGGER.severe( "Failed shutdown." + e.getMessage() );
+                LOG.error( "Failed shutdown.", e );
             }
         };
 
@@ -146,6 +154,7 @@ public class WebServer {
         ServletHolder servletHolder = new ServletHolder( new ShutdownServlet() );
 
         adminServerContext.addServlet( servletHolder, "/exit" );
+        adminServerContext.addFilter( ThreadNameFilter.class, "/*", EnumSet.of( DispatcherType.REQUEST ) );
 
         return adminServerContext;
     }
@@ -160,6 +169,7 @@ public class WebServer {
         servletHolder.setInitParameter( "javax.ws.rs.Application", "org.steamflake.restserver.ApplicationServices" );
 
         webServiceContext.addServlet( servletHolder, "/*" );
+        webServiceContext.addFilter( ThreadNameFilter.class, "/*", EnumSet.of( DispatcherType.REQUEST ) );
 
         return webServiceContext;
     }
@@ -178,7 +188,7 @@ public class WebServer {
         return fileServerContext;
     }
 
-    private static final Logger LOGGER = Logger.getLogger( WebServer.class.getName() );
+    private static final Logger LOG = LogManager.getLogger();
 
     /** App server for static content and REST web services. */
     private static Server appServer;

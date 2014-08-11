@@ -1,2 +1,9 @@
 
 buildDir = '../build/SteamflakeMetamodel'
+
+dependencies {
+
+    // Other Modules
+    compile project( ':SteamflakeUtilities' )
+
+}

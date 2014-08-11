@@ -1,5 +1,8 @@
+
 package org.steamflake.restserver.json;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.steamflake.restserver.services.Stuff;
 
 import javax.json.Json;
@@ -13,7 +16,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.util.logging.Logger;
 
 /**
  * Hello world domain entity JSON mapper.
@@ -30,9 +32,9 @@ public class StuffMapper
     @Override
     public boolean isWriteable( Class<?> clazz, Type type, Annotation[] annotations, MediaType mediaType ) {
 
-        LOGGER.info( "class: " + clazz.getName() );
-        LOGGER.info( "media type: " + mediaType.getType() );
-        LOGGER.info( "media subtype: " + mediaType.getSubtype() );
+        LOG.info( "class: " + clazz.getName() );
+        LOG.info( "media type: " + mediaType.getType() );
+        LOG.info( "media subtype: " + mediaType.getSubtype() );
 
         boolean result = "org.steamflake.restserver.services".equals( clazz.getPackage().getName() );
         result = result && mediaType.getType().equals( "application" );
@@ -50,5 +52,5 @@ public class StuffMapper
         }
     }
 
-    private static final Logger LOGGER = Logger.getLogger( StuffMapper.class.getName() );
+    private static final Logger LOG = LogManager.getLogger();
 }
