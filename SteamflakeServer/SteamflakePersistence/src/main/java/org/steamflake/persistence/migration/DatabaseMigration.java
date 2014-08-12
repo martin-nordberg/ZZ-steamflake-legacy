@@ -5,8 +5,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.internal.util.logging.LogFactory;
-import org.steamflake.persistence.h2database.H2DataSource;
-import org.steamflake.utilities.configuration.Configuration;
+
+import javax.sql.DataSource;
 
 /**
  * Static utility class to update the database schema.
@@ -16,7 +16,7 @@ public class DatabaseMigration {
     /**
      * Updates the database schema to the latest version.
      */
-    public static void updateDatabaseSchema() {
+    public static void updateDatabaseSchema( DataSource dataSource ) {
 
         LOG.info( "Updating database schema..." );
 
@@ -27,8 +27,7 @@ public class DatabaseMigration {
         Flyway flyway = new Flyway();
 
         // point it to the database
-        Configuration config = new Configuration( H2DataSource.class );
-        flyway.setDataSource( config.readString( "url" ), config.readString( "username" ), config.readString( "password" ) );
+        flyway.setDataSource( dataSource );
 
         // start the migration
         flyway.migrate();

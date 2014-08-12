@@ -152,8 +152,14 @@ public class WebServer {
         // add a shutdown servlet for the dynamic content
         // TBD: Any other stuff needed for admin ...
         ServletHolder servletHolder = new ServletHolder( new ShutdownServlet() );
-
         adminServerContext.addServlet( servletHolder, "/exit" );
+
+        // add a raw H2 SQL console
+        servletHolder = new ServletHolder( new org.h2.server.web.WebServlet() );
+        servletHolder.setInitParameter( "webAllowOthers", "true" );
+        adminServerContext.addServlet( servletHolder, "/h2console/*" );
+
+        // rename request threads for better logging
         adminServerContext.addFilter( ThreadNameFilter.class, "/*", EnumSet.of( DispatcherType.REQUEST ) );
 
         return adminServerContext;
@@ -167,8 +173,9 @@ public class WebServer {
         // add a RESTEasy servlet for the dynamic content
         ServletHolder servletHolder = new ServletHolder( new HttpServletDispatcher() );
         servletHolder.setInitParameter( "javax.ws.rs.Application", "org.steamflake.restserver.ApplicationServices" );
-
         webServiceContext.addServlet( servletHolder, "/*" );
+
+        // rename request threads for better logging
         webServiceContext.addFilter( ThreadNameFilter.class, "/*", EnumSet.of( DispatcherType.REQUEST ) );
 
         return webServiceContext;

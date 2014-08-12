@@ -1,8 +1,9 @@
 package org.steamflake.metamodel;
 
 /**
- * Created by mnordberg on 7/27/14.
+ * Interface to a namespace.
  */
-public interface INamespace {
+public interface INamespace
+    extends IAbstractNamespace {
 
 }

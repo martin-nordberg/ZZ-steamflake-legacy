@@ -2,7 +2,6 @@
 package org.steamflake.restserver;
 
 import org.steamflake.persistence.h2database.H2DataSource;
-import org.steamflake.persistence.migration.DatabaseMigration;
 
 /**
  * Steamflake main program.
@@ -10,8 +9,6 @@ import org.steamflake.persistence.migration.DatabaseMigration;
 public class Application {
 
     public static void main( String[] args ) throws Exception {
-
-        DatabaseMigration.updateDatabaseSchema();
 
         try( H2DataSource dataSource = new H2DataSource() ) {
 

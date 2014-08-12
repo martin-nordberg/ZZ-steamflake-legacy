@@ -2,6 +2,7 @@ package org.steamflake.persistence.h2database;
 
 import org.apache.logging.log4j.LogManager;
 import org.h2.jdbcx.JdbcConnectionPool;
+import org.steamflake.persistence.migration.DatabaseMigration;
 import org.steamflake.utilities.configuration.Configuration;
 
 import javax.sql.DataSource;
@@ -25,6 +26,8 @@ public class H2DataSource
         LOG.info( "Opening data source: URL = {}, User Name = {}", url, username );
 
         this.connectionPool = JdbcConnectionPool.create( url, username, config.readString( "password" ) );
+
+        DatabaseMigration.updateDatabaseSchema( this );
     }
 
     @Override
