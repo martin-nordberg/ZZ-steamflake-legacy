@@ -15,8 +15,11 @@ public class NamespaceDao {
 
     public void createNamespace( INamespace namespace ) {
         this.database.withVoidTransaction( tx -> {
-            this.database.update( "INSERT INTO MODEL_ELEMENT (UUID) VALUES (?)", namespace.getUuid() );
-            this.database.update( "INSERT INTO NAMESPACE (UUID, NAME, SUMMARY) VALUES (?, ?, ?)", namespace.getUuid(), namespace.getName(), namespace.getSummary() );
+            this.database.update( "INSERT INTO MODEL_ELEMENT (UUID, SUMMARY) VALUES (?, ?)", namespace.getUuid(), namespace.getSummary() );
+            this.database.update( "INSERT INTO CONTAINER_ELEMENT (UUID) VALUES (?)", namespace.getUuid() );
+            this.database.update( "INSERT INTO NAMED_ELEMENT (UUID, NAME) VALUES (?, ?)", namespace.getUuid(), namespace.getName() );
+            this.database.update( "INSERT INTO NAMED_CONTAINER_ELEMENT (UUID) VALUES (?)", namespace.getUuid() );
+            this.database.update( "INSERT INTO NAMESPACE (UUID) VALUES (?)", namespace.getUuid() );
         } );
     }
 
@@ -25,7 +28,7 @@ public class NamespaceDao {
     }
 
     public INamespace findNamespaceByUuid( String uuid ) {
-        return this.database.findUnique( Namespace.class, "SELECT UUID, NAME, SUMMARY FROM NAMESPACE WHERE UUID = ?", uuid );
+        return this.database.findUnique( Namespace.class, "SELECT UUID, NAME, SUMMARY FROM V_NAMESPACE WHERE UUID = ?", uuid );
     }
 
     private final Database database;
