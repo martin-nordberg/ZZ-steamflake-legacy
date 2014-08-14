@@ -34,6 +34,6 @@ public class DatabaseMigration {
 
     }
 
-    private static final Logger LOG = LogManager.getLogger( DatabaseMigration.class );
+    private static final Logger LOG = LogManager.getLogger();
 
 }

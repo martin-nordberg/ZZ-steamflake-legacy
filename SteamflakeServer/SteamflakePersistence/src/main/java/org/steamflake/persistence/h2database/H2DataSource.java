@@ -81,7 +81,7 @@ public class H2DataSource
         return this.connectionPool.isWrapperFor( iface );
     }
 
-    private static final org.apache.logging.log4j.Logger LOG = LogManager.getLogger( H2DataSource.class );
+    private static final org.apache.logging.log4j.Logger LOG = LogManager.getLogger();
 
     private final JdbcConnectionPool connectionPool;
 

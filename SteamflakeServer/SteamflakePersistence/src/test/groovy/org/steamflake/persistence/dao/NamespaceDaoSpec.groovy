@@ -27,21 +27,21 @@ class NamespaceDaoSpec extends Specification {
     def "A namespace can be created, read, and deleted" () {
 
         given: "a namespace to be saved"
-        def namespace = new Namespace( Uuids.makeUuid(), "example", "a testing sample namespace" )
+        def namespace = new Namespace( Uuids.makeUuid().toString(), "example", "a testing sample namespace" )
 
         when: "the namespace is created"
         dao.createNamespace( namespace )
 
         and: "retrieved by UUID"
-        def namespace2 = dao.findNamespaceByUuid( namespace.uuid )
+        def namespace2 = dao.findNamespaceByUuid( namespace.id )
 
         then: "it matches the original"
-        namespace2.uuid == namespace.uuid
+        namespace2.id == namespace.id
         namespace2.name == namespace.name
         namespace2.summary == namespace.summary
 
         and: "it can be deleted"
-        dao.deleteNamespace( namespace.uuid )
+        dao.deleteNamespace( namespace.id )
 
     }
 

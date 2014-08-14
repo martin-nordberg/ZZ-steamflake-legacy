@@ -1,9 +1,11 @@
 package org.steamflake.metamodel.impl;
 
 import org.steamflake.metamodel.INamespace;
+import org.steamflake.utilities.uuids.Uuids;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.UUID;
 
 /**
  * Namespace implementation.
@@ -22,7 +24,7 @@ public class Namespace
         String name,
         String summary
     ) {
-        this.uuid = uuid;
+        this.uuid = UUID.fromString( uuid );
         this.name = name;
         this.summary = summary;
     }
@@ -41,7 +43,7 @@ public class Namespace
 
     @Nonnull
     @Override
-    public String getUuid() {
+    public UUID getId() {
         return this.uuid;
     }
 
@@ -49,6 +51,6 @@ public class Namespace
 
     private final String summary;
 
-    private final String uuid;
+    private final UUID uuid;
 
 }
