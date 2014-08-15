@@ -116,9 +116,9 @@ export interface INamespace
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * A root package represents the nameless top level package..
+ * A root namespace represents the nameless top level namespace..
  */
-export interface IRootPackage
+export interface IRootNamespace
     extends IAbstractNamespace, elements.IRootContainerElement
 {
 
@@ -245,7 +245,7 @@ export interface IEnumeration
  * A module is a deployable package.
  */
 export interface IModule
-extends IAbstractPackage
+    extends IAbstractPackage
 {
 
     /** The version of this module. */
@@ -536,19 +536,19 @@ export class Namespace
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * A root package represents the nameless top level package..
+ * A root namespace represents the nameless top level namespace.
  */
-export class RootPackage
+export class RootNamespace
     extends AbstractNamespace
-    implements IRootPackage
+    implements IRootNamespace
 {
 
     /**
-     * Constructs a new root package.
-     * @param uuid The unique ID of this root package.
+     * Constructs a new root namespace.
+     * @param uuid The unique ID of this root namespace.
      */
     constructor( uuid : string ) {
-        super( this, "RootPackage", uuid, "$", "(Top level root package)" );
+        super( this, "RootNamespace", uuid, "$", "(Top level root namespace)" );
     }
 
 }
@@ -926,8 +926,8 @@ export class Package
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export function makeRootPackage( uuid : string ) : IRootPackage {
-    return new RootPackage( uuid );
+export function makeRootNamespace( uuid : string ) : IRootNamespace {
+    return new RootNamespace( uuid );
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -186,7 +186,7 @@ export class ModelElement
     /**
      * @param level The level of detail to include in the JSON output.
      * @param recursingTypeNames Optionally the quoted type names for types to include children of in recursive output.
-     *                       (e.g. "'RootPackage','Namespace'"). Null means recurse for all types (if flagged).
+     *                       (e.g. "'RootNamespace','Namespace'"). Null means recurse for all types (if flagged).
      * @returns {*} An object representing this code element for use in JSON data transfers.
      */
     public toJson( level : elements.EJsonDetailLevel, recursingTypeNames : string = null ) : any {

@@ -32,7 +32,7 @@ describe( "MongoDB Persistence", function() {
 
     it( "Creates, reads, and deletes a root model element", function( done : ()=>void ) {
 
-        var rootElement = structure.makeRootPackage( uuids.makeUuid() );
+        var rootElement = structure.makeRootNamespace( uuids.makeUuid() );
 
         var onError = function( msg : string ) {
             console.log( "FAILED: ", msg );
@@ -45,17 +45,17 @@ describe( "MongoDB Persistence", function() {
             done();
         };
 
-        var onDeleted = function( modelElement : structure.IRootPackage ) {
+        var onDeleted = function( modelElement : structure.IRootNamespace ) {
             expect( modelElement ).toBe( rootElement );
             store.disconnect().then( onDisconnected, onError );
         }
 
-        var onRead = function( modelElement : structure.IRootPackage ) {
+        var onRead = function( modelElement : structure.IRootNamespace ) {
             expect( modelElement ).toEqual( rootElement );
             store.deleter.deleteModelElement( modelElement ).then( onDeleted, onError );
         }
 
-        var onCreated = function( modelElement : structure.IRootPackage ) {
+        var onCreated = function( modelElement : structure.IRootNamespace ) {
             expect( modelElement ).toBe( rootElement );
             store.reader.loadRootModelElement().then( onRead, onError );
         }
@@ -73,7 +73,7 @@ describe( "MongoDB Persistence", function() {
 
     it( "Creates, updates, and deletes a model element", function( done : ()=>void ) {
 
-        var rootElement = structure.makeRootPackage( uuids.makeUuid() );
+        var rootElement = structure.makeRootNamespace( uuids.makeUuid() );
         var sampleElement = rootElement.makeNamespace( uuids.makeUuid(), { name: "TestNamespace", summary: "Namespace created for testing only" } );
 
         var onError = function( msg : string ) {

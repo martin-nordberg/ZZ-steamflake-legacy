@@ -53,7 +53,7 @@ class JsonFileFolderHierarchy {
         modelElement : elements.IModelElement
     ) : files.IPath {
 
-        if ( modelElement.typeName === "RootPackage" ) {
+        if ( modelElement.typeName === "RootNamespace" ) {
             return this._rootFolder;
         }
 
@@ -66,15 +66,15 @@ class JsonFileFolderHierarchy {
      * Determines the file for the root package.
      * @return {*} The name of the file for the root package.
      */
-    public determineRootPackageFilePath() : files.IPath {
-        return files.makePath( "RootPackage.json" );
+    public determineRootNamespaceFilePath() : files.IPath {
+        return files.makePath( "RootNamespace.json" );
     }
 
     /**
      * Determines the folder of the root package.
      * @return {*} The full path of the folder for the root package.
      */
-    public determineRootPackageFolderPath() : files.IPath {
+    public determineRootNamespaceFolderPath() : files.IPath {
         return this._rootFolder;
     }
 
@@ -144,7 +144,7 @@ class JsonFilePersistentStoreCreator
 
 /** JSON file reader. */
 class JsonFilePersistentStoreReader
-    implements persistence.IPersistentStoreReader<structure.IRootPackage>
+    implements persistence.IPersistentStoreReader<structure.IRootNamespace>
 {
 
     /**
@@ -161,11 +161,11 @@ class JsonFilePersistentStoreReader
         throw Error( "TBD - not yet implemented" );
     }
 
-    public loadRootModelElement() : promises.IPromise<structure.IRootPackage> {
+    public loadRootModelElement() : promises.IPromise<structure.IRootNamespace> {
 
         // determine the folder
-        var folderPath = this._folderHierarchy.determineRootPackageFolderPath();
-        var filePath = folderPath.append( this._folderHierarchy.determineRootPackageFilePath() );
+        var folderPath = this._folderHierarchy.determineRootNamespaceFolderPath();
+        var filePath = folderPath.append( this._folderHierarchy.determineRootNamespaceFilePath() );
 
         // function that reads a whole file
         var readWholeFile = function( file : files.IFileResource ) {
@@ -179,7 +179,7 @@ class JsonFilePersistentStoreReader
         // function that parses the JSON in a file
         var parseJson = function( jsonStr : string ) {
             var json = JSON.parse( jsonStr );
-            return structure.makeRootPackage( json.uuid );
+            return structure.makeRootNamespace( json.uuid );
         };
 
         return filePath.findResource().then_p( readWholeFile ).then( parseJson );
@@ -272,7 +272,7 @@ class JsonFilePersistentStoreDeleter
 
 /** JSON file persistent store. */
 class JsonFilePersistentStore
-    implements persistence.IPersistentStore<structure.IRootPackage>
+    implements persistence.IPersistentStore<structure.IRootNamespace>
 {
 
     /**
@@ -338,7 +338,7 @@ class JsonFilePersistentStore
  */
 export function makeJsonFilePersistentStore(
     rootFolder : string
-) : persistence.IPersistentStore<structure.IRootPackage> {
+) : persistence.IPersistentStore<structure.IRootNamespace> {
     return new JsonFilePersistentStore( rootFolder );
 }
 

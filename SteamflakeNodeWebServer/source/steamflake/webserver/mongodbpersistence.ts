@@ -18,7 +18,7 @@ import mongodb = require( 'mongodb' );
  * Interface to a MongoDB persistent store.
  */
 export interface IMongoDbPersistenceStore
-    extends persistence.IPersistentStore<structure.IRootPackage> {
+    extends persistence.IPersistentStore<structure.IRootNamespace> {
 
     /**
      * Establishes the connection to MongoDB.
@@ -113,7 +113,7 @@ class MongoDbPersistentStoreCreator
 
 /** MongoDB reader. */
 class MongoDbPersistentStoreReader
-    implements persistence.IPersistentStoreReader<structure.IRootPackage>
+    implements persistence.IPersistentStoreReader<structure.IRootNamespace>
 {
 
     /**
@@ -130,15 +130,15 @@ class MongoDbPersistentStoreReader
         throw Error( "TBD - not yet implemented" );
     }
 
-    public loadRootModelElement() : promises.IPromise<structure.IRootPackage> {
+    public loadRootModelElement() : promises.IPromise<structure.IRootNamespace> {
 
-        var result = promises.makePromise<structure.IRootPackage>();
+        var result = promises.makePromise<structure.IRootNamespace>();
 
         this._db.collection(
-            "RootPackage",
+            "RootNamespace",
             function( err : any, collection : mongodb.Collection ) {
                 if ( err ) {
-                    result.reject( "Failed to open RootPackage collection. " + err );
+                    result.reject( "Failed to open RootNamespace collection. " + err );
                     return;
                 }
 
@@ -155,8 +155,8 @@ class MongoDbPersistentStoreReader
                                     result.reject( "Failed to find root model element." );
                                 }
 
-                                var rootPackage = structure.makeRootPackage( item._id );
-                                result.fulfill( rootPackage );
+                                var rootNamespace = structure.makeRootNamespace( item._id );
+                                result.fulfill( rootNamespace );
                             }
                         );
                     }
@@ -255,9 +255,9 @@ class MongoDbPersistentStoreUpdater
 
     /**
      * Registers a listener to make updates to the database when the root package changes.
-     * @param rootPackage The root package to keep up to date.
+     * @param rootNamespace The root package to keep up to date.
      */
-    public determineChangesInRootPackage( rootPackage : structure.IRootPackage, changedAttributeNames : string[ ] ) {
+    public determineChangesInRootNamespace( rootNamespace : structure.IRootNamespace, changedAttributeNames : string[ ] ) {
         // changes to root package are ignored; invalid really
         return {};
     }
@@ -565,7 +565,7 @@ class MongoDbSchemaInitializer {
 
     private _db : mongodb.Db;
 
-    private/*static*/ _namedElementCollections = [ "Class", "Module", "Namespace", "Package", "RootPackage" ];
+    private/*static*/ _namedElementCollections = [ "Class", "Module", "Namespace", "Package", "RootNamespace" ];
 
     private/*static*/ _unnamedElementCollections = [ ];
 

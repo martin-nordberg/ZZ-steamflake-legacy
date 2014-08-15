@@ -10,23 +10,23 @@ describe( "JSON File Persistence", function() {
 
         var store = jsonfilepersistence.makeJsonFilePersistentStore( "/tmp/steamflake/a" );
 
-        var rootElement = structure.makeRootPackage( uuids.makeUuid() );
+        var rootElement = structure.makeRootNamespace( uuids.makeUuid() );
 
         var create = function() {
             return store.creator.createModelElement( rootElement );
         };
 
-        var load = function( modelElement : structure.IRootPackage ) {
+        var load = function( modelElement : structure.IRootNamespace ) {
             expect( modelElement ).toBe( rootElement );
             return store.reader.loadRootModelElement();
         };
 
-        var remove = function( modelElement : structure.IRootPackage ) {
+        var remove = function( modelElement : structure.IRootNamespace ) {
             expect( modelElement ).toEqual( rootElement );
             return store.deleter.deleteModelElement( modelElement );
         };
 
-        var finish = function( modelElement : structure.IRootPackage ) {
+        var finish = function( modelElement : structure.IRootNamespace ) {
             expect( modelElement.uuid ).toEqual( rootElement.uuid );
             done();
         };
@@ -48,7 +48,7 @@ describe( "JSON File Persistence", function() {
 
         var store = jsonfilepersistence.makeJsonFilePersistentStore( "/tmp/steamflake/b" );
 
-        var rootElement = structure.makeRootPackage( uuids.makeUuid() );
+        var rootElement = structure.makeRootNamespace( uuids.makeUuid() );
         var namespace1 = rootElement.makeNamespace( uuids.makeUuid(), { name: "testing" } );
         var namespace2 = namespace1.makeNamespace( uuids.makeUuid(), { name: "sample" } );
 
@@ -56,22 +56,22 @@ describe( "JSON File Persistence", function() {
             return store.creator.createModelElement( rootElement );
         };
 
-        var createNamespace1 = function( modelElement : structure.IRootPackage ) {
+        var createNamespace1 = function( modelElement : structure.IRootNamespace ) {
             expect( modelElement ).toBe( rootElement );
             return store.creator.createModelElement( namespace1 );
         };
 
-        var createNamespace2 = function( modelElement : structure.IRootPackage ) {
+        var createNamespace2 = function( modelElement : structure.IRootNamespace ) {
             expect( modelElement ).toBe( namespace1 );
             return store.creator.createModelElement( namespace2 );
         };
 
-        var deleteRootElement = function( modelElement : structure.IRootPackage ) {
+        var deleteRootElement = function( modelElement : structure.IRootNamespace ) {
             expect( modelElement ).toBe( namespace2 );
             return store.deleter.deleteModelElement( rootElement );
         };
 
-        var finish = function( modelElement : structure.IRootPackage ) {
+        var finish = function( modelElement : structure.IRootNamespace ) {
             expect( modelElement ).toBe( rootElement );
             done();
         };

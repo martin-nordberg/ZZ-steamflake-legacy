@@ -1,5 +1,4 @@
-
-package org.steamflake.metamodel;
+package org.steamflake.metamodel.elements;
 
 import javax.annotation.Nonnull;
 

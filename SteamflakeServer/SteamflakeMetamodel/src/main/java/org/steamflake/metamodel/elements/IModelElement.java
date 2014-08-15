@@ -1,12 +1,11 @@
-
-package org.steamflake.metamodel;
+package org.steamflake.metamodel.elements;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.UUID;
 
 /**
- * Interface to an abstract model element.
+ * Top level base class for Steamflake model elements. Represents any model element with a summary and a unique ID.
  */
 public interface IModelElement {
 
@@ -17,7 +16,7 @@ public interface IModelElement {
     UUID getId();
 
     /**
-     * @return A short summary of this model element
+     * @return a short summary of this model element
      */
     @Nullable
     String getSummary();

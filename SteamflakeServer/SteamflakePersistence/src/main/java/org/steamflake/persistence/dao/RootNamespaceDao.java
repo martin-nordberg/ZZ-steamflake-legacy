@@ -1,8 +1,8 @@
 package org.steamflake.persistence.dao;
 
 import fi.evident.dalesbred.Database;
-import org.steamflake.metamodel.IRootNamespace;
-import org.steamflake.metamodel.impl.RootNamespace;
+import org.steamflake.metamodel.structure.IRootNamespace;
+import org.steamflake.metamodelimpl.structure.RootNamespace;
 import org.steamflake.utilities.uuids.Uuids;
 
 import java.util.List;

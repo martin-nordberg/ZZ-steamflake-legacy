@@ -11,15 +11,15 @@ import uuids = require( '../../../../SteamflakeCore/source/steamflake/core/utili
 
 describe( "Structure", function() {
 
-    describe( "Root Package", function()  {
-        var rootPackage : structure.IRootPackage;
+    describe( "Root Namespace", function()  {
+        var rootNamespace : structure.IRootNamespace;
 
         beforeEach( function() {
-            rootPackage = structure.makeRootPackage( uuids.makeUuid() );
+            rootNamespace = structure.makeRootNamespace( uuids.makeUuid() );
         } );
 
-        it( "Constructs a root package", function() {
-            expect( rootPackage ).toBeDefined();
+        it( "Constructs a root namespace", function() {
+            expect( rootNamespace ).toBeDefined();
         } );
 
     } );

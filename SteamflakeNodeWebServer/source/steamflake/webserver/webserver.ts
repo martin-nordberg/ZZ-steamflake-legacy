@@ -80,7 +80,7 @@ class SteamflakeWebServer
         me.serveStaticContent();
 
         // root packages
-        me.serveRootPackage();
+        me.serveRootNamespace();
 
         // Establish request logging
         me.audit();
@@ -103,8 +103,8 @@ class SteamflakeWebServer
      * Creates a sample model for experimentation.
      */
     private buildModel() {
-        var rootPackage = structure.makeRootPackage( uuids.makeUuid() );
-         var steamflakeNamespace = rootPackage.makeNamespace( uuids.makeUuid(), {name:"steamflake", summary:"Steamflake"} );
+        var rootNamespace = structure.makeRootNamespace( uuids.makeUuid() );
+         var steamflakeNamespace = rootNamespace.makeNamespace( uuids.makeUuid(), {name:"steamflake", summary:"Steamflake"} );
           var languageNamespace = steamflakeNamespace.makeNamespace( uuids.makeUuid(), {name:"language", summary:"Steamflake Language"} );
            var metamodelNamespace = languageNamespace.makeNamespace( uuids.makeUuid(), {name:"metamodel", summary:"Steamflake Language Metamodel"} );
             var commandsModule = metamodelNamespace.makeModule( uuids.makeUuid(), {name:"commands", summary:"L-Zero Language Metamodel Commands", version:"0.1"} );
@@ -125,7 +125,7 @@ class SteamflakeWebServer
 //        var synchronizationPackage = concurrencyModule.addPackage( uuids.makeUuid(), {name:"synchronization", summary:"Concurrent Task Synchronization Utilities", isExported:true} );
 //        var regularexpressionsModule = utilitiesNamespace.addModule( uuids.makeUuid(), {name:"regularexpressions", summary:"Regular Expressions", version:"0.1"} );
 
-        this._store.creator.createModelElement( rootPackage )
+        this._store.creator.createModelElement( rootNamespace )
             .then_p( function( modelElement : elements.IModelElement ) { console.log( 'steamflake' ); return this._store.creator.createModelElement( steamflakeNamespace ); } )
             .then_p( function( modelElement : elements.IModelElement ) { console.log( 'language' ); return this._store.creator.createModelElement( languageNamespace ); } )
             .then_p( function( modelElement : elements.IModelElement ) { console.log( 'metamodel' ); return this._store.creator.createModelElement( metamodelNamespace ); } )
@@ -147,20 +147,20 @@ class SteamflakeWebServer
     /**
      * Serves JSON for the root package.
      */
-    private serveRootPackage() {
+    private serveRootNamespace() {
 
         var me = this;
 
-        // RootPackage response
+        // RootNamespace response
         me._server.get(
-            '/Steamflake/RootPackage',
+            '/Steamflake/RootNamespace',
             function respond( req: restify.Request, res: restify.Response, next: Function ) {
 
                 var load = function() {
                     return me._store.reader.loadRootModelElement();
                 };
 
-                var returnJson = function( modelElement : structure.IRootPackage ) {
+                var returnJson = function( modelElement : structure.IRootNamespace ) {
                     res.json( modelElement.toJson( elements.EJsonDetailLevel.Attributes ) );
                     next();
                 };
@@ -202,7 +202,7 @@ class SteamflakeWebServer
     private _server : restify.Server;
 
     /** The persistent store for Steamflake model elements. */
-    private _store : persistence.IPersistentStore<structure.IRootPackage>;
+    private _store : persistence.IPersistentStore<structure.IRootNamespace>;
 
     // File system configuration. TBD:  Make configurable.
     private static WORKSPACE_PATH = '/home/mnordberg/workspace';

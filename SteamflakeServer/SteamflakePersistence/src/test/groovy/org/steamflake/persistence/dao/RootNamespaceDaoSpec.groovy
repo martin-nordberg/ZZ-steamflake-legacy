@@ -1,9 +1,7 @@
 package org.steamflake.persistence.dao
 
 import fi.evident.dalesbred.Database
-import org.steamflake.metamodel.impl.Namespace
 import org.steamflake.persistence.h2database.H2DataSource
-import org.steamflake.utilities.uuids.Uuids
 import spock.lang.Specification
 
 /**
