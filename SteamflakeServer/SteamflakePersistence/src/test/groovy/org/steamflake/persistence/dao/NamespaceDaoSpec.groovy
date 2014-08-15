@@ -4,6 +4,7 @@ import fi.evident.dalesbred.Database
 import org.steamflake.metamodel.impl.Namespace
 import org.steamflake.persistence.h2database.H2DataSource
 import org.steamflake.utilities.uuids.Uuids
+import spock.lang.Ignore
 import spock.lang.Specification
 
 /**
@@ -42,6 +43,20 @@ class NamespaceDaoSpec extends Specification {
 
         and: "it can be deleted"
         dao.deleteNamespace( namespace.id )
+
+    }
+
+    @Ignore
+    def "it takes a while to create lots of namespaces" () {
+
+        when: "the namespaces are created"
+        for ( int i = 0 ; i< 100000 ; i+=1 ) {
+            def namespace = new Namespace(Uuids.makeUuid().toString(), "example"+i, "a testing sample namespace")
+            dao.createNamespace(namespace)
+        }
+
+        then: "they can be retrieved"
+        dao.findNamespacesAll()
 
     }
 

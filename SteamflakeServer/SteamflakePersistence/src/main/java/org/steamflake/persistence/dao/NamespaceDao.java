@@ -4,6 +4,7 @@ import fi.evident.dalesbred.Database;
 import org.steamflake.metamodel.INamespace;
 import org.steamflake.metamodel.impl.Namespace;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -32,6 +33,10 @@ public class NamespaceDao {
 
     public INamespace findNamespaceByUuid( UUID namespaceId ) {
         return this.database.findUnique( Namespace.class, "SELECT TO_CHAR(ID), NAME, SUMMARY FROM V_NAMESPACE WHERE ID = ?", namespaceId );
+    }
+
+    public List<? extends INamespace> findNamespacesAll() {
+        return this.database.findAll( Namespace.class, "SELECT TO_CHAR(ID), NAME, SUMMARY FROM V_NAMESPACE" );
     }
 
     private final Database database;
