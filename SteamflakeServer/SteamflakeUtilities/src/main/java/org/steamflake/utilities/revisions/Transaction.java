@@ -1,18 +1,20 @@
 package org.steamflake.utilities.revisions;
 
 import javax.annotation.Nonnull;
-import java.util.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Utility class for managing in-memory transactions. The code is similar to "versioned boxes", the concept
  * behind JVSTM for software transactional memory. However, this code is much more streamlined, though very
  * experimental.
  */
-public class Transaction
-    implements Comparable<Transaction> {
+public class Transaction {
 
     /**
      * Constructs a new transaction.
@@ -41,6 +43,9 @@ public class Transaction
 
         // Flag a write conflict as early as possible.
         this.newerRevisionSeen = false;
+
+        // Establish a link for putting this transaction in a linked list of completed transactions.
+        this.nextTransactionAwaitingCleanUp = new AtomicReference<>( null );
 
     }
 
@@ -84,15 +89,18 @@ public class Transaction
 
                         // If succeeded, no more retries are needed.
                         return;
-                    } catch ( Throwable e ) {
+                    }
+                    catch ( Throwable e ) {
                         // On any error abort the transaction.
                         transaction.abort();
                         throw e;
-                    } finally {
+                    }
+                    finally {
                         // Clear the thread's transaction.
                         transactionOfCurrentThread.set( null );
                     }
-                } catch ( WriteConflictException e ) {
+                }
+                catch ( WriteConflictException e ) {
                     // Ignore the exception; go around the loop again....
 
                     // Increment the thread priority for a better chance on next try.
@@ -106,16 +114,12 @@ public class Transaction
             // If we dropped out of the loop, then we exceeded the retry count.
             throw new MaximumRetriesExceededException();
 
-        } finally {
+        }
+        finally {
             // Restore the thread priority after any retries.
             Thread.currentThread().setPriority( Thread.NORM_PRIORITY );
         }
 
-    }
-
-    @Override
-    public int compareTo( Transaction that ) {
-        return Long.compare( this.targetRevisionNumber.get(), that.targetRevisionNumber.get() );
     }
 
     /**
@@ -145,7 +149,12 @@ public class Transaction
      */
     void addVersionedItemRead( @Nonnull AbstractVersionedItem versionedItem ) {
 
+        // Sanity check the input.
+        Objects.requireNonNull( versionedItem );
+
+        // Track versioned items read by this transaction.
         this.versionedItemsRead.add( versionedItem );
+
     }
 
     /**
@@ -156,6 +165,9 @@ public class Transaction
      * @param versionedItem the item that has been written.
      */
     void addVersionedItemWritten( @Nonnull AbstractVersionedItem versionedItem ) {
+
+        // Sanity check the input.
+        Objects.requireNonNull( versionedItem );
 
         // Track all versioned items written by this transaction.
         this.versionedItemsWritten.add( versionedItem );
@@ -195,28 +207,9 @@ public class Transaction
     /**
      * @return the revision number of information written by this transaction (negative while transaction is running; positive after committed.
      */
+    @Nonnull
     AtomicLong getTargetRevisionNumber() {
         return this.targetRevisionNumber;
-    }
-
-    /**
-     * When garbage collected itself, triggers the clean up of all the referenced versioned items. Note that
-     * the use of finalize() is generally to be avoided, but we're piggy-backing on the JVM apparatus for
-     * cleaning up ordinary memory garbage to also clean up revision garbage. This seems like a worthwhile
-     * usage.
-     *
-     * @throws Throwable only if the super call fails
-     */
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            // Remove all revisions older than the one written by this transaction.
-            for ( AbstractVersionedItem versionedItem : versionedItemsWritten ) {
-                versionedItem.removeUnusedRevisions( this.targetRevisionNumber.get() );
-            }
-        } finally {
-            super.finalize();
-        }
     }
 
     /**
@@ -275,6 +268,25 @@ public class Transaction
     }
 
     /**
+     * Puts this transaction at the head of a list of all transactions awaiting clean up.
+     */
+    private void awaitCleanUp() {
+
+        // Get the first transaction awaiting clean up.
+        Transaction firstTransAwaitingCleanUp = firstTransactionAwaitingCleanUp.get();
+
+        // Link this transaction into the head of the list.
+        this.nextTransactionAwaitingCleanUp.set( firstTransAwaitingCleanUp );
+
+        // Spin until we do both atomically.
+        while ( !firstTransactionAwaitingCleanUp.compareAndSet( firstTransAwaitingCleanUp, this ) ) {
+            firstTransAwaitingCleanUp = firstTransactionAwaitingCleanUp.get();
+            this.nextTransactionAwaitingCleanUp.set( firstTransAwaitingCleanUp );
+        }
+
+    }
+
+    /**
      * Removes the source revision number of this transaction from those in use. Cleans up older revisions
      * if not in use by other transactions.
      */
@@ -288,13 +300,42 @@ public class Transaction
         // garbage collection. In other words, items removed from the queue below (which are no longer otherwise
         // referenced) will clean up obsolete revisions when they themselves are garbage collected.
         // This is very experimental.
-        final Long oldestRevisionInUse = sourceRevisionsInUse.peek();
+
+        // Determine the oldest revision still needed.
+        Long oldestRevisionInUse = sourceRevisionsInUse.peek();
         if ( oldestRevisionInUse == null ) {
-            // The queue was (momentarily at least) empty, so kill everything below the prior oldest version.
-            transactionsAwaitingCleanUp.removeIf( t -> t.targetRevisionNumber.get() <= priorOldestRevisionInUse );
-        } else if ( oldestRevisionInUse > priorOldestRevisionInUse ) {
-            // We were the last transaction needing our source revision, so clean up after ourselves.
-            transactionsAwaitingCleanUp.removeIf( t -> t.targetRevisionNumber.get() <= oldestRevisionInUse );
+            oldestRevisionInUse = new Long( priorOldestRevisionInUse );
+        }
+
+        //  Remove each transaction awaiting clean up that has a target revision number older than needed.
+        AtomicReference<Transaction> tref = firstTransactionAwaitingCleanUp;
+        Transaction t = tref.get();
+        if ( t == null ) {
+            return;
+        }
+
+        AtomicReference<Transaction> trefNext = t.nextTransactionAwaitingCleanUp;
+        Transaction tNext = trefNext.get();
+
+        while ( true ) {
+            if ( t.targetRevisionNumber.get() <= oldestRevisionInUse ) {
+                if ( tref.compareAndSet( t, tNext ) ) {
+                    // Remove revisions older than the now unused revision number.
+                    t.removeUnusedRevisions();
+                    t.nextTransactionAwaitingCleanUp.set( null );
+                }
+            }
+            else {
+                tref = trefNext;
+            }
+
+            // Advance through the list of transactions awaiting clean up.
+            t = tref.get();
+            if ( t == null ) {
+                return;
+            }
+            trefNext = t.nextTransactionAwaitingCleanUp;
+            tNext = trefNext.get();
         }
 
     }
@@ -315,8 +356,8 @@ public class Transaction
         // No longer hang on to the items read.
         this.versionedItemsRead.clear();
 
-        // Add our revisions to a queue awaiting clean up when no longer needed.
-        transactionsAwaitingCleanUp.add( this );
+        // Add this transaction (with its written revisions) to a queue awaiting clean up when no longer needed.
+        this.awaitCleanUp();
 
         // Trigger any clean up that is possible from no longer needing our source version.
         this.cleanUpOlderRevisions();
@@ -324,9 +365,24 @@ public class Transaction
     }
 
     /**
-     * Thread-local storage for the transaction in use by the current thread (can be only one per thread).
+     * Cleans up of all the referenced versioned items written by this transaction.
      */
-    private static ThreadLocal<Transaction> transactionOfCurrentThread = new ThreadLocal<>();
+    private void removeUnusedRevisions() {
+
+        // Remove all revisions older than the one written by this transaction.
+        for ( AbstractVersionedItem versionedItem : this.versionedItemsWritten ) {
+            versionedItem.removeUnusedRevisions( this.targetRevisionNumber.get() );
+        }
+
+        // Stop referencing the versioned items.
+        this.versionedItemsWritten.clear();
+
+    }
+
+    /**
+     * Head of a linked list of transactions awaiting clean up.
+     */
+    private static AtomicReference<Transaction> firstTransactionAwaitingCleanUp = new AtomicReference<>( null );
 
     /**
      * Monotone increasing revision number incremented whenever a transaction is successfully committed.
@@ -345,10 +401,9 @@ public class Transaction
     private static Queue<Long> sourceRevisionsInUse = new PriorityBlockingQueue<>();
 
     /**
-     * Priority queue of transactions awaiting clean up once the revisions they wrote are no longer in use.
+     * Thread-local storage for the transaction in use by the current thread (can be only one per thread).
      */
-    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
-    private static Collection<Transaction> transactionsAwaitingCleanUp = new ConcurrentLinkedQueue<>();
+    private static ThreadLocal<Transaction> transactionOfCurrentThread = new ThreadLocal<>();
 
     /**
      * A revision number seen during reading that will cause a write conflict if anything writes through this transaction.
@@ -375,5 +430,10 @@ public class Transaction
      * The versioned item written by this transaction.
      */
     private final Set<AbstractVersionedItem> versionedItemsWritten;
+
+    /**
+     * The next transaction in a linked list of transactions awaiting clean up.
+     */
+    private final AtomicReference<Transaction> nextTransactionAwaitingCleanUp;
 
 }

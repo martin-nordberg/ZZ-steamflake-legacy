@@ -1,6 +1,7 @@
 package org.steamflake.utilities.revisions;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -19,11 +20,14 @@ public class Ver<T>
      */
     public Ver( @Nonnull T value ) {
 
+        // Sanity check the input.
+        Objects.requireNonNull( value );
+
         // Track everything through the current transaction.
         Transaction currentTransaction = Transaction.getTransactionOfCurrentThread();
 
         this.latestRevision = new AtomicReference<>( null );
-        this.latestRevision.set( new Revision<>( value, currentTransaction.getTargetRevisionNumber(), this.latestRevision ) );
+        this.latestRevision.set( new Revision<>( value, currentTransaction.getTargetRevisionNumber(), this.latestRevision.get() ) );
 
         // keep track of everything we've written
         currentTransaction.addVersionedItemWritten( this );
@@ -35,11 +39,13 @@ public class Ver<T>
      *
      * @return the value as of the start of the transaction or else as written by the transaction
      */
+    @Nonnull
     public T get() {
 
         // Track everything through the current transaction.
         Transaction currentTransaction = Transaction.getTransactionOfCurrentThread();
 
+        // Work within the transaction of the current thread.
         long sourceRevisionNumber = currentTransaction.getSourceRevisionNumber();
         long targetRevisionNumber = currentTransaction.getTargetRevisionNumber().get();
 
@@ -82,6 +88,10 @@ public class Ver<T>
      */
     public void set( @Nonnull T value ) {
 
+        // Sanity check the input
+        Objects.requireNonNull( value );
+
+        // Work within the transaction of the current thread.
         Transaction currentTransaction = Transaction.getTransactionOfCurrentThread();
 
         long sourceRevisionNumber = currentTransaction.getSourceRevisionNumber();
@@ -106,7 +116,7 @@ public class Ver<T>
         }
 
         // create the new revision at the front of the chain
-        this.latestRevision.set( new Revision<>( value, currentTransaction.getTargetRevisionNumber(), this.latestRevision ) );
+        this.latestRevision.set( new Revision<>( value, currentTransaction.getTargetRevisionNumber(), this.latestRevision.get() ) );
 
         // keep track of everything we've written
         currentTransaction.addVersionedItemWritten( this );
@@ -116,6 +126,7 @@ public class Ver<T>
     @Override
     void ensureNotWrittenByOtherTransaction() {
 
+        // Work within the transaction of the current thread.
         Transaction currentTransaction = Transaction.getTransactionOfCurrentThread();
 
         long sourceRevisionNumber = currentTransaction.getSourceRevisionNumber();
@@ -163,7 +174,8 @@ public class Ver<T>
                 }
                 priorRevision = null;
                 this.removeAbortedRevision();
-            } else {
+            }
+            else {
                 revision = priorRevision;
                 priorRevision = revision.priorRevision.get();
             }
@@ -203,8 +215,8 @@ public class Ver<T>
      */
     private static class Revision<T> {
 
-        Revision( @Nonnull T value, @Nonnull AtomicLong revisionNumber, @Nonnull AtomicReference<Revision<T>> priorRevision ) {
-            this.priorRevision = priorRevision;
+        Revision( @Nonnull T value, @Nonnull AtomicLong revisionNumber, Revision<T> priorRevision ) {
+            this.priorRevision = new AtomicReference<>( priorRevision );
             this.revisionNumber = revisionNumber;
             this.value = value;
         }
@@ -219,13 +231,13 @@ public class Ver<T>
          * A reference to the previous revision of the versioned item.
          */
         @Nonnull
-        AtomicReference<Revision<T>> priorRevision;
+        final AtomicReference<Revision<T>> priorRevision;
 
         /**
          * The revision number of this revision (uniquely from the transaction that wrote it).
          */
         @Nonnull
-        AtomicLong revisionNumber;
+        final AtomicLong revisionNumber;
 
     }
 

@@ -14,13 +14,6 @@ abstract class AbstractVersionedItem {
         this.hashCode = lastHashCode.incrementAndGet();
     }
 
-    /**
-     * Ensures that this item has been written by no transaction other than the currently running one.
-     *
-     * @throws WriteConflictException if there has been another transaction writing this item.
-     */
-    abstract void ensureNotWrittenByOtherTransaction();
-
     @Override
     public boolean equals( Object o ) {
         if ( this == o ) return true;
@@ -37,6 +30,13 @@ abstract class AbstractVersionedItem {
     public int hashCode() {
         return hashCode;
     }
+
+    /**
+     * Ensures that this item has been written by no transaction other than the currently running one.
+     *
+     * @throws WriteConflictException if there has been another transaction writing this item.
+     */
+    abstract void ensureNotWrittenByOtherTransaction();
 
     /**
      * Removes an aborted revision from this versioned item.
