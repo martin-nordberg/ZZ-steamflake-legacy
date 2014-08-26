@@ -12,9 +12,11 @@ public class TransactionGarbageCollectionTest {
 
         new Thread( new MetricThread() ).start();
 
-        for ( int i=0; i<1 ; i+=1 ) {
+        for ( int i=0; i<5 ; i+=1 ) {
             new Thread( new WorkerThread() ).start();
         }
+
+        new Thread( new GarbageCollectionThread() ).start();
 
     }
 
@@ -43,21 +45,17 @@ public class TransactionGarbageCollectionTest {
                 doInTransaction( 2, () -> {
                     this.myValue = new Ver<>( new Value() );
                 } );
-                for ( int i = 0; i < 100000; i += 1 ) {
+                for ( int i = 0; i < 50000; i += 1 ) {
                     doInTransaction( 5, () -> {
                         this.myValue.set( new Value() );
                     } );
                     if ( i % 100 == 0 ) {
                         Thread.yield();
                     }
-//                    if ( i % 1000 == 0 ) {
-//                        System.gc();
-//                    }
                 }
             }
             catch ( Exception e ) {
                 e.printStackTrace();
-//                System.out.println( "WORKER THREAD EXCEPTION: " + e.getMessage() );
             }
         }
 
@@ -70,16 +68,39 @@ public class TransactionGarbageCollectionTest {
         @Override
         public void run() {
             int priorCount = -1;
-            while ( true ) {
-                int count = Value.count.get();
+            int count = Value.count.get();
+            while ( count > 10 || priorCount < 10 ) {
                 if ( count != priorCount ) {
                     System.out.println( count );
                     priorCount = count;
                 }
-                System.gc();
+                count = Value.count.get();
             }
+            System.out.println( count );
         }
 
+    }
+
+    static class GarbageCollectionThread implements Runnable {
+
+        @Override
+        public void run() {
+
+            while ( Value.count.get() <= 10 ) {
+                Thread.yield();
+            }
+
+            while ( Value.count.get() > 10 ) {
+                try {
+                    Thread.sleep( 5000L );
+                    System.gc();
+                }
+                catch ( InterruptedException e ) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
     }
 
 }
