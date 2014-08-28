@@ -1,6 +1,5 @@
 package org.steamflake.utilities.revisions;
 
-import javax.annotation.Nonnull;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -18,13 +17,13 @@ public class Ver<T>
      *
      * @param value the initial value.
      */
-    public Ver( @Nonnull T value ) {
+    public Ver( T value ) {
 
         // Sanity check the input.
         Objects.requireNonNull( value );
 
         // Track everything through the current transaction.
-        Transaction currentTransaction = Transaction.getTransactionOfCurrentThread();
+        StmTransaction currentTransaction = StmTransactionContext.getTransactionOfCurrentThread();
 
         this.latestRevision = new AtomicReference<>( null );
         this.latestRevision.set( new Revision<>( value, currentTransaction.getTargetRevisionNumber(), this.latestRevision.get() ) );
@@ -39,11 +38,10 @@ public class Ver<T>
      *
      * @return the value as of the start of the transaction or else as written by the transaction
      */
-    @Nonnull
     public T get() {
 
         // Track everything through the current transaction.
-        Transaction currentTransaction = Transaction.getTransactionOfCurrentThread();
+        StmTransaction currentTransaction = StmTransactionContext.getTransactionOfCurrentThread();
 
         // Work within the transaction of the current thread.
         long sourceRevisionNumber = currentTransaction.getSourceRevisionNumber();
@@ -86,13 +84,13 @@ public class Ver<T>
      *
      * @param value The new raw value to become the next revision of this item.
      */
-    public void set( @Nonnull T value ) {
+    public void set( T value ) {
 
         // Sanity check the input
         Objects.requireNonNull( value );
 
         // Work within the transaction of the current thread.
-        Transaction currentTransaction = Transaction.getTransactionOfCurrentThread();
+        StmTransaction currentTransaction = StmTransactionContext.getTransactionOfCurrentThread();
 
         long sourceRevisionNumber = currentTransaction.getSourceRevisionNumber();
         long targetRevisionNumber = currentTransaction.getTargetRevisionNumber().get();
@@ -127,7 +125,7 @@ public class Ver<T>
     void ensureNotWrittenByOtherTransaction() {
 
         // Work within the transaction of the current thread.
-        Transaction currentTransaction = Transaction.getTransactionOfCurrentThread();
+        StmTransaction currentTransaction = StmTransactionContext.getTransactionOfCurrentThread();
 
         long sourceRevisionNumber = currentTransaction.getSourceRevisionNumber();
 
@@ -202,43 +200,39 @@ public class Ver<T>
     }
 
     /**
-     * Reference to the latest revision. Revisions are kept in a custom linked list with the newest revision at
-     * the head of the list.
-     */
-    @Nonnull
-    private final AtomicReference<Revision<T>> latestRevision;
-
-    /**
      * Internal record structure for revisions in the linked list of revisions.
      *
      * @param <T> the type of the value that is managed through its revisions.
      */
     private static class Revision<T> {
 
-        Revision( @Nonnull T value, @Nonnull AtomicLong revisionNumber, Revision<T> priorRevision ) {
+        Revision( T value, AtomicLong revisionNumber, Revision<T> priorRevision ) {
             this.priorRevision = new AtomicReference<>( priorRevision );
             this.revisionNumber = revisionNumber;
             this.value = value;
         }
 
         /**
-         * The value of the versioned item at this revision.
-         */
-        @Nonnull
-        T value;
-
-        /**
          * A reference to the previous revision of the versioned item.
          */
-        @Nonnull
         final AtomicReference<Revision<T>> priorRevision;
 
         /**
          * The revision number of this revision (uniquely from the transaction that wrote it).
          */
-        @Nonnull
         final AtomicLong revisionNumber;
 
+        /**
+         * The value of the versioned item at this revision.
+         */
+        T value;
+
     }
+
+    /**
+     * Reference to the latest revision. Revisions are kept in a custom linked list with the newest revision at
+     * the head of the list.
+     */
+    private final AtomicReference<Revision<T>> latestRevision;
 
 }

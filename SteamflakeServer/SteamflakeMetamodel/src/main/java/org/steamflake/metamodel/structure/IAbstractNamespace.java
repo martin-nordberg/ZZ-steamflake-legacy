@@ -5,8 +5,8 @@ import org.steamflake.metamodel.elements.INamedContainerElement;
 /**
  * An abstract namespace is a naming structure distinguishing modules.
  */
-public interface IAbstractNamespace
-    extends INamedContainerElement {
+public interface IAbstractNamespace<ISelf>
+    extends INamedContainerElement<ISelf, IAbstractNamespace> {
 
     // TBD: makeModule
 

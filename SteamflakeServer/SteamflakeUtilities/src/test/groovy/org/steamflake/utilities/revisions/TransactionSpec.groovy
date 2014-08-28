@@ -1,6 +1,5 @@
 package org.steamflake.utilities.revisions
 
-import org.steamflake.utilities.configuration.Configuration
 import spock.lang.Specification
 
 /**
@@ -12,17 +11,17 @@ class TransactionSpec extends Specification {
 
         given:
         Ver<Integer> stuff
-        Transaction.doInTransaction( 1 ) {
+        StmTransactionContext.doInTransaction( 1 ) {
             stuff = new Ver<>( 1 );
         }
 
         when:
-        Transaction.doInTransaction( 1 ) {
+        StmTransactionContext.doInTransaction( 1 ) {
             stuff.set( 2 );
         }
 
         then:
-        Transaction.doInTransaction( 1 ) {
+        StmTransactionContext.doInTransaction( 1 ) {
             assert stuff.get() == 2
         }
 

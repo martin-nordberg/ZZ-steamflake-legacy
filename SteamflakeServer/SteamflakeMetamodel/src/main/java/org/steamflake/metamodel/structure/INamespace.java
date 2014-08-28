@@ -5,6 +5,6 @@ package org.steamflake.metamodel.structure;
  * than the root namespace.
  */
 public interface INamespace
-    extends IAbstractNamespace {
+    extends IAbstractNamespace<INamespace> {
 
 }

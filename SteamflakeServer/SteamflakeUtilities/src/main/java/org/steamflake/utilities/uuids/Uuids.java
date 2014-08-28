@@ -78,7 +78,8 @@ public class Uuids {
                     }
                 }
             }
-        } catch ( SocketException ex ) {
+        }
+        catch ( SocketException ex ) {
             // ignore
         }
 
@@ -118,10 +119,12 @@ public class Uuids {
                     if ( prevTime100ns.compareAndSet( last, time100ns + 0xFF ) ) {
                         break;
                     }
-                } else if ( prevTime100ns.compareAndSet( last, time100ns ) ) {
+                }
+                else if ( prevTime100ns.compareAndSet( last, time100ns ) ) {
                     break;
                 }
-            } else {
+            }
+            else {
                 time100ns = last + 1;
             }
         }

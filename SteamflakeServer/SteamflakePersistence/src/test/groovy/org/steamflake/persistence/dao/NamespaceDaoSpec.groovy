@@ -3,6 +3,8 @@ package org.steamflake.persistence.dao
 import fi.evident.dalesbred.Database
 import org.steamflake.metamodelimpl.structure.Namespace
 import org.steamflake.persistence.h2database.H2DataSource
+import org.steamflake.utilities.revisions.StmTransaction
+import org.steamflake.utilities.revisions.StmTransactionContext
 import org.steamflake.utilities.uuids.Uuids
 import spock.lang.Ignore
 import spock.lang.Specification
@@ -15,6 +17,7 @@ class NamespaceDaoSpec extends Specification {
     static H2DataSource dataSource
     Database database
     NamespaceDao dao
+    StmTransaction transaction
 
     def setupSpec() {
         dataSource = new H2DataSource();
@@ -23,12 +26,14 @@ class NamespaceDaoSpec extends Specification {
     def setup() {
         database = new Database( dataSource );
         dao = new NamespaceDao( database );
+        transaction = StmTransactionContext.beginTransaction();
     }
 
     def "A namespace can be created, read, and deleted" () {
 
         given: "a namespace to be saved"
-        def namespace = new Namespace( Uuids.makeUuid().toString(), "example", "a testing sample namespace" )
+        def id = Uuids.makeUuid().toString();
+        Namespace namespace = new Namespace(id, id, "example", "a testing sample namespace")
 
         when: "the namespace is created"
         dao.createNamespace( namespace )
@@ -44,6 +49,9 @@ class NamespaceDaoSpec extends Specification {
         and: "it can be deleted"
         dao.deleteNamespace( namespace.id )
 
+        and: "then disappears from view"
+        dao.findNamespaceByUuid( namespace.id ) == null
+
     }
 
     @Ignore
@@ -51,13 +59,18 @@ class NamespaceDaoSpec extends Specification {
 
         when: "the namespaces are created"
         for ( int i = 0 ; i< 100000 ; i+=1 ) {
-            def namespace = new Namespace(Uuids.makeUuid().toString(), "example"+i, "a testing sample namespace")
+            def id = Uuids.makeUuid().toString();
+            def namespace = new Namespace( id, id, "example"+i, "a testing sample namespace" )
             dao.createNamespace(namespace)
         }
 
         then: "they can be retrieved"
         dao.findNamespacesAll()
 
+    }
+
+    def cleanup() {
+        StmTransactionContext.commitTransaction( transaction );
     }
 
     def cleanupSpec() {

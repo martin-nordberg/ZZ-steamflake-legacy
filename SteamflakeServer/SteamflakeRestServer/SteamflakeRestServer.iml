@@ -29,7 +29,6 @@
     <orderEntry type="library" exported="" name="Gradle: activation-1.1" level="project" />
     <orderEntry type="library" exported="" name="Gradle: commons-io-2.1" level="project" />
     <orderEntry type="library" exported="" name="Gradle: jcip-annotations-1.0" level="project" />
-    <orderEntry type="library" exported="" name="Gradle: jsr305-3.0.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: spock-core-0.7-groovy-2.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: junit-dep-4.10" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: groovy-all-2.0.5" level="project" />

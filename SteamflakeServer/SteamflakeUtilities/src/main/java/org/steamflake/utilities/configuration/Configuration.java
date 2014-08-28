@@ -1,7 +1,5 @@
-
 package org.steamflake.utilities.configuration;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -11,9 +9,7 @@ import java.util.Properties;
  */
 public class Configuration {
 
-    public Configuration(
-        @Nonnull Class<?> classInPkgWithConfig
-    ) {
+    public Configuration( Class<?> classInPkgWithConfig ) {
 
         // TBD: also open external properties file
 
@@ -28,16 +24,14 @@ public class Configuration {
             }
 
             this.properties.load( stream );
-        } catch ( IOException e ) {
+        }
+        catch ( IOException e ) {
             throw new IllegalArgumentException( "Failed to open properties file for class " + classInPkgWithConfig.getName() + "." );
         }
 
     }
 
-    @Nonnull
-    public String readString(
-        @Nonnull String key
-    ) {
+    public String readString( String key ) {
 
         // TBD: read from external properties first, then internal as fallback
 

@@ -2,6 +2,8 @@ package org.steamflake.persistence.dao
 
 import fi.evident.dalesbred.Database
 import org.steamflake.persistence.h2database.H2DataSource
+import org.steamflake.utilities.revisions.StmTransaction
+import org.steamflake.utilities.revisions.StmTransactionContext
 import spock.lang.Specification
 
 /**
@@ -12,6 +14,7 @@ class RootNamespaceDaoSpec extends Specification {
     static H2DataSource dataSource
     Database database
     RootNamespaceDao dao
+    StmTransaction transaction
 
     def setupSpec() {
         dataSource = new H2DataSource();
@@ -20,6 +23,7 @@ class RootNamespaceDaoSpec extends Specification {
     def setup() {
         database = new Database( dataSource );
         dao = new RootNamespaceDao( database );
+        transaction = StmTransactionContext.beginTransaction();
     }
 
     def "The root namespace can be read" () {
@@ -32,6 +36,10 @@ class RootNamespaceDaoSpec extends Specification {
         rootNamespace.name == '$'
         rootNamespace.summary != null
 
+    }
+
+    def cleanup() {
+        StmTransactionContext.commitTransaction( transaction );
     }
 
     def cleanupSpec() {

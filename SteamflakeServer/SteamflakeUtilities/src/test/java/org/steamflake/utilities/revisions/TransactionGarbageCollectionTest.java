@@ -1,7 +1,6 @@
 package org.steamflake.utilities.revisions;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import static org.steamflake.utilities.revisions.Transaction.doInTransaction;
 
 /**
  * Main program tests Transaction usage and garbage collection.
@@ -42,13 +41,15 @@ public class TransactionGarbageCollectionTest {
         @Override
         public void run() {
             try {
-                doInTransaction( 2, () -> {
+                Runnable task1 = () -> {
                     this.myValue = new Ver<>( new Value() );
-                } );
+                };
+                StmTransactionContext.doInTransaction( 2, task1 );
                 for ( int i = 0; i < 50000; i += 1 ) {
-                    doInTransaction( 5, () -> {
+                    Runnable task = () -> {
                         this.myValue.set( new Value() );
-                    } );
+                    };
+                    StmTransactionContext.doInTransaction( 5, task );
                     if ( i % 100 == 0 ) {
                         Thread.yield();
                     }

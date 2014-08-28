@@ -1,24 +1,41 @@
 package org.steamflake.metamodel.elements;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.UUID;
 
 /**
  * Top level base class for Steamflake model elements. Represents any model element with a summary and a unique ID.
  */
-public interface IModelElement {
+public interface IModelElement<ISelf, IParent extends IContainerElement> {
 
     /**
      * @return the unique ID of this model element
      */
-    @Nonnull
     UUID getId();
+
+    /**
+     * @return the container of this model element
+     */
+    IParent getParentContainer();
 
     /**
      * @return a short summary of this model element
      */
-    @Nullable
     String getSummary();
+
+    /**
+     * Changes the parent of this model element.
+     *
+     * @param parent the new parent.
+     * @return this model element.
+     */
+    ISelf setParentContainer( IParent parent );
+
+    /**
+     * Chanegs the summary of this model element.
+     *
+     * @param summary the new summary.
+     * @return this model element.
+     */
+    ISelf setSummary( String summary );
 
 }

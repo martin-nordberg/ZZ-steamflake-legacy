@@ -33,7 +33,8 @@ public class RootNamespaceDao {
 
     private void createRootNamespace( IRootNamespace rootNamespace ) {
         this.database.withVoidTransaction( tx -> {
-            this.database.update( "INSERT INTO MODEL_ELEMENT (ID, SUMMARY, TYPE) VALUES (?, ?, 'RootNamespace')", rootNamespace.getId(), rootNamespace.getSummary() );
+            this.database.update( "INSERT INTO MODEL_ELEMENT (ID, PARENT_CONTAINER_ID, SUMMARY, TYPE) VALUES (?, ?, ?, 'RootNamespace')",
+                                  rootNamespace.getId(), rootNamespace.getId(), rootNamespace.getSummary() );
             this.database.update( "INSERT INTO CONTAINER_ELEMENT (ID) VALUES (?)", rootNamespace.getId() );
             this.database.update( "INSERT INTO ROOT_CONTAINER_ELEMENT (ID) VALUES (?)", rootNamespace.getId() );
             this.database.update( "INSERT INTO NAMED_ELEMENT (ID, NAME) VALUES (?, ?)", rootNamespace.getId(), rootNamespace.getName() );
