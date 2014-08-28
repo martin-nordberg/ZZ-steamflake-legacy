@@ -19,7 +19,7 @@ public class NamespaceDao {
     public void createNamespace( INamespace namespace ) {
         this.database.withVoidTransaction( tx -> {
             this.database.update( "INSERT INTO MODEL_ELEMENT (ID, PARENT_CONTAINER_ID, SUMMARY, TYPE) VALUES (?, ?, ?, 'Namespace')",
-                                  namespace.getId(), namespace.getId()/*TBD*/, namespace.getSummary() );
+                                  namespace.getId(), namespace.getParentId(), namespace.getSummary() );
             this.database.update( "INSERT INTO CONTAINER_ELEMENT (ID) VALUES (?)", namespace.getId() );
             this.database.update( "INSERT INTO NAMED_ELEMENT (ID, NAME) VALUES (?, ?)", namespace.getId(), namespace.getName() );
             this.database.update( "INSERT INTO NAMED_CONTAINER_ELEMENT (ID) VALUES (?)", namespace.getId() );

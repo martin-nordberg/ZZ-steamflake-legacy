@@ -42,6 +42,11 @@ public class Module
     }
 
     @Override
+    public UUID getParentId() {
+        return this.state.get().parentId;
+    }
+
+    @Override
     public String getSummary() {
         return this.state.get().summary;
     }

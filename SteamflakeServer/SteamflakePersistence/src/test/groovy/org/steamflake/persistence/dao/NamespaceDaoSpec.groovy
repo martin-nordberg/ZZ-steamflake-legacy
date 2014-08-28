@@ -1,7 +1,9 @@
 package org.steamflake.persistence.dao
 
 import fi.evident.dalesbred.Database
+import org.steamflake.metamodel.structure.IAbstractNamespace
 import org.steamflake.metamodelimpl.structure.Namespace
+import org.steamflake.metamodelimpl.structure.RootNamespace
 import org.steamflake.persistence.h2database.H2DataSource
 import org.steamflake.utilities.revisions.StmTransaction
 import org.steamflake.utilities.revisions.StmTransactionContext
@@ -16,8 +18,10 @@ class NamespaceDaoSpec extends Specification {
 
     static H2DataSource dataSource
     Database database
+    RootNamespaceDao rootDao
     NamespaceDao dao
     StmTransaction transaction
+    RootNamespace root
 
     def setupSpec() {
         dataSource = new H2DataSource();
@@ -25,15 +29,17 @@ class NamespaceDaoSpec extends Specification {
 
     def setup() {
         database = new Database( dataSource );
+        rootDao = new RootNamespaceDao( database );
         dao = new NamespaceDao( database );
         transaction = StmTransactionContext.beginTransaction();
+        root = rootDao.findRootNamespace()
     }
 
     def "A namespace can be created, read, and deleted" () {
 
         given: "a namespace to be saved"
         def id = Uuids.makeUuid().toString();
-        Namespace namespace = new Namespace(id, id, "example", "a testing sample namespace")
+        Namespace namespace = new Namespace(id, root.getId().toString(), "example", "a testing sample namespace")
 
         when: "the namespace is created"
         dao.createNamespace( namespace )
@@ -58,9 +64,11 @@ class NamespaceDaoSpec extends Specification {
     def "it takes a while to create lots of namespaces" () {
 
         when: "the namespaces are created"
+        IAbstractNamespace namespace = root
         for ( int i = 0 ; i< 100000 ; i+=1 ) {
             def id = Uuids.makeUuid().toString();
-            def namespace = new Namespace( id, id, "example"+i, "a testing sample namespace" )
+            def parentId = namespace.getId().toString()
+            namespace = new Namespace( id, parentId, "example"+i, "testing sample namespace "+i )
             dao.createNamespace(namespace)
         }
 

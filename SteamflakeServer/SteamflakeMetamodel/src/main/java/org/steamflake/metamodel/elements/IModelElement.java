@@ -18,6 +18,11 @@ public interface IModelElement<ISelf, IParent extends IContainerElement> {
     IParent getParentContainer();
 
     /**
+     * @return the unique ID of the parent of this container.
+     */
+    UUID getParentId();
+
+    /**
      * @return a short summary of this model element
      */
     String getSummary();
@@ -31,7 +36,7 @@ public interface IModelElement<ISelf, IParent extends IContainerElement> {
     ISelf setParentContainer( IParent parent );
 
     /**
-     * Chanegs the summary of this model element.
+     * Changes the summary of this model element.
      *
      * @param summary the new summary.
      * @return this model element.

@@ -39,6 +39,11 @@ public class RootNamespace
     }
 
     @Override
+    public UUID getParentId() {
+        return this.id;
+    }
+
+    @Override
     public String getSummary() {
         return this.state.get().summary;
     }
