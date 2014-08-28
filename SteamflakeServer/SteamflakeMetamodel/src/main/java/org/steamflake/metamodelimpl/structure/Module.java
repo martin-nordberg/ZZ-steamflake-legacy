@@ -1,5 +1,6 @@
 package org.steamflake.metamodelimpl.structure;
 
+import org.steamflake.metamodel.elements.Ref;
 import org.steamflake.metamodel.structure.IModule;
 import org.steamflake.metamodel.structure.INamespace;
 import org.steamflake.utilities.revisions.Ver;
@@ -23,7 +24,7 @@ public class Module
      */
     public Module( String id, String parentId, String name, String summary, String version ) {
         this.id = UUID.fromString( id );
-        this.state = new Ver<>( new State( UUID.fromString( parentId ), null, name, summary, version ) );
+        this.state = new Ver<>( new State( new Ref<>( UUID.fromString(parentId) ), name, summary, version ) );
     }
 
     @Override
@@ -37,13 +38,8 @@ public class Module
     }
 
     @Override
-    public INamespace getParentContainer() {
-        return this.state.get().parent;
-    }
-
-    @Override
-    public UUID getParentId() {
-        return this.state.get().parentId;
+    public Ref<INamespace> refParentContainer() {
+        return this.state.get().parentContainer;
     }
 
     @Override
@@ -59,28 +55,28 @@ public class Module
     @Override
     public IModule setName( String name ) {
         State oldState = this.state.get();
-        this.state.set( new State( oldState.parentId, oldState.parent, name, oldState.summary, oldState.version ) );
+        this.state.set( new State( oldState.parentContainer, name, oldState.summary, oldState.version ) );
         return this;
     }
 
     @Override
     public IModule setParentContainer( INamespace parent ) {
         State oldState = this.state.get();
-        this.state.set( new State( parent.getId(), parent, oldState.name, oldState.summary, oldState.version ) );
+        this.state.set( new State( new Ref<>( parent.getId(), parent ), oldState.name, oldState.summary, oldState.version ) );
         return this;
     }
 
     @Override
     public IModule setSummary( String summary ) {
         State oldState = this.state.get();
-        this.state.set( new State( oldState.parentId, oldState.parent, oldState.name, summary, oldState.version ) );
+        this.state.set( new State( oldState.parentContainer, oldState.name, summary, oldState.version ) );
         return this;
     }
 
     @Override
     public IModule setVersion( String version ) {
         State oldState = this.state.get();
-        this.state.set( new State( oldState.parentId, oldState.parent, oldState.name, oldState.summary, version ) );
+        this.state.set( new State( oldState.parentContainer, oldState.name, oldState.summary, version ) );
         return this;
     }
 
@@ -89,9 +85,8 @@ public class Module
      */
     private static class State {
 
-        State( UUID parentId, INamespace parent, String name, String summary, String version ) {
-            this.parentId = parentId;
-            this.parent = parent;
+        State( Ref<INamespace> parentContainer, String name, String summary, String version ) {
+            this.parentContainer = parentContainer;
             this.name = name;
             this.summary = summary;
             this.version = version;
@@ -99,9 +94,7 @@ public class Module
 
         final String name;
 
-        INamespace parent;
-
-        final UUID parentId;
+        final Ref<INamespace> parentContainer;
 
         final String summary;
 

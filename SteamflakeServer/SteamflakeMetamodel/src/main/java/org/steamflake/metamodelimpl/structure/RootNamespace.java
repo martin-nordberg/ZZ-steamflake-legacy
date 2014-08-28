@@ -1,5 +1,6 @@
 package org.steamflake.metamodelimpl.structure;
 
+import org.steamflake.metamodel.elements.Ref;
 import org.steamflake.metamodel.structure.IAbstractNamespace;
 import org.steamflake.metamodel.structure.IRootNamespace;
 import org.steamflake.utilities.revisions.Ver;
@@ -20,6 +21,7 @@ public class RootNamespace
      */
     public RootNamespace( String id, String summary ) {
         this.id = UUID.fromString( id );
+        this.parentContainer = new Ref<>( this.id, this );
         this.state = new Ver<>( new State( summary ) );
     }
 
@@ -34,13 +36,8 @@ public class RootNamespace
     }
 
     @Override
-    public IAbstractNamespace getParentContainer() {
-        return this;
-    }
-
-    @Override
-    public UUID getParentId() {
-        return this.id;
+    public Ref<IAbstractNamespace> refParentContainer() {
+        return this.parentContainer;
     }
 
     @Override
@@ -81,6 +78,8 @@ public class RootNamespace
      * The unique ID of this root namespace.
      */
     private final UUID id;
+
+    private final Ref<IAbstractNamespace> parentContainer;
 
     /**
      * The versioned state of this root namespace.

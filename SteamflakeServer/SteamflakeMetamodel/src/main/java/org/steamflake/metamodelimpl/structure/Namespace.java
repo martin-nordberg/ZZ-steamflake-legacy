@@ -1,5 +1,6 @@
 package org.steamflake.metamodelimpl.structure;
 
+import org.steamflake.metamodel.elements.Ref;
 import org.steamflake.metamodel.structure.IAbstractNamespace;
 import org.steamflake.metamodel.structure.INamespace;
 import org.steamflake.utilities.revisions.Ver;
@@ -22,7 +23,7 @@ public class Namespace
      */
     public Namespace( String id, String parentId, String name, String summary ) {
         this.id = UUID.fromString( id );
-        this.state = new Ver<>( new State( UUID.fromString( parentId ), null, name, summary ) );
+        this.state = new Ver<>( new State( new Ref<>( UUID.fromString( parentId ) ), name, summary ) );
     }
 
     @Override
@@ -36,16 +37,8 @@ public class Namespace
     }
 
     @Override
-    public IAbstractNamespace getParentContainer() {
-
-        // TBD: initialize the parent reference from the parent UUID
-
-        return state.get().parent;
-    }
-
-    @Override
-    public UUID getParentId() {
-        return this.state.get().parentId;
+    public Ref<IAbstractNamespace> refParentContainer() {
+        return state.get().parentContainer;
     }
 
     @Override
@@ -56,21 +49,21 @@ public class Namespace
     @Override
     public INamespace setName( String name ) {
         State oldState = this.state.get();
-        this.state.set( new State( oldState.parentId, oldState.parent, name, oldState.summary ) );
+        this.state.set( new State( oldState.parentContainer, name, oldState.summary ) );
         return this;
     }
 
     @Override
     public INamespace setParentContainer( IAbstractNamespace parent ) {
         State oldState = this.state.get();
-        this.state.set( new State( parent.getId(), parent, oldState.name, oldState.summary ) );
+        this.state.set( new State( new Ref<>( parent.getId(), parent ), oldState.name, oldState.summary ) );
         return this;
     }
 
     @Override
     public INamespace setSummary( String summary ) {
         State oldState = this.state.get();
-        this.state.set( new State( oldState.parentId, oldState.parent, oldState.name, summary ) );
+        this.state.set( new State( oldState.parentContainer, oldState.name, summary ) );
         return this;
     }
 
@@ -79,18 +72,15 @@ public class Namespace
      */
     private static class State {
 
-        State( UUID parentId, IAbstractNamespace parent, String name, String summary ) {
-            this.parentId = parentId;
-            this.parent = parent;
+        State( Ref<IAbstractNamespace> parentContainer, String name, String summary ) {
+            this.parentContainer = parentContainer;
             this.name = name;
             this.summary = summary;
         }
 
         final String name;
 
-        IAbstractNamespace parent;
-
-        final UUID parentId;
+        final Ref<IAbstractNamespace> parentContainer;
 
         final String summary;
 

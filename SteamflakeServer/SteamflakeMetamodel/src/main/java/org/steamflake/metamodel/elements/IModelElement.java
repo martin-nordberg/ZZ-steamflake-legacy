@@ -13,19 +13,14 @@ public interface IModelElement<ISelf, IParent extends IContainerElement> {
     UUID getId();
 
     /**
-     * @return the container of this model element
-     */
-    IParent getParentContainer();
-
-    /**
-     * @return the unique ID of the parent of this container.
-     */
-    UUID getParentId();
-
-    /**
      * @return a short summary of this model element
      */
     String getSummary();
+
+    /**
+     * @return a reference to the container of this model element
+     */
+    Ref<IParent> refParentContainer();
 
     /**
      * Changes the parent of this model element.
