@@ -1,8 +1,7 @@
 package org.steamflake.metamodelimpl.structure;
 
 import org.steamflake.metamodel.elements.Ref;
-import org.steamflake.metamodel.structure.IModule;
-import org.steamflake.metamodel.structure.INamespace;
+import org.steamflake.metamodel.structure.*;
 import org.steamflake.utilities.revisions.Ver;
 
 import java.util.UUID;
@@ -24,7 +23,12 @@ public class Module
      */
     public Module( String id, String parentId, String name, String summary, String version ) {
         this.id = UUID.fromString( id );
-        this.state = new Ver<>( new State( new Ref<>( UUID.fromString(parentId) ), name, summary, version ) );
+        this.state = new Ver<>( new State( new Ref<>( UUID.fromString( parentId ) ), name, summary, version ) );
+    }
+
+    public Module( UUID id, INamespace parent, String name, String summary, String version ) {
+        this.id = id;
+        this.state = new Ver<>( new State( new Ref<>( parent.getId(), parent ), name, summary, version ) );
     }
 
     @Override
@@ -38,11 +42,6 @@ public class Module
     }
 
     @Override
-    public Ref<INamespace> refParentContainer() {
-        return this.state.get().parentContainer;
-    }
-
-    @Override
     public String getSummary() {
         return this.state.get().summary;
     }
@@ -50,6 +49,39 @@ public class Module
     @Override
     public String getVersion() {
         return this.state.get().version;
+    }
+
+    @Override
+    public boolean isExported() {
+        return true;
+    }
+
+    @Override
+    public IClass makeClass( UUID id, String name, String summary, boolean isExported ) {
+        return new Class( id, this, name, summary, isExported );
+    }
+
+    @Override
+    public IPackage makePackage( UUID id, String name, String summary, boolean isExported ) {
+        return new Package( id, this, name, summary, isExported );
+    }
+
+    @Override
+    public IParameter makeParameter( UUID id, String name, String summary, int sequence ) {
+        return new Parameter( id, this, name, summary, sequence );
+    }
+
+    @Override
+    public Ref<INamespace> refParentContainer() {
+        return this.state.get().parentContainer;
+    }
+
+    @Override
+    public IModule setExported( boolean isExported ) {
+        if ( !isExported ) {
+            throw new IllegalArgumentException( "A module is always exported." );
+        }
+        return this;
     }
 
     @Override

@@ -2,6 +2,7 @@ package org.steamflake.metamodelimpl.structure;
 
 import org.steamflake.metamodel.elements.Ref;
 import org.steamflake.metamodel.structure.IAbstractNamespace;
+import org.steamflake.metamodel.structure.IModule;
 import org.steamflake.metamodel.structure.INamespace;
 import org.steamflake.utilities.revisions.Ver;
 
@@ -26,6 +27,11 @@ public class Namespace
         this.state = new Ver<>( new State( new Ref<>( UUID.fromString( parentId ) ), name, summary ) );
     }
 
+    public Namespace( UUID id, IAbstractNamespace parent, String name, String summary ) {
+        this.id = id;
+        this.state = new Ver<>( new State( new Ref<>( parent.getId(), parent ), name, summary ) );
+    }
+
     @Override
     public UUID getId() {
         return this.id;
@@ -37,13 +43,23 @@ public class Namespace
     }
 
     @Override
-    public Ref<IAbstractNamespace> refParentContainer() {
-        return state.get().parentContainer;
+    public String getSummary() {
+        return state.get().summary;
     }
 
     @Override
-    public String getSummary() {
-        return state.get().summary;
+    public IModule makeModule( UUID id, String name, String summary, String version ) {
+        return new Module( id, this, name, summary, version );
+    }
+
+    @Override
+    public INamespace makeNamespace( UUID id, String name, String summary ) {
+        return new Namespace( id, this, name, summary );
+    }
+
+    @Override
+    public Ref<IAbstractNamespace> refParentContainer() {
+        return state.get().parentContainer;
     }
 
     @Override

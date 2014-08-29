@@ -10,6 +10,7 @@ public class Ref<T> {
 
     /**
      * Constructs a reference to a not-yet-loaded object with known UUID.
+     *
      * @param id the unique ID of the object.
      */
     public Ref( UUID id ) {
@@ -18,7 +19,8 @@ public class Ref<T> {
 
     /**
      * Constructs a reference to a loaded object.
-     * @param id the unique ID of the object.
+     *
+     * @param id    the unique ID of the object.
      * @param value the object itself.
      */
     public Ref( UUID id, T value ) {
