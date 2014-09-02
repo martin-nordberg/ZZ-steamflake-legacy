@@ -11,7 +11,8 @@ import java.util.UUID;
 /**
  * Namespace implementation.
  */
-public class Namespace
+public final class Namespace
+    extends AbstractNamespace<INamespace>
     implements INamespace {
 
     /**
@@ -23,89 +24,57 @@ public class Namespace
      * @param summary  a short summary of the namespace.
      */
     public Namespace( String id, String parentId, String name, String summary ) {
-        this.id = UUID.fromString( id );
+        super( UUID.fromString( id ) );
         this.state = new Ver<>( new State( new Ref<>( UUID.fromString( parentId ) ), name, summary ) );
     }
 
     public Namespace( UUID id, IAbstractNamespace parent, String name, String summary ) {
-        this.id = id;
+        super( id );
         this.state = new Ver<>( new State( new Ref<>( parent.getId(), parent ), name, summary ) );
     }
 
     @Override
-    public UUID getId() {
-        return this.id;
-    }
-
-    @Override
-    public String getName() {
-        return state.get().name;
-    }
-
-    @Override
-    public String getSummary() {
-        return state.get().summary;
-    }
-
-    @Override
-    public IModule makeModule( UUID id, String name, String summary, String version ) {
+    public final IModule makeModule( UUID id, String name, String summary, String version ) {
         return new Module( id, this, name, summary, version );
     }
 
     @Override
-    public INamespace makeNamespace( UUID id, String name, String summary ) {
-        return new Namespace( id, this, name, summary );
-    }
-
-    @Override
-    public Ref<IAbstractNamespace> refParentContainer() {
-        return state.get().parentContainer;
-    }
-
-    @Override
-    public INamespace setName( String name ) {
+    public final INamespace setName( String name ) {
         State oldState = this.state.get();
         this.state.set( new State( oldState.parentContainer, name, oldState.summary ) );
         return this;
     }
 
     @Override
-    public INamespace setParentContainer( IAbstractNamespace parent ) {
+    public final INamespace setParentContainer( IAbstractNamespace parent ) {
         State oldState = this.state.get();
         this.state.set( new State( new Ref<>( parent.getId(), parent ), oldState.name, oldState.summary ) );
         return this;
     }
 
     @Override
-    public INamespace setSummary( String summary ) {
+    public final INamespace setSummary( String summary ) {
         State oldState = this.state.get();
         this.state.set( new State( oldState.parentContainer, oldState.name, summary ) );
         return this;
     }
 
-    /**
-     * Class representing the versioned state of a namespace.
-     */
-    private static class State {
-
-        State( Ref<IAbstractNamespace> parentContainer, String name, String summary ) {
-            this.parentContainer = parentContainer;
-            this.name = name;
-            this.summary = summary;
-        }
-
-        final String name;
-
-        final Ref<IAbstractNamespace> parentContainer;
-
-        final String summary;
-
+    @Override
+    protected final State getState() {
+        return this.state.get();
     }
 
     /**
-     * The unique ID of this namespace.
+     * Class representing the versioned state of a namespace.
      */
-    private final UUID id;
+    private final static class State
+        extends AbstractNamespace.State<IAbstractNamespace> {
+
+        State( Ref<IAbstractNamespace> parentContainer, String name, String summary ) {
+            super( parentContainer, name, summary );
+        }
+
+    }
 
     /**
      * The versioned state of this namespace.

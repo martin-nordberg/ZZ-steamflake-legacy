@@ -2,9 +2,7 @@ package org.steamflake.metamodelimpl.structure;
 
 import org.steamflake.metamodel.elements.Ref;
 import org.steamflake.metamodel.structure.IAbstractPackage;
-import org.steamflake.metamodel.structure.IClass;
 import org.steamflake.metamodel.structure.IPackage;
-import org.steamflake.metamodel.structure.IParameter;
 import org.steamflake.utilities.revisions.Ver;
 
 import java.util.UUID;
@@ -13,6 +11,7 @@ import java.util.UUID;
  * Implementation of IPackage.
  */
 public class Package
+    extends AbstractPackage<IPackage, IAbstractPackage>
     implements IPackage {
 
     /**
@@ -25,53 +24,18 @@ public class Package
      * @param isExported whether the new package is visible outside this one.
      */
     public Package( String id, String parentId, String name, String summary, boolean isExported ) {
-        this.id = UUID.fromString( id );
+        super( UUID.fromString( id ) );
         this.state = new Ver<>( new State( new Ref<>( UUID.fromString( parentId ) ), name, summary, isExported ) );
     }
 
     public Package( UUID id, IAbstractPackage parent, String name, String summary, boolean isExported ) {
-        this.id = id;
+        super( id );
         this.state = new Ver<>( new State( new Ref<>( parent.getId(), parent ), name, summary, isExported ) );
     }
 
     @Override
-    public UUID getId() {
-        return this.id;
-    }
-
-    @Override
-    public String getName() {
-        return this.state.get().name;
-    }
-
-    @Override
-    public String getSummary() {
-        return this.state.get().summary;
-    }
-
-    @Override
-    public boolean isExported() {
-        return this.state.get().isExported;
-    }
-
-    @Override
-    public IClass makeClass( UUID id, String name, String summary, boolean isExported ) {
-        return new Class( id, this, name, summary, isExported );
-    }
-
-    @Override
-    public IPackage makePackage( UUID id, String name, String summary, boolean isExported ) {
-        return new Package( id, this, name, summary, isExported );
-    }
-
-    @Override
-    public IParameter makeParameter( UUID id, String name, String summary, int sequence ) {
-        return new Parameter( id, this, name, summary, sequence );
-    }
-
-    @Override
-    public Ref<IAbstractPackage> refParentContainer() {
-        return this.state.get().parentContainer;
+    protected State getState() {
+        return this.state.get();
     }
 
     @Override
@@ -105,29 +69,14 @@ public class Package
     /**
      * Class representing the versioned state of a module.
      */
-    private static class State {
+    private static class State
+        extends AbstractPackage.State<IAbstractPackage> {
 
         State( Ref<IAbstractPackage> parentContainer, String name, String summary, boolean isExported ) {
-            this.parentContainer = parentContainer;
-            this.name = name;
-            this.summary = summary;
-            this.isExported = isExported;
+            super( parentContainer, name, summary, isExported );
         }
 
-        final boolean isExported;
-
-        final String name;
-
-        final Ref<IAbstractPackage> parentContainer;
-
-        final String summary;
-
     }
-
-    /**
-     * The unique ID of this module.
-     */
-    private final UUID id;
 
     /**
      * The versioned state of this module.

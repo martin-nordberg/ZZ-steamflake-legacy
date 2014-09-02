@@ -3,7 +3,6 @@ package org.steamflake.metamodelimpl.structure;
 import org.steamflake.metamodel.elements.Ref;
 import org.steamflake.metamodel.structure.IClass;
 import org.steamflake.metamodel.structure.IComponent;
-import org.steamflake.metamodel.structure.IParameter;
 import org.steamflake.utilities.revisions.Ver;
 
 import java.util.UUID;
@@ -12,6 +11,7 @@ import java.util.UUID;
  * Implementation of IClass.
  */
 public class Class
+    extends AbstractComponent<IClass, IComponent>
     implements IClass {
 
     /**
@@ -24,48 +24,13 @@ public class Class
      * @param isExported whether this class is accessible outside its parent component.
      */
     public Class( String id, String parentId, String name, String summary, boolean isExported ) {
-        this.id = UUID.fromString( id );
+        super( UUID.fromString( id ) );
         this.state = new Ver<>( new State( new Ref<>( UUID.fromString( parentId ) ), name, summary, isExported ) );
     }
 
     public Class( UUID id, IComponent parent, String name, String summary, boolean isExported ) {
-        this.id = id;
+        super( id );
         this.state = new Ver<>( new State( new Ref<>( parent.getId(), parent ), name, summary, isExported ) );
-    }
-
-    @Override
-    public UUID getId() {
-        return this.id;
-    }
-
-    @Override
-    public String getName() {
-        return this.state.get().name;
-    }
-
-    @Override
-    public String getSummary() {
-        return this.state.get().summary;
-    }
-
-    @Override
-    public boolean isExported() {
-        return true;
-    }
-
-    @Override
-    public IClass makeClass( UUID id, String name, String summary, boolean isExported ) {
-        return new Class( id, this, name, summary, isExported );
-    }
-
-    @Override
-    public IParameter makeParameter( UUID id, String name, String summary, int sequence ) {
-        return new Parameter( id, this, name, summary, sequence );
-    }
-
-    @Override
-    public Ref<IComponent> refParentContainer() {
-        return this.state.get().parentContainer;
     }
 
     @Override
@@ -96,32 +61,22 @@ public class Class
         return this;
     }
 
-    /**
-     * Class representing the versioned state of a module.
-     */
-    private static class State {
-
-        State( Ref<IComponent> parentContainer, String name, String summary, boolean isExported ) {
-            this.parentContainer = parentContainer;
-            this.name = name;
-            this.summary = summary;
-            this.isExported = isExported;
-        }
-
-        final boolean isExported;
-
-        final String name;
-
-        final Ref<IComponent> parentContainer;
-
-        final String summary;
-
+    @Override
+    protected State getState() {
+        return this.state.get();
     }
 
     /**
-     * The unique ID of this module.
+     * Class representing the versioned state of a namespace.
      */
-    private final UUID id;
+    private final static class State
+        extends AbstractComponent.State<IComponent> {
+
+        State( Ref<IComponent> parentContainer, String name, String summary, boolean isExported ) {
+            super( parentContainer, name, summary, isExported );
+        }
+
+    }
 
     /**
      * The versioned state of this module.

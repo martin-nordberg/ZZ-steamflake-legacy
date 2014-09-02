@@ -3,6 +3,7 @@ package org.steamflake.metamodelimpl.structure;
 import org.steamflake.metamodel.elements.Ref;
 import org.steamflake.metamodel.structure.IFunctionSignature;
 import org.steamflake.metamodel.structure.IParameter;
+import org.steamflake.metamodelimpl.elements.AbstractNamedElement;
 import org.steamflake.utilities.revisions.Ver;
 
 import java.util.UUID;
@@ -11,6 +12,7 @@ import java.util.UUID;
  * Implementation of IParemeter.
  */
 public class Parameter
+    extends AbstractNamedElement<IParameter, IFunctionSignature>
     implements IParameter {
 
     /**
@@ -23,38 +25,23 @@ public class Parameter
      * @param sequence the sequence number of the parameter.
      */
     public Parameter( String id, String parentId, String name, String summary, int sequence ) {
-        this.id = UUID.fromString( id );
+        super( UUID.fromString( id ) );
         this.state = new Ver<>( new State( new Ref<>( UUID.fromString( parentId ) ), name, summary, sequence ) );
     }
 
     public Parameter( UUID id, IFunctionSignature parent, String name, String summary, int sequence ) {
-        this.id = id;
+        super( id );
         this.state = new Ver<>( new State( new Ref<>( parent.getId(), parent ), name, summary, sequence ) );
     }
 
     @Override
-    public UUID getId() {
-        return this.id;
-    }
-
-    @Override
-    public String getName() {
-        return this.state.get().name;
+    protected State getState() {
+        return this.state.get();
     }
 
     @Override
     public int getSequence() {
         return this.state.get().sequence;
-    }
-
-    @Override
-    public String getSummary() {
-        return this.state.get().summary;
-    }
-
-    @Override
-    public Ref<IFunctionSignature> refParentContainer() {
-        return this.state.get().parentContainer;
     }
 
     @Override
@@ -88,29 +75,17 @@ public class Parameter
     /**
      * Class representing the versioned state of a module.
      */
-    private static class State {
+    private static class State
+        extends AbstractNamedElement.State<IFunctionSignature>{
 
         State( Ref<IFunctionSignature> parentContainer, String name, String summary, int sequence ) {
-            this.parentContainer = parentContainer;
-            this.name = name;
-            this.summary = summary;
+            super( parentContainer, name, summary );
             this.sequence = sequence;
         }
 
-        final String name;
-
-        final Ref<IFunctionSignature> parentContainer;
-
         final int sequence;
 
-        final String summary;
-
     }
-
-    /**
-     * The unique ID of this module.
-     */
-    private final UUID id;
 
     /**
      * The versioned state of this module.

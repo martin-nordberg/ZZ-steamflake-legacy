@@ -10,8 +10,6 @@ import java.util.UUID;
 public interface IAbstractNamespace<ISelf>
     extends INamedContainerElement<ISelf, IAbstractNamespace> {
 
-    // TBD: makeModule
-
     /**
      * Creates a new namespace that is a child of this one.
      *

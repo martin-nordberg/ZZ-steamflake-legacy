@@ -10,6 +10,7 @@ import java.util.UUID;
  * Implementation for IModule.
  */
 public class Module
+    extends AbstractPackage<IModule, INamespace>
     implements IModule {
 
     /**
@@ -22,58 +23,18 @@ public class Module
      * @param version  the version number of the module.
      */
     public Module( String id, String parentId, String name, String summary, String version ) {
-        this.id = UUID.fromString( id );
+        super( UUID.fromString( id ) );
         this.state = new Ver<>( new State( new Ref<>( UUID.fromString( parentId ) ), name, summary, version ) );
     }
 
     public Module( UUID id, INamespace parent, String name, String summary, String version ) {
-        this.id = id;
+        super( id );
         this.state = new Ver<>( new State( new Ref<>( parent.getId(), parent ), name, summary, version ) );
     }
 
     @Override
-    public UUID getId() {
-        return this.id;
-    }
-
-    @Override
-    public String getName() {
-        return this.state.get().name;
-    }
-
-    @Override
-    public String getSummary() {
-        return this.state.get().summary;
-    }
-
-    @Override
-    public String getVersion() {
-        return this.state.get().version;
-    }
-
-    @Override
-    public boolean isExported() {
-        return true;
-    }
-
-    @Override
-    public IClass makeClass( UUID id, String name, String summary, boolean isExported ) {
-        return new Class( id, this, name, summary, isExported );
-    }
-
-    @Override
-    public IPackage makePackage( UUID id, String name, String summary, boolean isExported ) {
-        return new Package( id, this, name, summary, isExported );
-    }
-
-    @Override
-    public IParameter makeParameter( UUID id, String name, String summary, int sequence ) {
-        return new Parameter( id, this, name, summary, sequence );
-    }
-
-    @Override
-    public Ref<INamespace> refParentContainer() {
-        return this.state.get().parentContainer;
+    protected State getState() {
+        return this.state.get();
     }
 
     @Override
@@ -106,6 +67,11 @@ public class Module
     }
 
     @Override
+    public String getVersion() {
+        return this.state.get().version;
+    }
+
+    @Override
     public IModule setVersion( String version ) {
         State oldState = this.state.get();
         this.state.set( new State( oldState.parentContainer, oldState.name, oldState.summary, version ) );
@@ -115,29 +81,17 @@ public class Module
     /**
      * Class representing the versioned state of a module.
      */
-    private static class State {
+    private static class State
+        extends AbstractPackage.State<INamespace> {
 
         State( Ref<INamespace> parentContainer, String name, String summary, String version ) {
-            this.parentContainer = parentContainer;
-            this.name = name;
-            this.summary = summary;
+            super( parentContainer, name, summary, true );
             this.version = version;
         }
-
-        final String name;
-
-        final Ref<INamespace> parentContainer;
-
-        final String summary;
 
         final String version;
 
     }
-
-    /**
-     * The unique ID of this module.
-     */
-    private final UUID id;
 
     /**
      * The versioned state of this module.
