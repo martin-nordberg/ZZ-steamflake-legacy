@@ -2,7 +2,7 @@ package org.steamflake.metamodelimpl.structure;
 
 import org.steamflake.metamodel.elements.Ref;
 import org.steamflake.metamodel.structure.*;
-import org.steamflake.utilities.revisions.Ver;
+import org.steamflake.utilities.revisions.V;
 
 import java.util.UUID;
 
@@ -24,12 +24,12 @@ public class Module
      */
     public Module( String id, String parentId, String name, String summary, String version ) {
         super( UUID.fromString( id ) );
-        this.state = new Ver<>( new State( new Ref<>( UUID.fromString( parentId ) ), name, summary, version ) );
+        this.state = new V<>( new State( new Ref<>( UUID.fromString( parentId ) ), name, summary, version ) );
     }
 
     public Module( UUID id, INamespace parent, String name, String summary, String version ) {
         super( id );
-        this.state = new Ver<>( new State( new Ref<>( parent.getId(), parent ), name, summary, version ) );
+        this.state = new V<>( new State( new Ref<>( parent.getId(), parent ), name, summary, version ) );
     }
 
     @Override
@@ -96,6 +96,6 @@ public class Module
     /**
      * The versioned state of this module.
      */
-    private final Ver<State> state;
+    private final V<State> state;
 
 }

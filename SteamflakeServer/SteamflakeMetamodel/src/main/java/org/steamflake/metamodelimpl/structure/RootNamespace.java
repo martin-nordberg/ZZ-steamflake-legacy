@@ -4,7 +4,7 @@ import org.steamflake.metamodel.elements.Ref;
 import org.steamflake.metamodel.structure.IAbstractNamespace;
 import org.steamflake.metamodel.structure.INamespace;
 import org.steamflake.metamodel.structure.IRootNamespace;
-import org.steamflake.utilities.revisions.Ver;
+import org.steamflake.utilities.revisions.V;
 
 import java.util.UUID;
 
@@ -23,7 +23,7 @@ public class RootNamespace
     public RootNamespace( String id, String summary ) {
         this.id = UUID.fromString( id );
         this.parentContainer = new Ref<>( this.id, this );
-        this.state = new Ver<>( new State( summary ) );
+        this.state = new V<>( new State( summary ) );
     }
 
     @Override
@@ -90,6 +90,6 @@ public class RootNamespace
     /**
      * The versioned state of this root namespace.
      */
-    private final Ver<State> state;
+    private final V<State> state;
 
 }

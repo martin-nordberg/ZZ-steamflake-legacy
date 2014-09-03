@@ -4,7 +4,7 @@ import org.steamflake.metamodel.elements.Ref;
 import org.steamflake.metamodel.structure.IFunctionSignature;
 import org.steamflake.metamodel.structure.IParameter;
 import org.steamflake.metamodelimpl.elements.AbstractNamedElement;
-import org.steamflake.utilities.revisions.Ver;
+import org.steamflake.utilities.revisions.V;
 
 import java.util.UUID;
 
@@ -26,12 +26,12 @@ public class Parameter
      */
     public Parameter( String id, String parentId, String name, String summary, int sequence ) {
         super( UUID.fromString( id ) );
-        this.state = new Ver<>( new State( new Ref<>( UUID.fromString( parentId ) ), name, summary, sequence ) );
+        this.state = new V<>( new State( new Ref<>( UUID.fromString( parentId ) ), name, summary, sequence ) );
     }
 
     public Parameter( UUID id, IFunctionSignature parent, String name, String summary, int sequence ) {
         super( id );
-        this.state = new Ver<>( new State( new Ref<>( parent.getId(), parent ), name, summary, sequence ) );
+        this.state = new V<>( new State( new Ref<>( parent.getId(), parent ), name, summary, sequence ) );
     }
 
     @Override
@@ -90,6 +90,6 @@ public class Parameter
     /**
      * The versioned state of this module.
      */
-    private final Ver<State> state;
+    private final V<State> state;
 
 }

@@ -4,7 +4,7 @@ import org.steamflake.metamodel.elements.Ref;
 import org.steamflake.metamodel.structure.IAbstractNamespace;
 import org.steamflake.metamodel.structure.IModule;
 import org.steamflake.metamodel.structure.INamespace;
-import org.steamflake.utilities.revisions.Ver;
+import org.steamflake.utilities.revisions.V;
 
 import java.util.UUID;
 
@@ -25,12 +25,12 @@ public final class Namespace
      */
     public Namespace( String id, String parentId, String name, String summary ) {
         super( UUID.fromString( id ) );
-        this.state = new Ver<>( new State( new Ref<>( UUID.fromString( parentId ) ), name, summary ) );
+        this.state = new V<>( new State( new Ref<>( UUID.fromString( parentId ) ), name, summary ) );
     }
 
     public Namespace( UUID id, IAbstractNamespace parent, String name, String summary ) {
         super( id );
-        this.state = new Ver<>( new State( new Ref<>( parent.getId(), parent ), name, summary ) );
+        this.state = new V<>( new State( new Ref<>( parent.getId(), parent ), name, summary ) );
     }
 
     @Override
@@ -79,7 +79,7 @@ public final class Namespace
     /**
      * The versioned state of this namespace.
      */
-    private final Ver<State> state;
+    private final V<State> state;
 
 }
 

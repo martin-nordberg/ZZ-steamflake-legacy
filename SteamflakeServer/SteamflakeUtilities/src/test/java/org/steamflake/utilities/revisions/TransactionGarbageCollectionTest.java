@@ -42,7 +42,7 @@ public class TransactionGarbageCollectionTest {
         public void run() {
             try {
                 Runnable task1 = () -> {
-                    this.myValue = new Ver<>( new Value() );
+                    this.myValue = new V<>( new Value() );
                 };
                 StmTransactionContext.doInTransaction( 2, task1 );
                 for ( int i = 0; i < 50000; i += 1 ) {
@@ -60,7 +60,7 @@ public class TransactionGarbageCollectionTest {
             }
         }
 
-        private Ver<Value> myValue;
+        private V<Value> myValue;
 
     }
 

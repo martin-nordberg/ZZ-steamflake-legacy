@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicReference;
  *
  * @param <T> the type of the value that is managed through its revisions.
  */
-public class Ver<T>
+public class V<T>
     extends AbstractVersionedItem {
 
     /**
@@ -17,7 +17,7 @@ public class Ver<T>
      *
      * @param value the initial value.
      */
-    public Ver( T value ) {
+    public V( T value ) {
 
         // Sanity check the input.
         Objects.requireNonNull( value );
@@ -167,13 +167,17 @@ public class Ver<T>
             final long revisionNumber = priorRevision.revisionNumber.get();
 
             if ( revisionNumber == 0L ) {
+                // If found & removed w/o concurrent change, then done.
                 if ( revision.priorRevision.compareAndSet( priorRevision, priorRevision.priorRevision.get() ) ) {
                     return;
                 }
+
+                // If concurrent change, abandon this call and try again from the top.
                 priorRevision = null;
                 this.removeAbortedRevision();
             }
             else {
+                // Advance through the list.
                 revision = priorRevision;
                 priorRevision = revision.priorRevision.get();
             }

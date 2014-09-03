@@ -8,17 +8,17 @@ import java.util.UUID;
 public interface IModelElement<ISelf, IParent extends IContainerElement> {
 
     /**
-     * @return the unique ID of this model element
+     * @return the unique ID of this model element.
      */
     UUID getId();
 
     /**
-     * @return a short summary of this model element
+     * @return a short summary of this model element.
      */
     String getSummary();
 
     /**
-     * @return a reference to the container of this model element
+     * @return a reference to the container of this model element.
      */
     Ref<IParent> refParentContainer();
 

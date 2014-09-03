@@ -53,7 +53,7 @@ public class StmTransactionContext {
     }
 
     /**
-     * Performs the work of the given callback inside a transaction.
+     * Performs the work of the given callback inside a newly created transaction.
      *
      * @param task       the work to be done inside a transaction.
      * @param maxRetries the maximum number of times to retry the transaction if write conflicts are encountered

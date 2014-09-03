@@ -3,7 +3,7 @@ package org.steamflake.metamodelimpl.structure;
 import org.steamflake.metamodel.elements.Ref;
 import org.steamflake.metamodel.structure.IClass;
 import org.steamflake.metamodel.structure.IComponent;
-import org.steamflake.utilities.revisions.Ver;
+import org.steamflake.utilities.revisions.V;
 
 import java.util.UUID;
 
@@ -25,12 +25,12 @@ public class Class
      */
     public Class( String id, String parentId, String name, String summary, boolean isExported ) {
         super( UUID.fromString( id ) );
-        this.state = new Ver<>( new State( new Ref<>( UUID.fromString( parentId ) ), name, summary, isExported ) );
+        this.state = new V<>( new State( new Ref<>( UUID.fromString( parentId ) ), name, summary, isExported ) );
     }
 
     public Class( UUID id, IComponent parent, String name, String summary, boolean isExported ) {
         super( id );
-        this.state = new Ver<>( new State( new Ref<>( parent.getId(), parent ), name, summary, isExported ) );
+        this.state = new V<>( new State( new Ref<>( parent.getId(), parent ), name, summary, isExported ) );
     }
 
     @Override
@@ -81,6 +81,6 @@ public class Class
     /**
      * The versioned state of this module.
      */
-    private final Ver<State> state;
+    private final V<State> state;
 
 }

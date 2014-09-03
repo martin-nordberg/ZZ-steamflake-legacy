@@ -52,7 +52,7 @@ public class StmTransaction {
      * Atomically commits the given transaction.
      *
      * @param transaction the transaction to commit
-     * @throws WriteConflictException if some other transaction has written some value the given transaction read
+     * @throws WriteConflictException if some other transaction has written some value the given transaction read.
      */
     private static synchronized void writeTransaction( StmTransaction transaction ) {
 
@@ -150,7 +150,7 @@ public class StmTransaction {
     }
 
     /**
-     * @return the revision number of information to be read by this transaction
+     * @return the revision number of information to be read by this transaction.
      */
     long getSourceRevisionNumber() {
         return sourceRevisionNumber;
@@ -266,13 +266,14 @@ public class StmTransaction {
     }
 
     /**
-     * Cleans up of all the referenced versioned items written by this transaction.
+     * Cleans up all the referenced versioned items written by this transaction.
      */
     private void removeUnusedRevisions() {
 
         // Remove all revisions older than the one written by this transaction.
+        final long oldestUsableRevisionNumber = this.targetRevisionNumber.get();
         for ( AbstractVersionedItem versionedItem : this.versionedItemsWritten ) {
-            versionedItem.removeUnusedRevisions( this.targetRevisionNumber.get() );
+            versionedItem.removeUnusedRevisions( oldestUsableRevisionNumber );
         }
 
         // Stop referencing the versioned items.
@@ -302,7 +303,7 @@ public class StmTransaction {
     private static Queue<Long> sourceRevisionsInUse = new PriorityBlockingQueue<>();
 
     /**
-     * A revision number seen during reading that will cause a write conflict if anything writes through this transaction.
+     * A newer revision number seen during reading will cause a write conflict if anything writes through this transaction.
      */
     private boolean newerRevisionSeen;
 
