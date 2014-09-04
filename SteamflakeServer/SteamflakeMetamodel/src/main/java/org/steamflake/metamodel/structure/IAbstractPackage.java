@@ -7,7 +7,7 @@ import java.util.UUID;
 /**
  * An abstract package collects related components.
  */
-public interface IAbstractPackage<ISelf, IParent extends INamedContainerElement>
+public interface IAbstractPackage<ISelf extends IAbstractPackage, IParent extends INamedContainerElement>
     extends IComponent<ISelf, IParent> {
 
     /**

@@ -1,7 +1,6 @@
 package org.steamflake.metamodelimpl.structure;
 
 import org.steamflake.metamodel.elements.Ref;
-import org.steamflake.metamodel.structure.IAbstractNamespace;
 import org.steamflake.metamodel.structure.INamespace;
 import org.steamflake.metamodel.structure.IRootNamespace;
 import org.steamflake.utilities.revisions.V;
@@ -11,7 +10,7 @@ import java.util.UUID;
 /**
  * Root namespace implementation.
  */
-public class RootNamespace
+public final class RootNamespace
     implements IRootNamespace {
 
     /**
@@ -23,61 +22,48 @@ public class RootNamespace
     public RootNamespace( String id, String summary ) {
         this.id = UUID.fromString( id );
         this.parentContainer = new Ref<>( this.id, this );
-        this.state = new V<>( new State( summary ) );
+        this.summary = new V<>( summary );
     }
 
     @Override
-    public UUID getId() {
+    public final UUID getId() {
         return this.id;
     }
 
     @Override
-    public String getName() {
+    public final String getName() {
         return "$";
     }
 
     @Override
-    public String getSummary() {
-        return this.state.get().summary;
+    public final String getSummary() {
+        return this.summary.get();
     }
 
     @Override
-    public INamespace makeNamespace( UUID id, String name, String summary ) {
+    public final INamespace makeNamespace( UUID id, String name, String summary ) {
         return new Namespace( id, this, name, summary );
     }
 
     @Override
-    public Ref<IAbstractNamespace> refParentContainer() {
+    public final Ref<IRootNamespace> refParentContainer() {
         return this.parentContainer;
     }
 
     @Override
-    public IRootNamespace setName( String name ) {
+    public final IRootNamespace setName( String name ) {
         throw new UnsupportedOperationException( "Cannot change the name of the root namespace." );
     }
 
     @Override
-    public IRootNamespace setParentContainer( IAbstractNamespace parent ) {
+    public final IRootNamespace setParentContainer( IRootNamespace parent ) {
         throw new UnsupportedOperationException( "Cannot change the parent of the root namespace." );
     }
 
     @Override
-    public IRootNamespace setSummary( String summary ) {
-        this.state.set( new State( summary ) );
+    public final IRootNamespace setSummary( String summary ) {
+        this.summary.set( summary );
         return this;
-    }
-
-    /**
-     * Class representing the versioned state of a root namespace.
-     */
-    private static class State {
-
-        State( String summary ) {
-            this.summary = summary;
-        }
-
-        final String summary;
-
     }
 
     /**
@@ -85,11 +71,14 @@ public class RootNamespace
      */
     private final UUID id;
 
-    private final Ref<IAbstractNamespace> parentContainer;
+    /**
+     * The "parent" of this root namespace (i.e. the root namespace itself).
+     */
+    private final Ref<IRootNamespace> parentContainer;
 
     /**
-     * The versioned state of this root namespace.
+     * The versioned summary of this root namespace.
      */
-    private final V<State> state;
+    private final V<String> summary;
 
 }

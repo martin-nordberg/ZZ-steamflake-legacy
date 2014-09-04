@@ -7,6 +7,10 @@ import java.util.Objects;
  */
 public class StmTransactionContext {
 
+    private StmTransactionContext() {
+        throw new UnsupportedOperationException( "Static utility class only." );
+    }
+
     /**
      * Creates a new transaction. The lifecycle of the transaction must be managed by the client, which
      * is responsible for calling either commitTransaction or abortTransaction on the result.

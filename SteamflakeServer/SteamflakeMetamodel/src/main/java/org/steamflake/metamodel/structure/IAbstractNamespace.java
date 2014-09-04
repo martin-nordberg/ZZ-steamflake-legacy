@@ -7,8 +7,8 @@ import java.util.UUID;
 /**
  * An abstract namespace is a naming structure distinguishing modules.
  */
-public interface IAbstractNamespace<ISelf>
-    extends INamedContainerElement<ISelf, IAbstractNamespace> {
+public interface IAbstractNamespace<ISelf extends IAbstractNamespace, IParent extends IAbstractNamespace>
+    extends INamedContainerElement<ISelf, IParent> {
 
     /**
      * Creates a new namespace that is a child of this one.

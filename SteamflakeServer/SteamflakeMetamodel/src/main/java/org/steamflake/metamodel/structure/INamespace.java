@@ -7,7 +7,7 @@ import java.util.UUID;
  * than the root namespace.
  */
 public interface INamespace
-    extends IAbstractNamespace<INamespace> {
+    extends IAbstractNamespace<INamespace, IAbstractNamespace> {
 
     /**
      * Creates a new module.

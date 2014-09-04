@@ -3,7 +3,7 @@ package org.steamflake.metamodel.elements;
 /**
  * Interface to an abstract named model element.
  */
-public interface INamedElement<ISelf, IParent extends INamedContainerElement>
+public interface INamedElement<ISelf extends INamedElement, IParent extends INamedContainerElement>
     extends IModelElement<ISelf, IParent> {
 
     /**
@@ -12,7 +12,7 @@ public interface INamedElement<ISelf, IParent extends INamedContainerElement>
     String getName();
 
     /**
-     * Chanegs the name of this model element.
+     * Changes the name of this model element.
      *
      * @param name the new name.
      * @return this model element.

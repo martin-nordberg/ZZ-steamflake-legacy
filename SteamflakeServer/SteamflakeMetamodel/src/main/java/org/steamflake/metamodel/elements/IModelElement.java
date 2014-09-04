@@ -5,7 +5,7 @@ import java.util.UUID;
 /**
  * Top level base class for Steamflake model elements. Represents any model element with a summary and a unique ID.
  */
-public interface IModelElement<ISelf, IParent extends IContainerElement> {
+public interface IModelElement<ISelf extends IModelElement, IParent extends IContainerElement> {
 
     /**
      * @return the unique ID of this model element.

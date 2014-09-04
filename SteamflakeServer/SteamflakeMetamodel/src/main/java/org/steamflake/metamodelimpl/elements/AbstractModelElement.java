@@ -3,17 +3,20 @@ package org.steamflake.metamodelimpl.elements;
 import org.steamflake.metamodel.elements.IContainerElement;
 import org.steamflake.metamodel.elements.IModelElement;
 import org.steamflake.metamodel.elements.Ref;
+import org.steamflake.utilities.revisions.V;
 
 import java.util.UUID;
 
 /**
  * Abstract base class for classes implementing IModelElement.
  */
-public abstract class AbstractModelElement<ISelf, IParent extends IContainerElement>
+public abstract class AbstractModelElement<ISelf extends IModelElement, IParent extends IContainerElement>
     implements IModelElement<ISelf, IParent> {
 
-    protected AbstractModelElement( UUID id ) {
+    protected AbstractModelElement( UUID id, Ref<IParent> parentContainer, String summary ) {
         this.id = id;
+        this.parentContainer = new V<>( parentContainer );
+        this.summary = new V<>( summary );
     }
 
     @Override
@@ -23,40 +26,41 @@ public abstract class AbstractModelElement<ISelf, IParent extends IContainerElem
 
     @Override
     public final String getSummary() {
-        return this.getState().summary;
+        return this.summary.get();
     }
 
     @Override
     public final Ref<IParent> refParentContainer() {
-        return getState().parentContainer;
+        return this.parentContainer.get();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public final ISelf setParentContainer( IParent parentContainer ) {
+        this.parentContainer.set( new Ref<>( parentContainer.getId(), parentContainer ) );
+        return (ISelf) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public final ISelf setSummary( String summary ) {
+        this.summary.set( summary );
+        return (ISelf) this;
     }
 
     /**
-     * Returns the versioned state of this model element.
-     *
-     * @return a versioned reference to the current state of the model element.
-     */
-    protected abstract State<IParent> getState();
-
-    /**
-     * Class representing the versioned state of a namespace.
-     */
-    protected static class State<IParent extends IContainerElement> {
-
-        protected State( Ref<IParent> parentContainer, String summary ) {
-            this.parentContainer = parentContainer;
-            this.summary = summary;
-        }
-
-        public final Ref<IParent> parentContainer;
-
-        public final String summary;
-
-    }
-
-    /**
-     * The unique ID of this namespace.
+     * The unique ID of this model element.
      */
     private final UUID id;
+
+    /**
+     * A reference to the parent container of this model element.
+     */
+    private final V<Ref<IParent>> parentContainer;
+
+    /**
+     * A short summary of this model element.
+     */
+    private final V<String> summary;
 
 }

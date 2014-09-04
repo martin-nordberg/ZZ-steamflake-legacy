@@ -1,7 +1,8 @@
 package org.steamflake.metamodelimpl.structure;
 
 import org.steamflake.metamodel.elements.Ref;
-import org.steamflake.metamodel.structure.*;
+import org.steamflake.metamodel.structure.IModule;
+import org.steamflake.metamodel.structure.INamespace;
 import org.steamflake.utilities.revisions.V;
 
 import java.util.UUID;
@@ -9,7 +10,7 @@ import java.util.UUID;
 /**
  * Implementation for IModule.
  */
-public class Module
+public final class Module
     extends AbstractPackage<IModule, INamespace>
     implements IModule {
 
@@ -23,79 +24,29 @@ public class Module
      * @param version  the version number of the module.
      */
     public Module( String id, String parentId, String name, String summary, String version ) {
-        super( UUID.fromString( id ) );
-        this.state = new V<>( new State( new Ref<>( UUID.fromString( parentId ) ), name, summary, version ) );
+        super( UUID.fromString( id ), new Ref<>( UUID.fromString( parentId ) ), name, summary, true );
+        this.version = new V<>( version );
     }
 
     public Module( UUID id, INamespace parent, String name, String summary, String version ) {
-        super( id );
-        this.state = new V<>( new State( new Ref<>( parent.getId(), parent ), name, summary, version ) );
-    }
-
-    @Override
-    protected State getState() {
-        return this.state.get();
-    }
-
-    @Override
-    public IModule setExported( boolean isExported ) {
-        if ( !isExported ) {
-            throw new IllegalArgumentException( "A module is always exported." );
-        }
-        return this;
-    }
-
-    @Override
-    public IModule setName( String name ) {
-        State oldState = this.state.get();
-        this.state.set( new State( oldState.parentContainer, name, oldState.summary, oldState.version ) );
-        return this;
-    }
-
-    @Override
-    public IModule setParentContainer( INamespace parent ) {
-        State oldState = this.state.get();
-        this.state.set( new State( new Ref<>( parent.getId(), parent ), oldState.name, oldState.summary, oldState.version ) );
-        return this;
-    }
-
-    @Override
-    public IModule setSummary( String summary ) {
-        State oldState = this.state.get();
-        this.state.set( new State( oldState.parentContainer, oldState.name, summary, oldState.version ) );
-        return this;
+        super( id, new Ref<>( parent.getId(), parent ), name, summary, true );
+        this.version = new V<>( version );
     }
 
     @Override
     public String getVersion() {
-        return this.state.get().version;
+        return this.version.get();
     }
 
     @Override
     public IModule setVersion( String version ) {
-        State oldState = this.state.get();
-        this.state.set( new State( oldState.parentContainer, oldState.name, oldState.summary, version ) );
+        this.version.set( version );
         return this;
     }
 
     /**
-     * Class representing the versioned state of a module.
+     * The version number of this module.
      */
-    private static class State
-        extends AbstractPackage.State<INamespace> {
-
-        State( Ref<INamespace> parentContainer, String name, String summary, String version ) {
-            super( parentContainer, name, summary, true );
-            this.version = version;
-        }
-
-        final String version;
-
-    }
-
-    /**
-     * The versioned state of this module.
-     */
-    private final V<State> state;
+    private final V<String> version;
 
 }

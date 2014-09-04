@@ -1,5 +1,6 @@
 package org.steamflake.metamodelimpl.structure;
 
+import org.steamflake.metamodel.elements.Ref;
 import org.steamflake.metamodel.structure.IAbstractNamespace;
 import org.steamflake.metamodel.structure.INamespace;
 import org.steamflake.metamodelimpl.elements.AbstractNamedElement;
@@ -9,12 +10,12 @@ import java.util.UUID;
 /**
  * Abstract base class for concrete namespaces.
  */
-public abstract class AbstractNamespace<ISelf>
-    extends AbstractNamedElement<ISelf, IAbstractNamespace>
-    implements IAbstractNamespace<ISelf> {
+public abstract class AbstractNamespace<ISelf extends IAbstractNamespace, IParent extends IAbstractNamespace>
+    extends AbstractNamedElement<ISelf, IParent>
+    implements IAbstractNamespace<ISelf, IParent> {
 
-    protected AbstractNamespace( UUID id ) {
-        super( id );
+    protected AbstractNamespace( UUID id, Ref<IParent> parentContainer, String name, String summary ) {
+        super( id, parentContainer, name, summary );
     }
 
     @Override

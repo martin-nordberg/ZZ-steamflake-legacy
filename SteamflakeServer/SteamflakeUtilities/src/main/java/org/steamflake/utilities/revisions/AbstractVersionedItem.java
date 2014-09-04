@@ -14,16 +14,20 @@ abstract class AbstractVersionedItem {
         this.hashCode = lastHashCode.incrementAndGet();
     }
 
+    @SuppressWarnings("SimplifiableIfStatement")
     @Override
-    public boolean equals( Object o ) {
-        if ( this == o ) return true;
-        if ( o == null || getClass() != o.getClass() ) return false;
+    public boolean equals( Object that ) {
 
-        AbstractVersionedItem that = (AbstractVersionedItem) o;
+        if ( this == that ) {
+            return true;
+        }
 
-        if ( hashCode != that.hashCode ) return false;
+        if ( that == null || getClass() != that.getClass() ) {
+            return false;
+        }
 
-        return true;
+        return hashCode == ((AbstractVersionedItem) that).hashCode;
+
     }
 
     @Override

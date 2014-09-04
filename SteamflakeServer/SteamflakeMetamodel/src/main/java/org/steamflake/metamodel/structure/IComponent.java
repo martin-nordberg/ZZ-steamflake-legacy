@@ -7,7 +7,7 @@ import java.util.UUID;
 /**
  * A component represents a reusable element of behavior.
  */
-public interface IComponent<ISelf, IParent extends INamedContainerElement>
+public interface IComponent<ISelf extends IComponent, IParent extends INamedContainerElement>
     extends IFunction<ISelf, IParent> {
 
     /**

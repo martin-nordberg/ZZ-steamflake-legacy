@@ -7,7 +7,7 @@ import java.util.UUID;
 /**
  * A function signature represents the name and parameters of a function.
  */
-public interface IFunctionSignature<ISelf, IParent extends INamedContainerElement>
+public interface IFunctionSignature<ISelf extends IFunctionSignature, IParent extends INamedContainerElement>
     extends INamedContainerElement<ISelf, IParent> {
 
     /**

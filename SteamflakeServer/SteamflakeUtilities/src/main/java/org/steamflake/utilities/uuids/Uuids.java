@@ -12,6 +12,10 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class Uuids {
 
+    private Uuids() {
+        throw new UnsupportedOperationException( "Static utility class only." );
+    }
+
     /**
      * Makes a version 1 UUID.
      *

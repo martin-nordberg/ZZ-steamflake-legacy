@@ -7,7 +7,7 @@ import org.steamflake.metamodel.elements.INamedContainerElement;
  * For a package it's the initializer of the package. For a component it's the constructor of the component. A method
  * is itself simply a single function.
  */
-public interface IFunction<ISelf, IParent extends INamedContainerElement>
+public interface IFunction<ISelf extends IFunction, IParent extends INamedContainerElement>
     extends IFunctionSignature<ISelf, IParent> {
 
 }

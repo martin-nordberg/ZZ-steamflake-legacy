@@ -2,27 +2,28 @@ package org.steamflake.metamodelimpl.structure;
 
 import org.steamflake.metamodel.elements.INamedContainerElement;
 import org.steamflake.metamodel.elements.Ref;
-import org.steamflake.metamodel.structure.IAbstractNamespace;
 import org.steamflake.metamodel.structure.IFunctionSignature;
 import org.steamflake.metamodel.structure.IParameter;
 import org.steamflake.metamodelimpl.elements.AbstractNamedContainerElement;
+import org.steamflake.utilities.revisions.V;
 
 import java.util.UUID;
 
 /**
  * Abstract base class for implementations of IFunctionSignature.
  */
-public abstract class AbstractFunctionSignature<ISelf, IParent extends INamedContainerElement>
+public abstract class AbstractFunctionSignature<ISelf extends IFunctionSignature, IParent extends INamedContainerElement>
     extends AbstractNamedContainerElement<ISelf, IParent>
     implements IFunctionSignature<ISelf, IParent> {
 
-    protected AbstractFunctionSignature( UUID id ) {
-        super( id );
+    protected AbstractFunctionSignature( UUID id, Ref<IParent> parentContainer, String name, String summary, boolean isExported ) {
+        super( id, parentContainer, name, summary );
+        this.isExported = new V<>( isExported );
     }
 
     @Override
     public final boolean isExported() {
-        return this.getState().isExported;
+        return this.isExported.get();
     }
 
     @Override
@@ -30,22 +31,13 @@ public abstract class AbstractFunctionSignature<ISelf, IParent extends INamedCon
         return new Parameter( id, this, name, summary, sequence );
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    protected abstract State<IParent> getState();
-
-    /**
-     * Class representing the versioned state of a namespace.
-     */
-    protected static class State<IParent extends INamedContainerElement>
-        extends AbstractNamedContainerElement.State<IParent> {
-
-        State( Ref<IParent> parentContainer, String name, String summary, boolean isExported ) {
-            super( parentContainer, name, summary );
-
-            this.isExported = isExported;
-        }
-
-        public final boolean isExported;
+    public final ISelf setExported( boolean isExported ) {
+        this.isExported.set( isExported );
+        return (ISelf) this;
     }
+
+    private final V<Boolean> isExported;
 
 }
