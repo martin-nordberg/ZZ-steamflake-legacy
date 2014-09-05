@@ -6,46 +6,57 @@ import java.util.UUID;
  * Reference to an object by UUID and ordinary Java reference. Supports lazy loading (or non-loading) of
  * related objects.
  */
-public class Ref<T> {
+public class Ref<T extends IModelElement> {
 
     /**
-     * Constructs a reference to a not-yet-loaded object with known UUID.
+     * Constructs a reference to a not-yet-loaded model element with known UUID.
      *
-     * @param id the unique ID of the object.
+     * @param id the unique ID of the model element.
      */
     public Ref( UUID id ) {
-        this( id, null );
-    }
-
-    /**
-     * Constructs a reference to a loaded object.
-     *
-     * @param id    the unique ID of the object.
-     * @param value the object itself.
-     */
-    public Ref( UUID id, T value ) {
         this.id = id;
-        this.value = value;
+        this.modelElement = null;
     }
 
     /**
-     * @return the unique ID of the object.
+     * Constructs a reference to an already loaded model element.
+     *
+     * @param modelElement the object itself.
+     */
+    public Ref( T modelElement ) {
+        this.id = modelElement.getId();
+        this.modelElement = modelElement;
+    }
+
+    /**
+     * Gets the referenced model element, looking it up by UUID if needed.
+     *
+     * @param registry a facility for looking up the referenced model element by UUID if needed.
+     * @return the referenced model element.
+     */
+    public T get( Class<T> type, IModelElementLookUp registry ) {
+        if ( this.modelElement == null ) {
+            this.modelElement = registry.lookUpModelElementByUuid( type, this.id ).get();
+        }
+
+        return this.modelElement;
+    }
+
+    /**
+     * @return the unique ID of the model element.
      */
     public UUID getId() {
         return this.id;
     }
 
     /**
-     * @return Whether the referenced object has been loaded and is referenceable.
+     * The unique ID of the referenced model element.
      */
-    public boolean isLoaded() {
-        return value != null;
-    }
-
-    // TBD: return value, lazy loading, Optional-like monad functionality, etc.
-
     private final UUID id;
 
-    private T value;
+    /**
+     * The referenced model element itself.
+     */
+    private T modelElement;
 
 }

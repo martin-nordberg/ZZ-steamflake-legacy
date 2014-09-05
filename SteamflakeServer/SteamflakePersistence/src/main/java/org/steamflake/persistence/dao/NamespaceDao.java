@@ -1,7 +1,9 @@
 package org.steamflake.persistence.dao;
 
 import fi.evident.dalesbred.Database;
+import org.steamflake.metamodel.registry.IModelElementRegistry;
 import org.steamflake.metamodel.structure.INamespace;
+import org.steamflake.metamodelimpl.registry.NullModelElementRegistry;
 import org.steamflake.metamodelimpl.structure.Namespace;
 
 import java.util.List;
@@ -19,7 +21,7 @@ public class NamespaceDao {
     public void createNamespace( INamespace namespace ) {
         this.database.withVoidTransaction( tx -> {
             this.database.update( "INSERT INTO MODEL_ELEMENT (ID, PARENT_CONTAINER_ID, SUMMARY, TYPE) VALUES (?, ?, ?, 'Namespace')",
-                                  namespace.getId(), namespace.refParentContainer().getId(), namespace.getSummary() );
+                                  namespace.getId(), namespace.getParentContainerId(), namespace.getSummary() );
             this.database.update( "INSERT INTO CONTAINER_ELEMENT (ID) VALUES (?)", namespace.getId() );
             this.database.update( "INSERT INTO NAMED_ELEMENT (ID, NAME) VALUES (?, ?)", namespace.getId(), namespace.getName() );
             this.database.update( "INSERT INTO NAMED_CONTAINER_ELEMENT (ID) VALUES (?)", namespace.getId() );
@@ -39,6 +41,8 @@ public class NamespaceDao {
     public List<? extends INamespace> findNamespacesAll() {
         return this.database.findAll( Namespace.class, "SELECT TO_CHAR(ID), TO_CHAR(PARENT_CONTAINER_ID), NAME, SUMMARY FROM V_NAMESPACE" );
     }
+
+    private static final IModelElementRegistry registry = new NullModelElementRegistry();
 
     private final Database database;
 

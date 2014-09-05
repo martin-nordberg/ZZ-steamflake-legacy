@@ -1,5 +1,6 @@
 package org.steamflake.metamodelimpl.structure;
 
+import org.steamflake.metamodel.elements.IModelElementLookUp;
 import org.steamflake.metamodel.elements.Ref;
 import org.steamflake.metamodel.structure.IModule;
 import org.steamflake.metamodel.structure.INamespace;
@@ -29,8 +30,13 @@ public final class Module
     }
 
     public Module( UUID id, INamespace parent, String name, String summary, String version ) {
-        super( id, new Ref<>( parent.getId(), parent ), name, summary, true );
+        super( id, new Ref<>( parent ), name, summary, true );
         this.version = new V<>( version );
+    }
+
+    @Override
+    public INamespace getParentContainer( IModelElementLookUp registry ) {
+        return this.parentContainer.get().get( INamespace.class, registry );
     }
 
     @Override

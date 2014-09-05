@@ -13,14 +13,24 @@ public interface IModelElement<ISelf extends IModelElement, IParent extends ICon
     UUID getId();
 
     /**
+     * @return the container of this model element.
+     */
+    IParent getParentContainer( IModelElementLookUp registry );
+
+    /**
+     * @return the unique ID of the container of this model element.
+     */
+    UUID getParentContainerId();
+
+    /**
+     * @return a shareable reference to this model element.
+     */
+    Ref<ISelf> getSelf();
+
+    /**
      * @return a short summary of this model element.
      */
     String getSummary();
-
-    /**
-     * @return a reference to the container of this model element.
-     */
-    Ref<IParent> refParentContainer();
 
     /**
      * Changes the parent of this model element.

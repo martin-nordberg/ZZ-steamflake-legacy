@@ -1,5 +1,6 @@
 package org.steamflake.metamodelimpl.structure;
 
+import org.steamflake.metamodel.elements.IModelElementLookUp;
 import org.steamflake.metamodel.elements.Ref;
 import org.steamflake.metamodel.structure.IAbstractNamespace;
 import org.steamflake.metamodel.structure.IModule;
@@ -27,7 +28,12 @@ public final class Namespace
     }
 
     public Namespace( UUID id, IAbstractNamespace parent, String name, String summary ) {
-        super( id, new Ref<>( parent.getId(), parent ), name, summary );
+        super( id, new Ref<>( parent ), name, summary );
+    }
+
+    @Override
+    public IAbstractNamespace getParentContainer( IModelElementLookUp registry ) {
+        return this.parentContainer.get().get( IAbstractNamespace.class, registry );
     }
 
     @Override

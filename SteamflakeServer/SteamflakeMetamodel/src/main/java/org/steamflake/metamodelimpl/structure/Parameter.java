@@ -1,5 +1,6 @@
 package org.steamflake.metamodelimpl.structure;
 
+import org.steamflake.metamodel.elements.IModelElementLookUp;
 import org.steamflake.metamodel.elements.Ref;
 import org.steamflake.metamodel.structure.IFunctionSignature;
 import org.steamflake.metamodel.structure.IParameter;
@@ -30,8 +31,13 @@ public final class Parameter
     }
 
     public Parameter( UUID id, IFunctionSignature parent, String name, String summary, int sequence ) {
-        super( id, new Ref<>( parent.getId(), parent ), name, summary );
+        super( id, new Ref<>( parent ), name, summary );
         this.sequence = new V<>( sequence );
+    }
+
+    @Override
+    public IFunctionSignature getParentContainer( IModelElementLookUp registry ) {
+        return this.parentContainer.get().get( IFunctionSignature.class, registry );
     }
 
     @Override

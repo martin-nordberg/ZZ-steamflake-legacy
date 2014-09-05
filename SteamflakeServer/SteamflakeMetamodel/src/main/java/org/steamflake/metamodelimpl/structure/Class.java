@@ -1,5 +1,6 @@
 package org.steamflake.metamodelimpl.structure;
 
+import org.steamflake.metamodel.elements.IModelElementLookUp;
 import org.steamflake.metamodel.elements.Ref;
 import org.steamflake.metamodel.structure.IClass;
 import org.steamflake.metamodel.structure.IComponent;
@@ -27,7 +28,12 @@ public final class Class
     }
 
     public Class( UUID id, IComponent parent, String name, String summary, boolean isExported ) {
-        super( id, new Ref<>( parent.getId(), parent ), name, summary, isExported );
+        super( id, new Ref<>( parent ), name, summary, isExported );
+    }
+
+    @Override
+    public IComponent getParentContainer( IModelElementLookUp registry ) {
+        return this.parentContainer.get().get( IComponent.class, registry );
     }
 
 }

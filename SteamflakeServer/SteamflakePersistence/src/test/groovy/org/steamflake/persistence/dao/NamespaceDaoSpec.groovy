@@ -2,8 +2,8 @@ package org.steamflake.persistence.dao
 
 import fi.evident.dalesbred.Database
 import org.steamflake.metamodel.structure.IAbstractNamespace
+import org.steamflake.metamodel.structure.IRootNamespace
 import org.steamflake.metamodelimpl.structure.Namespace
-import org.steamflake.metamodelimpl.structure.RootNamespace
 import org.steamflake.persistence.h2database.H2DataSource
 import org.steamflake.utilities.revisions.StmTransaction
 import org.steamflake.utilities.revisions.StmTransactionContext
@@ -21,7 +21,7 @@ class NamespaceDaoSpec extends Specification {
     RootNamespaceDao rootDao
     NamespaceDao dao
     StmTransaction transaction
-    RootNamespace root
+    IRootNamespace root
 
     def setupSpec() {
         dataSource = new H2DataSource();

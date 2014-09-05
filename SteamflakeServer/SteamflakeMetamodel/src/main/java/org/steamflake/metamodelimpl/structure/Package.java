@@ -1,5 +1,6 @@
 package org.steamflake.metamodelimpl.structure;
 
+import org.steamflake.metamodel.elements.IModelElementLookUp;
 import org.steamflake.metamodel.elements.Ref;
 import org.steamflake.metamodel.structure.IAbstractPackage;
 import org.steamflake.metamodel.structure.IPackage;
@@ -27,7 +28,11 @@ public final class Package
     }
 
     public Package( UUID id, IAbstractPackage parent, String name, String summary, boolean isExported ) {
-        super( id, new Ref<>( parent.getId(), parent ), name, summary, isExported );
+        super( id, new Ref<>( parent ), name, summary, isExported );
     }
 
+    @Override
+    public IAbstractPackage getParentContainer( IModelElementLookUp registry ) {
+        return this.parentContainer.get().get( IAbstractPackage.class, registry );
+    }
 }

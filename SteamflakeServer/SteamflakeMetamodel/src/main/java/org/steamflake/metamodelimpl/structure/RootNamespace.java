@@ -1,5 +1,6 @@
 package org.steamflake.metamodelimpl.structure;
 
+import org.steamflake.metamodel.elements.IModelElementLookUp;
 import org.steamflake.metamodel.elements.Ref;
 import org.steamflake.metamodel.structure.INamespace;
 import org.steamflake.metamodel.structure.IRootNamespace;
@@ -21,7 +22,7 @@ public final class RootNamespace
      */
     public RootNamespace( String id, String summary ) {
         this.id = UUID.fromString( id );
-        this.parentContainer = new Ref<>( this.id, this );
+        this.parentContainer = new Ref<>( this );
         this.summary = new V<>( summary );
     }
 
@@ -36,6 +37,21 @@ public final class RootNamespace
     }
 
     @Override
+    public final IRootNamespace getParentContainer( IModelElementLookUp registry ) {
+        return this;
+    }
+
+    @Override
+    public final UUID getParentContainerId() {
+        return this.id;
+    }
+
+    @Override
+    public final Ref<IRootNamespace> getSelf() {
+        return parentContainer;
+    }
+
+    @Override
     public final String getSummary() {
         return this.summary.get();
     }
@@ -43,11 +59,6 @@ public final class RootNamespace
     @Override
     public final INamespace makeNamespace( UUID id, String name, String summary ) {
         return new Namespace( id, this, name, summary );
-    }
-
-    @Override
-    public final Ref<IRootNamespace> refParentContainer() {
-        return this.parentContainer;
     }
 
     @Override
