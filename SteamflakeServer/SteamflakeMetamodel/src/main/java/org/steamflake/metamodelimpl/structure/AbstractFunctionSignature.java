@@ -16,7 +16,7 @@ public abstract class AbstractFunctionSignature<ISelf extends IFunctionSignature
     extends AbstractNamedContainerElement<ISelf, IParent>
     implements IFunctionSignature<ISelf, IParent> {
 
-    protected AbstractFunctionSignature( UUID id, Ref<IParent> parentContainer, String name, String summary, boolean isExported ) {
+    protected AbstractFunctionSignature( UUID id, Ref<? extends IParent> parentContainer, String name, String summary, boolean isExported ) {
         super( id, parentContainer, name, summary );
         this.isExported = new V<>( isExported );
     }
@@ -28,7 +28,7 @@ public abstract class AbstractFunctionSignature<ISelf extends IFunctionSignature
 
     @Override
     public final IParameter makeParameter( UUID id, String name, String summary, int sequence ) {
-        return new Parameter( id, this, name, summary, sequence );
+        return new Parameter( id, this.getSelf(), name, summary, sequence );
     }
 
     @SuppressWarnings("unchecked")

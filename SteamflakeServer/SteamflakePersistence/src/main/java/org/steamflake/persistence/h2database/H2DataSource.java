@@ -52,16 +52,6 @@ public class H2DataSource
     }
 
     @Override
-    public void setLogWriter( PrintWriter out ) throws SQLException {
-        this.connectionPool.setLogWriter( out );
-    }
-
-    @Override
-    public void setLoginTimeout( int seconds ) throws SQLException {
-        this.connectionPool.setLoginTimeout( seconds );
-    }
-
-    @Override
     public int getLoginTimeout() throws SQLException {
         return this.connectionPool.getLoginTimeout();
     }
@@ -72,13 +62,23 @@ public class H2DataSource
     }
 
     @Override
-    public <T> T unwrap( Class<T> iface ) throws SQLException {
-        return this.connectionPool.unwrap( iface );
+    public boolean isWrapperFor( Class<?> iface ) throws SQLException {
+        return this.connectionPool.isWrapperFor( iface );
     }
 
     @Override
-    public boolean isWrapperFor( Class<?> iface ) throws SQLException {
-        return this.connectionPool.isWrapperFor( iface );
+    public void setLogWriter( PrintWriter out ) throws SQLException {
+        this.connectionPool.setLogWriter( out );
+    }
+
+    @Override
+    public void setLoginTimeout( int seconds ) throws SQLException {
+        this.connectionPool.setLoginTimeout( seconds );
+    }
+
+    @Override
+    public <T> T unwrap( Class<T> iface ) throws SQLException {
+        return this.connectionPool.unwrap( iface );
     }
 
     private static final org.apache.logging.log4j.Logger LOG = LogManager.getLogger();

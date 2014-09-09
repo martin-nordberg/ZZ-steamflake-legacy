@@ -12,7 +12,7 @@ public abstract class AbstractNamedContainerElement<ISelf extends INamedContaine
     extends AbstractNamedElement<ISelf, IParent>
     implements INamedContainerElement<ISelf, IParent> {
 
-    protected AbstractNamedContainerElement( UUID id, Ref<IParent> parentContainer, String name, String summary ) {
+    protected AbstractNamedContainerElement( UUID id, Ref<? extends IParent> parentContainer, String name, String summary ) {
         super( id, parentContainer, name, summary );
     }
 

@@ -27,8 +27,8 @@ public final class Class
         super( UUID.fromString( id ), new Ref<>( UUID.fromString( parentId ) ), name, summary, isExported );
     }
 
-    public Class( UUID id, IComponent parent, String name, String summary, boolean isExported ) {
-        super( id, new Ref<>( parent ), name, summary, isExported );
+    public Class( UUID id, Ref<? extends IComponent> parent, String name, String summary, boolean isExported ) {
+        super( id, parent, name, summary, isExported );
     }
 
     @Override

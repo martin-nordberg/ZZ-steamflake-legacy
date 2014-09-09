@@ -20,16 +20,6 @@ public class FlywayLog4j2Adapter
     }
 
     @Override
-    public void info( String message ) {
-        this.logger.info( message );
-    }
-
-    @Override
-    public void warn( String message ) {
-        this.logger.warn( message );
-    }
-
-    @Override
     public void error( String message ) {
         this.logger.error( message );
     }
@@ -37,6 +27,16 @@ public class FlywayLog4j2Adapter
     @Override
     public void error( String message, Exception e ) {
         this.logger.error( message, e );
+    }
+
+    @Override
+    public void info( String message ) {
+        this.logger.info( message );
+    }
+
+    @Override
+    public void warn( String message ) {
+        this.logger.warn( message );
     }
 
     private final Logger logger;

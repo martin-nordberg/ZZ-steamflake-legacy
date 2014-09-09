@@ -29,8 +29,8 @@ public final class Module
         this.version = new V<>( version );
     }
 
-    public Module( UUID id, INamespace parent, String name, String summary, String version ) {
-        super( id, new Ref<>( parent ), name, summary, true );
+    public Module( UUID id, Ref<? extends INamespace> parent, String name, String summary, String version ) {
+        super( id, parent, name, summary, true );
         this.version = new V<>( version );
     }
 

@@ -1,4 +1,4 @@
-package org.steamflake.persistence.dao
+package org.steamflake.persistence.registry
 
 import fi.evident.dalesbred.Database
 import org.steamflake.persistence.h2database.H2DataSource
@@ -7,13 +7,13 @@ import org.steamflake.utilities.revisions.StmTransactionContext
 import spock.lang.Specification
 
 /**
- * Specification for root namespace data access.
+ * Created by mnordberg on 9/8/14.
  */
-class RootNamespaceDaoSpec extends Specification {
+class DatabaseModelElementRegistrySpec extends Specification {
 
     static H2DataSource dataSource
     Database database
-    RootNamespaceDao dao
+    DatabaseModelElementRegistry registry
     StmTransaction transaction
 
     def setupSpec() {
@@ -22,19 +22,25 @@ class RootNamespaceDaoSpec extends Specification {
 
     def setup() {
         database = new Database(dataSource);
-        dao = new RootNamespaceDao(database);
+        registry = new DatabaseModelElementRegistry( database );
         transaction = StmTransactionContext.beginTransaction();
     }
 
-    def "The root namespace can be read"() {
+    def "The root namespace can be looked up"() {
 
-        when: "the root namespace is read"
-        def rootNamespace = dao.findRootNamespace()
+        when: "the root namespace is looked up"
+        def rootNamespace = registry.lookUpRootNamespace().get().get()
+
+        and: "the root namespace is looked up again"
+        def rootNamespace2 = registry.lookUpRootNamespace().get().get()
 
         then: "it has usable attributes"
         rootNamespace.id != null
         rootNamespace.name == '$'
         rootNamespace.summary != null
+
+        and: "it is the same (cached) object"
+        rootNamespace2.is( rootNamespace )
 
     }
 

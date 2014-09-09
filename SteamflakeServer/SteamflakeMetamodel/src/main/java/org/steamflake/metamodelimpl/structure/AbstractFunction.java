@@ -13,7 +13,7 @@ public abstract class AbstractFunction<ISelf extends IFunction, IParent extends 
     extends AbstractFunctionSignature<ISelf, IParent>
     implements IFunction<ISelf, IParent> {
 
-    protected AbstractFunction( UUID id, Ref<IParent> parentContainer, String name, String summary, boolean isExported ) {
+    protected AbstractFunction( UUID id, Ref<? extends IParent> parentContainer, String name, String summary, boolean isExported ) {
         super( id, parentContainer, name, summary, isExported );
     }
 

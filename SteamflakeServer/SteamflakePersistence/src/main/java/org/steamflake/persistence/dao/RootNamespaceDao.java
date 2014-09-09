@@ -17,11 +17,17 @@ public class RootNamespaceDao {
 
     /**
      * Finds the one and only root namespace. (Creates it for the first time if not found.)
+     *
      * @return the root namespace.
      */
     public IRootNamespace findRootNamespace() {
 
         List<RootNamespace> result = this.database.findAll( RootNamespace.class, "SELECT TO_CHAR(ID), SUMMARY FROM V_ROOT_NAMESPACE" );
+
+        if ( result.isEmpty() ) {
+            return null;
+        }
+
         return result.get( 0 );
 
     }

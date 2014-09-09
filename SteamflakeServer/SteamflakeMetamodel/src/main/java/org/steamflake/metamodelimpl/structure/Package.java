@@ -27,8 +27,8 @@ public final class Package
         super( UUID.fromString( id ), new Ref<>( UUID.fromString( parentId ) ), name, summary, isExported );
     }
 
-    public Package( UUID id, IAbstractPackage parent, String name, String summary, boolean isExported ) {
-        super( id, new Ref<>( parent ), name, summary, isExported );
+    public Package( UUID id, Ref<? extends IAbstractPackage> parent, String name, String summary, boolean isExported ) {
+        super( id, parent, name, summary, isExported );
     }
 
     @Override

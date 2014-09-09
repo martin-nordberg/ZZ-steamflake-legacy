@@ -30,8 +30,8 @@ public final class Parameter
         this.sequence = new V<>( sequence );
     }
 
-    public Parameter( UUID id, IFunctionSignature parent, String name, String summary, int sequence ) {
-        super( id, new Ref<>( parent ), name, summary );
+    public Parameter( UUID id, Ref<? extends IFunctionSignature> parent, String name, String summary, int sequence ) {
+        super( id, parent, name, summary );
         this.sequence = new V<>( sequence );
     }
 

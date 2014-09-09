@@ -2,8 +2,9 @@ package org.steamflake.persistence.dao
 
 import fi.evident.dalesbred.Database
 import org.steamflake.metamodel.structure.IAbstractNamespace
+import org.steamflake.metamodel.structure.INamespace
 import org.steamflake.metamodel.structure.IRootNamespace
-import org.steamflake.metamodelimpl.structure.Namespace
+import org.steamflake.metamodelimpl.registry.InMemoryModelElementRegistry
 import org.steamflake.persistence.h2database.H2DataSource
 import org.steamflake.utilities.revisions.StmTransaction
 import org.steamflake.utilities.revisions.StmTransactionContext
@@ -28,47 +29,44 @@ class NamespaceDaoSpec extends Specification {
     }
 
     def setup() {
-        database = new Database( dataSource );
-        rootDao = new RootNamespaceDao( database );
-        dao = new NamespaceDao( database );
+        database = new Database(dataSource);
+        rootDao = new RootNamespaceDao(database);
+        dao = new NamespaceDao( database, new InMemoryModelElementRegistry() );
         transaction = StmTransactionContext.beginTransaction();
         root = rootDao.findRootNamespace()
     }
 
-    def "A namespace can be created, read, and deleted" () {
+    def "A namespace can be created, read, and deleted"() {
 
         given: "a namespace to be saved"
-        def id = Uuids.makeUuid().toString();
-        Namespace namespace = new Namespace(id, root.getId().toString(), "example", "a testing sample namespace")
+        def id = Uuids.makeUuid();
+        INamespace namespace = root.makeNamespace(id, "example", "a testing sample namespace")
 
         when: "the namespace is created"
-        dao.createNamespace( namespace )
+        dao.createNamespace(namespace)
 
         and: "retrieved by UUID"
-        def namespace2 = dao.findNamespaceByUuid( namespace.id )
+        def namespace2 = dao.findNamespaceByUuid( id )
 
-        then: "it matches the original"
-        namespace2.id == namespace.id
-        namespace2.name == namespace.name
-        namespace2.summary == namespace.summary
+        then: "it is the same (cached) object as the original"
+        namespace2.is( namespace )
 
         and: "it can be deleted"
-        dao.deleteNamespace( namespace.id )
+        dao.deleteNamespace( id )
 
         and: "then disappears from view"
-        dao.findNamespaceByUuid( namespace.id ) == null
+        dao.findNamespaceByUuid( id ) == null
 
     }
 
     @Ignore
-    def "it takes a while to create lots of namespaces" () {
+    def "it takes a while to create lots of namespaces"() {
 
         when: "the namespaces are created"
         IAbstractNamespace namespace = root
-        for ( int i = 0 ; i< 100000 ; i+=1 ) {
-            def id = Uuids.makeUuid().toString();
-            def parentId = namespace.getId().toString()
-            namespace = new Namespace( id, parentId, "example"+i, "testing sample namespace "+i )
+        for (int i = 0; i < 100000; i += 1) {
+            def id = Uuids.makeUuid();
+            namespace = namespace.makeNamespace(id, "example" + i, "testing sample namespace " + i)
             dao.createNamespace(namespace)
         }
 
@@ -78,7 +76,7 @@ class NamespaceDaoSpec extends Specification {
     }
 
     def cleanup() {
-        StmTransactionContext.commitTransaction( transaction );
+        StmTransactionContext.commitTransaction(transaction);
     }
 
     def cleanupSpec() {

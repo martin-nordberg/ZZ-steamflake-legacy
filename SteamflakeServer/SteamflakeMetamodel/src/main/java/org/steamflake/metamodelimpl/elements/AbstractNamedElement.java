@@ -14,7 +14,7 @@ public abstract class AbstractNamedElement<ISelf extends INamedElement, IParent 
     extends AbstractModelElement<ISelf, IParent>
     implements INamedElement<ISelf, IParent> {
 
-    protected AbstractNamedElement( UUID id, Ref<IParent> parentContainer, String name, String summary ) {
+    protected AbstractNamedElement( UUID id, Ref<? extends IParent> parentContainer, String name, String summary ) {
         super( id, parentContainer, summary );
         this.name = new V<>( name );
     }

@@ -58,7 +58,7 @@ public final class RootNamespace
 
     @Override
     public final INamespace makeNamespace( UUID id, String name, String summary ) {
-        return new Namespace( id, this, name, summary );
+        return new Namespace( id, this.getSelf(), name, summary );
     }
 
     @Override

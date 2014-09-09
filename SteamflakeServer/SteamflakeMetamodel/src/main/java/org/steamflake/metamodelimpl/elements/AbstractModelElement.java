@@ -21,9 +21,9 @@ public abstract class AbstractModelElement<ISelf extends IModelElement, IParent 
      * @param summary         a short summary of the model element.
      */
     @SuppressWarnings("unchecked")
-    protected AbstractModelElement( UUID id, Ref<IParent> parentContainer, String summary ) {
+    protected AbstractModelElement( UUID id, Ref<? extends IParent> parentContainer, String summary ) {
         this.id = id;
-        this.parentContainer = new V<>( parentContainer );
+        this.parentContainer = new V<>( (Ref<IParent>) parentContainer );
         this.self = new Ref<>( (ISelf) this );
         this.summary = new V<>( summary );
     }

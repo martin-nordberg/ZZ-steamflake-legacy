@@ -1,6 +1,7 @@
 package org.steamflake.metamodelimpl.registry;
 
 import org.steamflake.metamodel.elements.IModelElement;
+import org.steamflake.metamodel.elements.Ref;
 import org.steamflake.metamodel.registry.IModelElementRegistry;
 
 import java.util.Optional;
@@ -9,22 +10,22 @@ import java.util.UUID;
 /**
  * Do nothing/find nothing model element registry.
  */
-public class NullModelElementRegistry
+public final class NullModelElementRegistry
     implements IModelElementRegistry {
 
     @Override
-    public <T extends IModelElement> Optional<T> lookUpModelElementByUuid( Class<T> modelElementType, UUID id ) {
+    public final <IElement extends IModelElement> Optional<Ref<IElement>> lookUpModelElementByUuid( Class<IElement> modelElementType, UUID id ) {
         return Optional.empty();
     }
 
     @Override
-    public void registerModelElement( IModelElement modelElement ) {
-        // do nothing
+    public final boolean registerModelElement( Ref<? extends IModelElement> modelElement ) {
+        return false;
     }
 
     @Override
-    public void unregisterModelElement( IModelElement modelElement ) {
-        // do nothing
+    public final boolean unregisterModelElement( UUID modelElementId ) {
+        return false;
     }
 
 }

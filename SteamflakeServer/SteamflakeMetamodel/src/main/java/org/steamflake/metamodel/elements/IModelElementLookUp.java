@@ -14,8 +14,9 @@ public interface IModelElementLookUp {
      *
      * @param modelElementType the type of element to find.
      * @param id               the unique ID of the model element to find.
-     * @returns the model element found or Optional.empty() if not registered.
+     * @param <IElement>       the type of element to find.
+     * @return the model element found or Optional.empty() if not registered.
      */
-    <T extends IModelElement> Optional<T> lookUpModelElementByUuid( Class<T> modelElementType, UUID id );
+    <IElement extends IModelElement> Optional<Ref<IElement>> lookUpModelElementByUuid( Class<IElement> modelElementType, UUID id );
 
 }
