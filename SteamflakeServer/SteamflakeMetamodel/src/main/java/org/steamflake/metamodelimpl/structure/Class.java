@@ -24,7 +24,7 @@ public final class Class
      * @param isExported whether this class is accessible outside its parent component.
      */
     public Class( String id, String parentId, String name, String summary, boolean isExported ) {
-        super( UUID.fromString( id ), new Ref<>( UUID.fromString( parentId ) ), name, summary, isExported );
+        super( UUID.fromString( id ), Ref.byId( UUID.fromString( parentId ) ), name, summary, isExported );
     }
 
     public Class( UUID id, Ref<? extends IComponent> parent, String name, String summary, boolean isExported ) {
@@ -33,7 +33,7 @@ public final class Class
 
     @Override
     public IComponent getParentContainer( IModelElementLookUp registry ) {
-        return this.parentContainer.get().get( IComponent.class, registry );
+        return this.parentContainer.get().orLoad( IComponent.class, registry );
     }
 
 }

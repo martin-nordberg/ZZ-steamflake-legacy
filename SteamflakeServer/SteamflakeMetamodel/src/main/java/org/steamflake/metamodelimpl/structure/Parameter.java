@@ -26,7 +26,7 @@ public final class Parameter
      * @param sequence the sequence number of the parameter.
      */
     public Parameter( String id, String parentId, String name, String summary, int sequence ) {
-        super( UUID.fromString( id ), new Ref<>( UUID.fromString( parentId ) ), name, summary );
+        super( UUID.fromString( id ), Ref.byId( UUID.fromString( parentId ) ), name, summary );
         this.sequence = new V<>( sequence );
     }
 
@@ -37,7 +37,7 @@ public final class Parameter
 
     @Override
     public IFunctionSignature getParentContainer( IModelElementLookUp registry ) {
-        return this.parentContainer.get().get( IFunctionSignature.class, registry );
+        return this.parentContainer.get().orLoad( IFunctionSignature.class, registry );
     }
 
     @Override

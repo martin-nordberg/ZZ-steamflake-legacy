@@ -24,7 +24,7 @@ public abstract class AbstractModelElement<ISelf extends IModelElement, IParent 
     protected AbstractModelElement( UUID id, Ref<? extends IParent> parentContainer, String summary ) {
         this.id = id;
         this.parentContainer = new V<>( (Ref<IParent>) parentContainer );
-        this.self = new Ref<>( (ISelf) this );
+        this.self = Ref.to( (ISelf) this );   // TBD: when relevant, needs to be the Ref created ahead of time by UUID
         this.summary = new V<>( summary );
     }
 
@@ -72,7 +72,7 @@ public abstract class AbstractModelElement<ISelf extends IModelElement, IParent 
     @SuppressWarnings("unchecked")
     @Override
     public final ISelf setParentContainer( IParent parentContainer ) {
-        this.parentContainer.set( new Ref<>( parentContainer ) );
+        this.parentContainer.set( parentContainer.getSelf() );
         return (ISelf) this;
     }
 

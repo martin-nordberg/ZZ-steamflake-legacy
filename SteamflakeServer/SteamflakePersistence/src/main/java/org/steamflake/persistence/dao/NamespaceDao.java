@@ -101,7 +101,7 @@ public class NamespaceDao {
             Optional<Ref<IAbstractNamespace>> parent = registry.lookUpModelElementByUuid( IAbstractNamespace.class, parentId );
 
             if ( !parent.isPresent() ) {
-                parent = Optional.of( new Ref<>( parentId ) );
+                parent = Optional.of( Ref.byId( parentId ) );
                 registry.registerModelElement( parent.get() );
             }
 

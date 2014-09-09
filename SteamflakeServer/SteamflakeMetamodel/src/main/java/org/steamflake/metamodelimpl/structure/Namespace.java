@@ -24,7 +24,7 @@ public final class Namespace
      * @param summary  a short summary of the namespace.
      */
     public Namespace( UUID id, String parentId, String name, String summary ) {
-        super( id, new Ref<>( UUID.fromString( parentId ) ), name, summary );
+        super( id, Ref.byId( UUID.fromString( parentId ) ), name, summary );
     }
 
     public Namespace( UUID id, Ref<? extends IAbstractNamespace> parent, String name, String summary ) {
@@ -33,7 +33,7 @@ public final class Namespace
 
     @Override
     public IAbstractNamespace getParentContainer( IModelElementLookUp registry ) {
-        return this.parentContainer.get().get( IAbstractNamespace.class, registry );
+        return this.parentContainer.get().orLoad( IAbstractNamespace.class, registry );
     }
 
     @Override

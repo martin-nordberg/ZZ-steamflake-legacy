@@ -25,7 +25,7 @@ public final class Module
      * @param version  the version number of the module.
      */
     public Module( String id, String parentId, String name, String summary, String version ) {
-        super( UUID.fromString( id ), new Ref<>( UUID.fromString( parentId ) ), name, summary, true );
+        super( UUID.fromString( id ), Ref.byId( UUID.fromString( parentId ) ), name, summary, true );
         this.version = new V<>( version );
     }
 
@@ -36,7 +36,7 @@ public final class Module
 
     @Override
     public INamespace getParentContainer( IModelElementLookUp registry ) {
-        return this.parentContainer.get().get( INamespace.class, registry );
+        return this.parentContainer.get().orLoad( INamespace.class, registry );
     }
 
     @Override

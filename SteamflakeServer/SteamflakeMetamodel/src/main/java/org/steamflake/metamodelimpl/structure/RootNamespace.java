@@ -22,7 +22,7 @@ public final class RootNamespace
      */
     public RootNamespace( String id, String summary ) {
         this.id = UUID.fromString( id );
-        this.parentContainer = new Ref<>( this );
+        this.parentContainer = Ref.to( this );
         this.summary = new V<>( summary );
     }
 

@@ -24,7 +24,7 @@ public final class Package
      * @param isExported whether the new package is visible outside this one.
      */
     public Package( String id, String parentId, String name, String summary, boolean isExported ) {
-        super( UUID.fromString( id ), new Ref<>( UUID.fromString( parentId ) ), name, summary, isExported );
+        super( UUID.fromString( id ), Ref.byId( UUID.fromString( parentId ) ), name, summary, isExported );
     }
 
     public Package( UUID id, Ref<? extends IAbstractPackage> parent, String name, String summary, boolean isExported ) {
@@ -33,6 +33,6 @@ public final class Package
 
     @Override
     public IAbstractPackage getParentContainer( IModelElementLookUp registry ) {
-        return this.parentContainer.get().get( IAbstractPackage.class, registry );
+        return this.parentContainer.get().orLoad( IAbstractPackage.class, registry );
     }
 }
