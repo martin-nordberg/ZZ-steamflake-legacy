@@ -5,7 +5,7 @@ import org.steamflake.metamodel.elements.Ref;
 import org.steamflake.metamodel.registry.IModelElementRegistry;
 
 import java.util.Map;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -34,7 +34,7 @@ public final class InMemoryModelElementRegistry
 
     @SuppressWarnings("unchecked")
     @Override
-    public final <IElement extends IModelElement> Optional<Ref<IElement>> doLookUpModelElementByUuid( Class<IElement> modelElementType, UUID id ) {
+    public final <IElement extends IModelElement> Ref<IElement> doLookUpModelElementByUuid( Class<IElement> modelElementType, UUID id ) {
 
         Ref<? extends IModelElement> result = this.modelElements.get( id );
 
@@ -44,22 +44,21 @@ public final class InMemoryModelElementRegistry
                     throw new ClassCastException( "Attempted to retrieve model element with wrong type. Queried: " + modelElementType.getName() + " vs. Actual: " + result.get().getClass() );
                 }
             }
-            return Optional.of( (Ref<IElement>) result );
+            return (Ref<IElement>) result;
         }
 
-        return Optional.empty();
+        return Ref.missing();
 
     }
 
     @Override
-    public final boolean doRegisterModelElement( Ref<? extends IModelElement> modelElement ) {
+    public final void doRegisterModelElement( Ref<? extends IModelElement> modelElement ) {
         this.modelElements.put( modelElement.getId(), modelElement );
-        return true;
     }
 
     @Override
-    public final boolean doUnregisterModelElement( UUID modelElementId ) {
-        return this.modelElements.remove( modelElementId ) != null;
+    public final void doUnregisterModelElement( UUID modelElementId ) {
+        this.modelElements.remove( modelElementId );
     }
 
     /**

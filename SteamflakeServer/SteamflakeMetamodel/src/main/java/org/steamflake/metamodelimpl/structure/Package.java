@@ -33,6 +33,6 @@ public final class Package
 
     @Override
     public IAbstractPackage getParentContainer( IModelElementLookUp registry ) {
-        return this.parentContainer.get().orLoad( IAbstractPackage.class, registry );
+        return this.parentContainer.get().orLookUp( IAbstractPackage.class, registry );
     }
 }

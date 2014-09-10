@@ -36,7 +36,7 @@ public final class Module
 
     @Override
     public INamespace getParentContainer( IModelElementLookUp registry ) {
-        return this.parentContainer.get().orLoad( INamespace.class, registry );
+        return this.parentContainer.get().orLookUp( INamespace.class, registry );
     }
 
     @Override

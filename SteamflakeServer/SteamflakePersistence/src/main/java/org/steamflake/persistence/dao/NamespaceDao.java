@@ -10,7 +10,6 @@ import org.steamflake.metamodel.structure.INamespace;
 import org.steamflake.metamodelimpl.structure.Namespace;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -30,6 +29,7 @@ public class NamespaceDao {
     }
 
     public void createNamespace( INamespace namespace ) {
+
         this.database.withVoidTransaction( tx -> {
             this.database.update( "INSERT INTO MODEL_ELEMENT (ID, PARENT_CONTAINER_ID, SUMMARY, TYPE) VALUES (?, ?, ?, 'Namespace')", namespace.getId(), namespace.getParentContainerId(), namespace.getSummary() );
             this.database.update( "INSERT INTO CONTAINER_ELEMENT (ID) VALUES (?)", namespace.getId() );
@@ -38,27 +38,36 @@ public class NamespaceDao {
             this.database.update( "INSERT INTO ABSTRACT_NAMESPACE (ID) VALUES (?)", namespace.getId() );
             this.database.update( "INSERT INTO NAMESPACE (ID) VALUES (?)", namespace.getId() );
         } );
+
         this.registry.registerModelElement( namespace.getSelf() );
+
     }
 
     public void deleteNamespace( UUID namespaceId ) {
+
         this.registry.unregisterModelElement( namespaceId );
+
         this.database.update( "UPDATE MODEL_ELEMENT SET DESTROYED = TRUE WHERE ID = ?", namespaceId );
+
     }
 
     public INamespace findNamespaceByUuid( UUID namespaceId ) {
 
-        Optional<Ref<INamespace>> result = this.registry.lookUpModelElementByUuid( INamespace.class, namespaceId );
+        return this.database.findUniqueOrNull(
+            INamespace.class,
+            "SELECT TO_CHAR(ID), TO_CHAR(PARENT_CONTAINER_ID), NAME, SUMMARY FROM V_NAMESPACE WHERE ID = ?",
+            namespaceId
+        );
 
-        if ( !result.isPresent() ) {
-            return this.database.findUniqueOrNull( INamespace.class, "SELECT TO_CHAR(ID), TO_CHAR(PARENT_CONTAINER_ID), NAME, SUMMARY FROM V_NAMESPACE WHERE ID = ?", namespaceId );
-        }
-
-        return result.get().get();
     }
 
     public List<? extends INamespace> findNamespacesAll() {
-        return this.database.findAll( INamespace.class, "SELECT TO_CHAR(ID), TO_CHAR(PARENT_CONTAINER_ID), NAME, SUMMARY FROM V_NAMESPACE" );
+
+        return this.database.findAll(
+            INamespace.class,
+            "SELECT TO_CHAR(ID), TO_CHAR(PARENT_CONTAINER_ID), NAME, SUMMARY FROM V_NAMESPACE"
+        );
+
     }
 
     private final Database database;
@@ -88,25 +97,32 @@ public class NamespaceDao {
 
             final UUID id = UUID.fromString( (String) fields.getValues().get( 0 ) );
 
-            Optional<Ref<INamespace>> result = registry.lookUpModelElementByUuid( INamespace.class, id );
-
-            if ( result.isPresent() && result.get().isLoaded() ) {
-                return result.get().get();
+            // First see if it's already loaded.
+            Ref<INamespace> result = registry.lookUpModelElementByUuid( INamespace.class, id );
+            if ( result.isLoaded() ) {
+                return result.get();
             }
 
+            // Get the attributes from the database result.
             final UUID parentId = UUID.fromString( (String) fields.getValues().get( 1 ) );
-            String name = (String) fields.getValues().get( 2 );
-            String summary = (String) fields.getValues().get( 3 );
+            final String name = (String) fields.getValues().get( 2 );
+            final String summary = (String) fields.getValues().get( 3 );
 
-            Optional<Ref<IAbstractNamespace>> parent = registry.lookUpModelElementByUuid( IAbstractNamespace.class, parentId );
+            // Look up the parent.
+            Ref<IAbstractNamespace> parent = registry.lookUpModelElementByUuid( IAbstractNamespace.class, parentId );
 
-            if ( !parent.isPresent() ) {
-                parent = Optional.of( Ref.byId( parentId ) );
-                registry.registerModelElement( parent.get() );
+            // If parent not found, register a reference to it.
+            if ( parent.isMissing() ) {
+                parent = Ref.byId( parentId );
+                registry.registerModelElement( parent );
             }
 
-            Namespace namespace = new Namespace( id, parent.get(), name, summary );
+            // Create the namespace.
+            Namespace namespace = new Namespace( id, parent, name, summary );
+
+            // Register it for future look ups.
             this.registry.registerModelElement( namespace.getSelf() );
+
             return namespace;
 
         }

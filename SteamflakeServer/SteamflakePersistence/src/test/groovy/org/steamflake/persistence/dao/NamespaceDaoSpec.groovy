@@ -29,9 +29,10 @@ class NamespaceDaoSpec extends Specification {
     }
 
     def setup() {
+        def cache = new InMemoryModelElementRegistry()
         database = new Database(dataSource);
-        rootDao = new RootNamespaceDao(database);
-        dao = new NamespaceDao( database, new InMemoryModelElementRegistry() );
+        rootDao = new RootNamespaceDao(database,cache);
+        dao = new NamespaceDao( database, cache );
         transaction = StmTransactionContext.beginTransaction();
         root = rootDao.findRootNamespace()
     }

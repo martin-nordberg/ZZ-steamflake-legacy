@@ -1,6 +1,5 @@
 package org.steamflake.metamodel.elements;
 
-import java.util.Optional;
 import java.util.UUID;
 
 
@@ -15,8 +14,8 @@ public interface IModelElementLookUp {
      * @param modelElementType the type of element to find.
      * @param id               the unique ID of the model element to find.
      * @param <IElement>       the type of element to find.
-     * @return the model element found or Optional.empty() if not registered.
+     * @return the model element found or Ref.missing() if not registered.
      */
-    <IElement extends IModelElement> Optional<Ref<IElement>> lookUpModelElementByUuid( Class<IElement> modelElementType, UUID id );
+    <IElement extends IModelElement> Ref<IElement> lookUpModelElementByUuid( Class<IElement> modelElementType, UUID id );
 
 }

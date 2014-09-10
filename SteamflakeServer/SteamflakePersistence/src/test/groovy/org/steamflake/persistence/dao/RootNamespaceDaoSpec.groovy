@@ -1,6 +1,7 @@
 package org.steamflake.persistence.dao
 
 import fi.evident.dalesbred.Database
+import org.steamflake.metamodelimpl.registry.InMemoryModelElementRegistry
 import org.steamflake.persistence.h2database.H2DataSource
 import org.steamflake.utilities.revisions.StmTransaction
 import org.steamflake.utilities.revisions.StmTransactionContext
@@ -21,8 +22,9 @@ class RootNamespaceDaoSpec extends Specification {
     }
 
     def setup() {
+        def cache = new InMemoryModelElementRegistry()
         database = new Database(dataSource);
-        dao = new RootNamespaceDao(database);
+        dao = new RootNamespaceDao(database,cache);
         transaction = StmTransactionContext.beginTransaction();
     }
 

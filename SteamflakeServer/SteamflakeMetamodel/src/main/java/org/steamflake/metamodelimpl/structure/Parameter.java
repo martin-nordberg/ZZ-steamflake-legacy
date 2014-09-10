@@ -37,7 +37,7 @@ public final class Parameter
 
     @Override
     public IFunctionSignature getParentContainer( IModelElementLookUp registry ) {
-        return this.parentContainer.get().orLoad( IFunctionSignature.class, registry );
+        return this.parentContainer.get().orLookUp( IFunctionSignature.class, registry );
     }
 
     @Override

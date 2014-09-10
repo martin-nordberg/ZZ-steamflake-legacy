@@ -33,7 +33,7 @@ public final class Namespace
 
     @Override
     public IAbstractNamespace getParentContainer( IModelElementLookUp registry ) {
-        return this.parentContainer.get().orLoad( IAbstractNamespace.class, registry );
+        return this.parentContainer.get().orLookUp( IAbstractNamespace.class, registry );
     }
 
     @Override

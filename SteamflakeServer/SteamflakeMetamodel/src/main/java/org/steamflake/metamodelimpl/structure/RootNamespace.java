@@ -20,8 +20,8 @@ public final class RootNamespace
      * @param id      the unique ID of the namespace.
      * @param summary a short summary of the namespace.
      */
-    public RootNamespace( String id, String summary ) {
-        this.id = UUID.fromString( id );
+    public RootNamespace( UUID id, String summary ) {
+        this.id = id;
         this.parentContainer = Ref.to( this );
         this.summary = new V<>( summary );
     }

@@ -1,6 +1,7 @@
 package org.steamflake.persistence.registry
 
 import fi.evident.dalesbred.Database
+import org.steamflake.metamodelimpl.registry.InMemoryModelElementRegistry
 import org.steamflake.persistence.h2database.H2DataSource
 import org.steamflake.utilities.revisions.StmTransaction
 import org.steamflake.utilities.revisions.StmTransactionContext
@@ -22,17 +23,17 @@ class DatabaseModelElementRegistrySpec extends Specification {
 
     def setup() {
         database = new Database(dataSource);
-        registry = new DatabaseModelElementRegistry( database );
+        registry = new DatabaseModelElementRegistry( new InMemoryModelElementRegistry(), database );
         transaction = StmTransactionContext.beginTransaction();
     }
 
     def "The root namespace can be looked up"() {
 
         when: "the root namespace is looked up"
-        def rootNamespace = registry.lookUpRootNamespace().get().get()
+        def rootNamespace = registry.lookUpRootNamespace().get()
 
         and: "the root namespace is looked up again"
-        def rootNamespace2 = registry.lookUpRootNamespace().get().get()
+        def rootNamespace2 = registry.lookUpRootNamespace().get()
 
         then: "it has usable attributes"
         rootNamespace.id != null

@@ -33,7 +33,7 @@ public final class Class
 
     @Override
     public IComponent getParentContainer( IModelElementLookUp registry ) {
-        return this.parentContainer.get().orLoad( IComponent.class, registry );
+        return this.parentContainer.get().orLookUp( IComponent.class, registry );
     }
 
 }
