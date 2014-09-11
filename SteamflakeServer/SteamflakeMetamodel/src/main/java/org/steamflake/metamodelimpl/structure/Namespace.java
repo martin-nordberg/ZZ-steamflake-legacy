@@ -18,17 +18,13 @@ public final class Namespace
     /**
      * Constructs a new namespace.
      *
-     * @param id       the unique ID of the namespace.
-     * @param parentId the unique ID of the parent container of this namespace.
-     * @param name     the name of the namespace.
-     * @param summary  a short summary of the namespace.
+     * @param self    the registered shared reference to the object.
+     * @param parent  the parent container of the namespace.
+     * @param name    the name of the namespace.
+     * @param summary a short summary of the namespace.
      */
-    public Namespace( UUID id, String parentId, String name, String summary ) {
-        super( id, Ref.byId( UUID.fromString( parentId ) ), name, summary );
-    }
-
-    public Namespace( UUID id, Ref<? extends IAbstractNamespace> parent, String name, String summary ) {
-        super( id, parent, name, summary );
+    public Namespace( Ref<INamespace> self, Ref<? extends IAbstractNamespace> parent, String name, String summary ) {
+        super( self, parent, name, summary );
     }
 
     @Override
@@ -38,7 +34,7 @@ public final class Namespace
 
     @Override
     public final IModule makeModule( UUID id, String name, String summary, String version ) {
-        return new Module( id, this.getSelf(), name, summary, version );
+        return new Module( Ref.byId( id ), this.getSelf(), name, summary, version );
     }
 
 }

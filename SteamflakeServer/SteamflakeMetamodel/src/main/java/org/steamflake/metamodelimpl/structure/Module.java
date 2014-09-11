@@ -6,8 +6,6 @@ import org.steamflake.metamodel.structure.IModule;
 import org.steamflake.metamodel.structure.INamespace;
 import org.steamflake.utilities.revisions.V;
 
-import java.util.UUID;
-
 /**
  * Implementation for IModule.
  */
@@ -18,19 +16,14 @@ public final class Module
     /**
      * Constructs a new module with given attributes.
      *
-     * @param id       the unique ID of the module.
-     * @param parentId the unique ID of the parent namespace of the module.
-     * @param name     the name of the module.
-     * @param summary  a summary of the module.
-     * @param version  the version number of the module.
+     * @param self    the registered shared reference to the object.
+     * @param parent  the parent namespace of the module.
+     * @param name    the name of the module.
+     * @param summary a summary of the module.
+     * @param version the version number of the module.
      */
-    public Module( String id, String parentId, String name, String summary, String version ) {
-        super( UUID.fromString( id ), Ref.byId( UUID.fromString( parentId ) ), name, summary, true );
-        this.version = new V<>( version );
-    }
-
-    public Module( UUID id, Ref<? extends INamespace> parent, String name, String summary, String version ) {
-        super( id, parent, name, summary, true );
+    public Module( Ref<IModule> self, Ref<? extends INamespace> parent, String name, String summary, String version ) {
+        super( self, parent, name, summary, true );
         this.version = new V<>( version );
     }
 

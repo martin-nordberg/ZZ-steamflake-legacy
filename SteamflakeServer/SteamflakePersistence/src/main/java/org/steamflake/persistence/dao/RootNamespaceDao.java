@@ -33,10 +33,7 @@ public class RootNamespaceDao {
      */
     public IRootNamespace findRootNamespace() {
 
-        List<IRootNamespace> result = this.database.findAll(
-            IRootNamespace.class,
-            "SELECT TO_CHAR(ID), SUMMARY FROM V_ROOT_NAMESPACE"
-        );
+        List<IRootNamespace> result = this.database.findAll( IRootNamespace.class, "SELECT TO_CHAR(ID), SUMMARY FROM V_ROOT_NAMESPACE" );
 
         if ( result.isEmpty() ) {
             return null;
@@ -54,6 +51,7 @@ public class RootNamespaceDao {
 
         /**
          * Constructs a new instantiator associated with the given model element registry.
+         *
          * @param registry the registry of objects to use for caching and for unique object identity.
          */
         private RootNamespaceInstantiator( IModelElementRegistry registry ) {
@@ -62,6 +60,7 @@ public class RootNamespaceDao {
 
         /**
          * Instantiates a root namespace either by finding it in the registry or else creating it and adding it to the registry.
+         *
          * @param fields the fields from the database query.
          * @return the new namespace.
          */
@@ -81,7 +80,7 @@ public class RootNamespaceDao {
             final String summary = (String) fields.getValues().get( 1 );
 
             // Create the root namespace.
-            RootNamespace rootNamespace = new RootNamespace( id, summary );
+            RootNamespace rootNamespace = new RootNamespace( result.orById( id ), summary );
 
             // Register it for future look ups.
             this.registry.registerModelElement( rootNamespace.getSelf() );

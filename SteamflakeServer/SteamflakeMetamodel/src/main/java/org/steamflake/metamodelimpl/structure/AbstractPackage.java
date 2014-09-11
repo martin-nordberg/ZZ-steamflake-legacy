@@ -15,13 +15,13 @@ public abstract class AbstractPackage<ISelf extends IAbstractPackage, IParent ex
     implements IAbstractPackage<ISelf, IParent> {
 
 
-    protected AbstractPackage( UUID id, Ref<? extends IParent> parentContainer, String name, String summary, boolean isExported ) {
-        super( id, parentContainer, name, summary, isExported );
+    protected AbstractPackage( Ref<ISelf> self, Ref<? extends IParent> parentContainer, String name, String summary, boolean isExported ) {
+        super( self, parentContainer, name, summary, isExported );
     }
 
     @Override
     public final IPackage makePackage( UUID id, String name, String summary, boolean isExported ) {
-        return new Package( id, this.getSelf(), name, summary, isExported );
+        return new Package( Ref.byId( id ), this.getSelf(), name, summary, isExported );
     }
 
 }

@@ -5,8 +5,6 @@ import org.steamflake.metamodel.elements.Ref;
 import org.steamflake.metamodel.structure.IAbstractPackage;
 import org.steamflake.metamodel.structure.IPackage;
 
-import java.util.UUID;
-
 /**
  * Implementation of IPackage.
  */
@@ -17,18 +15,14 @@ public final class Package
     /**
      * Constructs a new package with given attributes.
      *
-     * @param id         the unique ID of the package.
-     * @param parentId   the unique ID of the parent package of the new package.
+     * @param self       the registered shared reference to the object.
+     * @param parent     the parent package of the new package.
      * @param name       the name of the package.
      * @param summary    a summary of the package.
      * @param isExported whether the new package is visible outside this one.
      */
-    public Package( String id, String parentId, String name, String summary, boolean isExported ) {
-        super( UUID.fromString( id ), Ref.byId( UUID.fromString( parentId ) ), name, summary, isExported );
-    }
-
-    public Package( UUID id, Ref<? extends IAbstractPackage> parent, String name, String summary, boolean isExported ) {
-        super( id, parent, name, summary, isExported );
+    public Package( Ref<IPackage> self, Ref<? extends IAbstractPackage> parent, String name, String summary, boolean isExported ) {
+        super( self, parent, name, summary, isExported );
     }
 
     @Override

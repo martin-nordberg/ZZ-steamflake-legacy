@@ -14,13 +14,13 @@ public abstract class AbstractNamespace<ISelf extends IAbstractNamespace, IParen
     extends AbstractNamedElement<ISelf, IParent>
     implements IAbstractNamespace<ISelf, IParent> {
 
-    protected AbstractNamespace( UUID id, Ref<? extends IParent> parentContainer, String name, String summary ) {
-        super( id, parentContainer, name, summary );
+    protected AbstractNamespace( Ref<ISelf> self, Ref<? extends IParent> parentContainer, String name, String summary ) {
+        super( self, parentContainer, name, summary );
     }
 
     @Override
     public final INamespace makeNamespace( UUID id, String name, String summary ) {
-        return new Namespace( id, this.getSelf(), name, summary );
+        return new Namespace( Ref.byId( id ), this.getSelf(), name, summary );
     }
 
 }

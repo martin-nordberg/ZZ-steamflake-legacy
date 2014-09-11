@@ -14,13 +14,13 @@ public abstract class AbstractComponent<ISelf extends IComponent, IParent extend
     extends AbstractFunction<ISelf, IParent>
     implements IComponent<ISelf, IParent> {
 
-    protected AbstractComponent( UUID id, Ref<? extends IParent> parentContainer, String name, String summary, boolean isExported ) {
-        super( id, parentContainer, summary, name, isExported );
+    protected AbstractComponent( Ref<ISelf> self, Ref<? extends IParent> parentContainer, String name, String summary, boolean isExported ) {
+        super( self, parentContainer, summary, name, isExported );
     }
 
     @Override
     public final IClass makeClass( UUID id, String name, String summary, boolean isExported ) {
-        return new Class( id, this.getSelf(), name, summary, isExported );
+        return new Class( Ref.byId( id ), this.getSelf(), name, summary, isExported );
     }
 
 }

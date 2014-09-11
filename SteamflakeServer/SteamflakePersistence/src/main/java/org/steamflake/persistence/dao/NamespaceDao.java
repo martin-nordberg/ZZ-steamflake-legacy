@@ -53,24 +53,15 @@ public class NamespaceDao {
 
     public INamespace findNamespaceByUuid( UUID namespaceId ) {
 
-        return this.database.findUniqueOrNull(
-            INamespace.class,
-            "SELECT TO_CHAR(ID), TO_CHAR(PARENT_CONTAINER_ID), NAME, SUMMARY FROM V_NAMESPACE WHERE ID = ?",
-            namespaceId
-        );
+        return this.database.findUniqueOrNull( INamespace.class, "SELECT TO_CHAR(ID), TO_CHAR(PARENT_CONTAINER_ID), NAME, SUMMARY FROM V_NAMESPACE WHERE ID = ?", namespaceId );
 
     }
 
     public List<? extends INamespace> findNamespacesAll() {
 
-        return this.database.findAll(
-            INamespace.class,
-            "SELECT TO_CHAR(ID), TO_CHAR(PARENT_CONTAINER_ID), NAME, SUMMARY FROM V_NAMESPACE"
-        );
+        return this.database.findAll( INamespace.class, "SELECT TO_CHAR(ID), TO_CHAR(PARENT_CONTAINER_ID), NAME, SUMMARY FROM V_NAMESPACE" );
 
     }
-
-    private final Database database;
 
     /**
      * Custom instantiator for namespaces with model element registry look up.
@@ -80,6 +71,7 @@ public class NamespaceDao {
 
         /**
          * Constructs a new instantiator associated with the given model element registry.
+         *
          * @param registry the registry of objects to use for caching and for unique object identity.
          */
         private NamespaceInstantiator( IModelElementRegistry registry ) {
@@ -88,6 +80,7 @@ public class NamespaceDao {
 
         /**
          * Instantiates a namespace either by finding it in the registry or else creating it and adding it to the registry.
+         *
          * @param fields the fields from the database query.
          * @return the new namespace.
          */
@@ -118,7 +111,7 @@ public class NamespaceDao {
             }
 
             // Create the namespace.
-            Namespace namespace = new Namespace( id, parent, name, summary );
+            Namespace namespace = new Namespace( result.orById( id ), parent, name, summary );
 
             // Register it for future look ups.
             this.registry.registerModelElement( namespace.getSelf() );
@@ -130,6 +123,8 @@ public class NamespaceDao {
         private final IModelElementRegistry registry;
 
     }
+
+    private final Database database;
 
     private final IModelElementRegistry registry;
 

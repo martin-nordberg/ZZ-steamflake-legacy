@@ -24,7 +24,7 @@ class RootNamespaceDaoSpec extends Specification {
     def setup() {
         def cache = new InMemoryModelElementRegistry()
         database = new Database(dataSource);
-        dao = new RootNamespaceDao(database,cache);
+        dao = new RootNamespaceDao(database, cache);
         transaction = StmTransactionContext.beginTransaction();
     }
 

@@ -23,7 +23,7 @@ class DatabaseModelElementRegistrySpec extends Specification {
 
     def setup() {
         database = new Database(dataSource);
-        registry = new DatabaseModelElementRegistry( new InMemoryModelElementRegistry(), database );
+        registry = new DatabaseModelElementRegistry(new InMemoryModelElementRegistry(), database);
         transaction = StmTransactionContext.beginTransaction();
     }
 
@@ -41,7 +41,7 @@ class DatabaseModelElementRegistrySpec extends Specification {
         rootNamespace.summary != null
 
         and: "it is the same (cached) object"
-        rootNamespace2.is( rootNamespace )
+        rootNamespace2.is(rootNamespace)
 
     }
 

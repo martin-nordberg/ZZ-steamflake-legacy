@@ -45,31 +45,6 @@ public final class DatabaseModelElementRegistry
     }
 
     /**
-     * Looks up a namespace.
-     *
-     * @param id the unique ID of the namespace to find.
-     * @return the namespace found or null if not found.
-     */
-    private Ref<INamespace> lookUpNamespace( UUID id ) {
-
-        // First try a look up in the associated registry.
-        return this.registry.lookUpModelElementByUuid( INamespace.class, id ).orIfMissing( () -> {
-
-            // If missing, find the namespace in the database.
-            NamespaceDao dao = new NamespaceDao( this.database, this.registry );
-            INamespace namespace = dao.findNamespaceByUuid( id );
-
-            if ( namespace == null ) {
-                return Ref.missing();
-            }
-
-            return namespace.getSelf();
-
-        } );
-
-    }
-
-    /**
      * Looks up the root namespace.
      *
      * @return the root namespace found or null if not found.
@@ -98,6 +73,31 @@ public final class DatabaseModelElementRegistry
 
         // Return the root namespace found.
         return rootNamespace.getSelf();
+
+    }
+
+    /**
+     * Looks up a namespace.
+     *
+     * @param id the unique ID of the namespace to find.
+     * @return the namespace found or null if not found.
+     */
+    private Ref<INamespace> lookUpNamespace( UUID id ) {
+
+        // First try a look up in the associated registry.
+        return this.registry.lookUpModelElementByUuid( INamespace.class, id ).orIfMissing( () -> {
+
+            // If missing, find the namespace in the database.
+            NamespaceDao dao = new NamespaceDao( this.database, this.registry );
+            INamespace namespace = dao.findNamespaceByUuid( id );
+
+            if ( namespace == null ) {
+                return Ref.missing();
+            }
+
+            return namespace.getSelf();
+
+        } );
 
     }
 

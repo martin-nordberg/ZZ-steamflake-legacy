@@ -5,8 +5,6 @@ import org.steamflake.metamodel.elements.INamedElement;
 import org.steamflake.metamodel.elements.Ref;
 import org.steamflake.utilities.revisions.V;
 
-import java.util.UUID;
-
 /**
  * Abstract base class for named model elements
  */
@@ -14,8 +12,8 @@ public abstract class AbstractNamedElement<ISelf extends INamedElement, IParent 
     extends AbstractModelElement<ISelf, IParent>
     implements INamedElement<ISelf, IParent> {
 
-    protected AbstractNamedElement( UUID id, Ref<? extends IParent> parentContainer, String name, String summary ) {
-        super( id, parentContainer, summary );
+    protected AbstractNamedElement( Ref<ISelf> self, Ref<? extends IParent> parentContainer, String name, String summary ) {
+        super( self, parentContainer, summary );
         this.name = new V<>( name );
     }
 

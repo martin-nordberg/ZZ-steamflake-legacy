@@ -7,8 +7,6 @@ import org.steamflake.metamodel.structure.IParameter;
 import org.steamflake.metamodelimpl.elements.AbstractNamedElement;
 import org.steamflake.utilities.revisions.V;
 
-import java.util.UUID;
-
 /**
  * Implementation of IParemeter.
  */
@@ -19,19 +17,14 @@ public final class Parameter
     /**
      * Constructs a new parameter with given attributes.
      *
-     * @param id       the unique ID of the parameter.
-     * @param parentId the unique ID of the parent namespace of the parameter.
+     * @param self     the registered shared reference to the object.
+     * @param parent   the parent function signature of the parameter.
      * @param name     the name of the parameter.
      * @param summary  a summary of the parameter.
      * @param sequence the sequence number of the parameter.
      */
-    public Parameter( String id, String parentId, String name, String summary, int sequence ) {
-        super( UUID.fromString( id ), Ref.byId( UUID.fromString( parentId ) ), name, summary );
-        this.sequence = new V<>( sequence );
-    }
-
-    public Parameter( UUID id, Ref<? extends IFunctionSignature> parent, String name, String summary, int sequence ) {
-        super( id, parent, name, summary );
+    public Parameter( Ref<IParameter> self, Ref<? extends IFunctionSignature> parent, String name, String summary, int sequence ) {
+        super( self, parent, name, summary );
         this.sequence = new V<>( sequence );
     }
 

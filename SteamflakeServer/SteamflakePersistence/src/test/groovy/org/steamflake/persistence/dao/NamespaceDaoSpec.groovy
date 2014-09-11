@@ -31,8 +31,8 @@ class NamespaceDaoSpec extends Specification {
     def setup() {
         def cache = new InMemoryModelElementRegistry()
         database = new Database(dataSource);
-        rootDao = new RootNamespaceDao(database,cache);
-        dao = new NamespaceDao( database, cache );
+        rootDao = new RootNamespaceDao(database, cache);
+        dao = new NamespaceDao(database, cache);
         transaction = StmTransactionContext.beginTransaction();
         root = rootDao.findRootNamespace()
     }
@@ -47,16 +47,16 @@ class NamespaceDaoSpec extends Specification {
         dao.createNamespace(namespace)
 
         and: "retrieved by UUID"
-        def namespace2 = dao.findNamespaceByUuid( id )
+        def namespace2 = dao.findNamespaceByUuid(id)
 
         then: "it is the same (cached) object as the original"
-        namespace2.is( namespace )
+        namespace2.is(namespace)
 
         and: "it can be deleted"
-        dao.deleteNamespace( id )
+        dao.deleteNamespace(id)
 
         and: "then disappears from view"
-        dao.findNamespaceByUuid( id ) == null
+        dao.findNamespaceByUuid(id) == null
 
     }
 

@@ -16,16 +16,17 @@ public abstract class AbstractModelElement<ISelf extends IModelElement, IParent 
     /**
      * Constructs a new model element.
      *
-     * @param id              the unique ID of the model element.
+     * @param self            the shared reference to this object from the element registry.
      * @param parentContainer a reference to the parent container of the element.
      * @param summary         a short summary of the model element.
      */
     @SuppressWarnings("unchecked")
-    protected AbstractModelElement( UUID id, Ref<? extends IParent> parentContainer, String summary ) {
-        this.id = id;
+    protected AbstractModelElement( Ref<ISelf> self, Ref<? extends IParent> parentContainer, String summary ) {
+
         this.parentContainer = new V<>( (Ref<IParent>) parentContainer );
-        this.self = Ref.to( (ISelf) this );   // TBD: when relevant, needs to be the Ref created ahead of time by UUID
+        this.self = self.set( (ISelf) this );
         this.summary = new V<>( summary );
+
     }
 
     @SuppressWarnings("SimplifiableIfStatement")
@@ -40,13 +41,13 @@ public abstract class AbstractModelElement<ISelf extends IModelElement, IParent 
             return false;
         }
 
-        return id.equals( ((AbstractModelElement) that).id );
+        return self.getId().equals( ((AbstractModelElement) that).self.getId() );
 
     }
 
     @Override
     public final UUID getId() {
-        return this.id;
+        return this.self.getId();
     }
 
     @Override
@@ -66,7 +67,7 @@ public abstract class AbstractModelElement<ISelf extends IModelElement, IParent 
 
     @Override
     public final int hashCode() {
-        return id.hashCode();
+        return this.self.getId().hashCode();
     }
 
     @SuppressWarnings("unchecked")
@@ -81,18 +82,12 @@ public abstract class AbstractModelElement<ISelf extends IModelElement, IParent 
     public final ISelf setSummary( String summary ) {
         this.summary.set( summary );
         return (ISelf) this;
-
     }
 
     /**
      * A reference to the parent container of this model element.
      */
     protected final V<Ref<IParent>> parentContainer;
-
-    /**
-     * The unique ID of this model element.
-     */
-    private final UUID id;
 
     /**
      * A shareable reference to this object.

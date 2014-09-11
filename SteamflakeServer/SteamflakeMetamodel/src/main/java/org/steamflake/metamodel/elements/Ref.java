@@ -7,12 +7,15 @@ import java.util.function.Supplier;
 
 /**
  * Reference to an object by UUID and ordinary Java reference. Supports lazy loading (or non-loading) of
- * related objects.
+ * related objects. Provides Optional-like handling of missing values.
  */
 public final class Ref<IElement extends IModelElement> {
 
-    // TBD: Combine in the functionality of Optional
-
+    /**
+     * Constructs a new reference to a model element with given ID.
+     * @param id the unique ID of the model element.
+     * @param modelElement the model element itself.
+     */
     private Ref( UUID id, IElement modelElement ) {
         this.id = id;
         this.modelElement = modelElement;
@@ -50,21 +53,6 @@ public final class Ref<IElement extends IModelElement> {
      */
     public static <IElement extends IModelElement> Ref<IElement> to( IElement modelElement ) {
         Objects.requireNonNull( modelElement );
-        return new Ref<>( modelElement.getId(), modelElement );
-    }
-
-    /**
-     * Constructs a new reference object to a given model element.
-     *
-     * @param modelElement the model element referenced.
-     * @param <IElement>   the type of model element.
-     * @return the new reference.
-     */
-    @SuppressWarnings("unchecked")
-    public static <IElement extends IModelElement> Ref<IElement> toNullable( IElement modelElement ) {
-        if ( modelElement == null ) {
-            return MISSING;
-        }
         return new Ref<>( modelElement.getId(), modelElement );
     }
 
@@ -165,13 +153,52 @@ public final class Ref<IElement extends IModelElement> {
         return this.id == null;
     }
 
-    public Ref<IElement> orIfMissing( Supplier<Ref<IElement>> supplier ) {
+    /**
+     * Returns this reference itself, or if missing a new reference with given UUID.
+     * @param id the unique ID expected for the reference.
+     * @return this reference or if missing, a new one with given ID.
+     */
+    public final Ref<IElement> orById( UUID id ) {
+
+        if ( this.id == null ) {
+            return Ref.byId( id );
+        }
+
+        return this;
+
+    }
+
+    /**
+     * Returns this reference itself, or if missing, a new reference provided by the given callback.
+     * @param supplier a callback that will provide the reference if needed.
+     * @return this reference or if missing, a new one as supplied dynamically.
+     */
+    public final Ref<IElement> orIfMissing( Supplier<Ref<IElement>> supplier ) {
 
         if ( this.id == null ) {
             return supplier.get();
         }
 
         return this;
+
+    }
+
+    /**
+     * Gets the referenced model element, looking it up by UUID if needed.
+     *
+     * @param type     the type of this Ref
+     * @param registry a facility for looking up the referenced model element by UUID if needed.
+     * @return the referenced model element.
+     */
+    public final IElement orLookUp( Class<IElement> type, IModelElementLookUp registry ) {
+
+        Objects.requireNonNull( this.id );
+
+        if ( this.modelElement == null ) {
+            this.modelElement = registry.lookUpModelElementByUuid( type, this.id ).get();
+        }
+
+        return this.modelElement;
 
     }
 
@@ -192,21 +219,19 @@ public final class Ref<IElement extends IModelElement> {
     }
 
     /**
-     * Gets the referenced model element, looking it up by UUID if needed.
-     *
-     * @param type     the type of this Ref
-     * @param registry a facility for looking up the referenced model element by UUID if needed.
-     * @return the referenced model element.
+     * Sets the referenced model element.
+     * @param modelElement the model element to bereferenced by this object.
+     * @return this reference object with the model element set.
      */
-    public final IElement orLookUp( Class<IElement> type, IModelElementLookUp registry ) {
+    public Ref<IElement> set( IElement modelElement ) {
 
-        Objects.requireNonNull( this.id );
-
-        if ( this.modelElement == null ) {
-            this.modelElement = registry.lookUpModelElementByUuid( type, this.id ).get();
+        if ( this.modelElement != null ) {
+            throw new IllegalStateException( "Cannot change reference once set." );
         }
 
-        return this.modelElement;
+        this.modelElement = modelElement;
+
+        return this;
 
     }
 
