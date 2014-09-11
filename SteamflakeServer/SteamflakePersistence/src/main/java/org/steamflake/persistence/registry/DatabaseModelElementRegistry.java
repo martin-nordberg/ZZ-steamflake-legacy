@@ -5,7 +5,6 @@ import org.steamflake.metamodel.elements.IModelElement;
 import org.steamflake.metamodel.elements.IModelElementLookUp;
 import org.steamflake.metamodel.elements.Ref;
 import org.steamflake.metamodel.registry.IModelElementRegistry;
-import org.steamflake.metamodel.structure.INamespace;
 import org.steamflake.metamodel.structure.IRootNamespace;
 import org.steamflake.persistence.dao.NamespaceDao;
 import org.steamflake.persistence.dao.RootNamespaceDao;
@@ -33,9 +32,11 @@ public final class DatabaseModelElementRegistry
 
         String typeName = modelElementType.getSimpleName();
 
+        // TBD: will not be easy to make this work for abstract model element types
+
         switch ( typeName ) {
             case "INamespace":
-                return (Ref<IElement>) this.lookUpNamespace( id );
+                return this.lookUpNamespace( modelElementType, id );
             case "IRootNamespace":
                 return (Ref<IElement>) this.lookUpRootNamespace();
             default:
@@ -82,20 +83,21 @@ public final class DatabaseModelElementRegistry
      * @param id the unique ID of the namespace to find.
      * @return the namespace found or null if not found.
      */
-    private Ref<INamespace> lookUpNamespace( UUID id ) {
+    @SuppressWarnings("unchecked")
+    private <IElement extends IModelElement> Ref<IElement> lookUpNamespace( Class<IElement> modelElementType, UUID id ) {
 
         // First try a look up in the associated registry.
-        return this.registry.lookUpModelElementByUuid( INamespace.class, id ).orIfMissing( () -> {
+        return this.registry.lookUpModelElementByUuid( modelElementType, id ).orIfMissing( () -> {
 
             // If missing, find the namespace in the database.
             NamespaceDao dao = new NamespaceDao( this.database, this.registry );
-            INamespace namespace = dao.findNamespaceByUuid( id );
+            IModelElement namespace = dao.findNamespaceByUuid( id );
 
             if ( namespace == null ) {
                 return Ref.missing();
             }
 
-            return namespace.getSelf();
+            return (Ref<IElement>) namespace.getSelf();
 
         } );
 
