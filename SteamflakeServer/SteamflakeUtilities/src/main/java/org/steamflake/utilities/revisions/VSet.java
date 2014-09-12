@@ -1,21 +1,21 @@
 package org.steamflake.utilities.revisions;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Handle to a versioned item that is a list of items.
+ * Handle to a versioned item that is a set of items.
+ * TBD: This is practically a clone of VList; either refactor out a generic base class or else implement
+ * a better versioned set.
  */
-public class VList<T>
+public class VSet<T>
     extends AbstractVersionedItem {
 
     /**
-     * Constructs a new versioned list with given starting value for the current transaction's revision.
+     * Constructs a new versioned set with given starting value for the current transaction's revision.
      */
-    public VList() {
+    public VSet() {
 
         // Track everything through the current transaction.
         StmTransaction currentTransaction = StmTransactionContext.getTransactionOfCurrentThread();
@@ -29,7 +29,7 @@ public class VList<T>
     }
 
     /**
-     * Adds an item to the list.
+     * Adds an item to the set.
      *
      * @param value The new raw value to become the next revision of this item.
      */
@@ -73,11 +73,11 @@ public class VList<T>
     }
 
     /**
-     * Reads the version of the item list relevant for the transaction active in the currently running thread.
+     * Reads the version of the item Set relevant for the transaction active in the currently running thread.
      *
-     * @return a copy of the list of items as of the start of the transaction or else as written by the transaction.
+     * @return a copy of the Set of items as of the start of the transaction or else as written by the transaction.
      */
-    public List<T> get() {
+    public Set<T> get() {
 
         // Track everything through the current transaction.
         StmTransaction currentTransaction = StmTransactionContext.getTransactionOfCurrentThread();
@@ -93,7 +93,7 @@ public class VList<T>
 
             // If written by the current transaction, read back the written value.
             if ( revisionNumber == targetRevisionNumber ) {
-                return revision.getList();
+                return revision.getSet();
             }
 
             // If written and committed by some other transaction, note that our transaction is already poised for
@@ -108,7 +108,7 @@ public class VList<T>
                 currentTransaction.addVersionedItemRead( this );
 
                 // Return the value found for the source revision or earlier.
-                return revision.getList();
+                return revision.getSet();
             }
 
         }
@@ -119,9 +119,9 @@ public class VList<T>
     }
 
     /**
-     * Removes an item from the list.
+     * Removes an item from the set.
      *
-     * @param value The item to be removed from this revision of the list.
+     * @param value The item to be removed from this revision of the set.
      */
     public void remove( T value ) {
 
@@ -218,7 +218,7 @@ public class VList<T>
                 this.removeAbortedRevision();
             }
             else {
-                // Advance through the list.
+                // Advance through the set.
                 revision = priorRevision;
                 priorRevision = revision.priorRevision.get();
             }
@@ -239,7 +239,7 @@ public class VList<T>
                 Revision<T> priorRev = revision.priorRevision.get();
                 if ( priorRev != null ) {
                     Revision<T> consolidatedPriorRev = new Revision<>( priorRev.revisionNumber, null );
-                    consolidatedPriorRev.addedValues.addAll( priorRev.getList() );
+                    consolidatedPriorRev.addedValues.addAll( priorRev.getSet() );
                     revision.priorRevision.set( consolidatedPriorRev );
                 }
                 break;
@@ -250,7 +250,7 @@ public class VList<T>
     }
 
     /**
-     * Internal record structure for revisions in the linked list of revisions.
+     * Internal record structure for revisions in the linked Set of revisions.
      *
      * @param <T> the type of the value that is managed through its revisions.
      */
@@ -264,19 +264,19 @@ public class VList<T>
         }
 
         /**
-         * Recursively determines the list of items from its history of additions and removals.
+         * Recursively determines the set of items from its history of additions and removals.
          *
-         * @return the cumulative list.
+         * @return the cumulative Set.
          */
-        List<T> getList() {
+        Set<T> getSet() {
             Revision<T> priorRev = this.priorRevision.get();
 
-            List<T> result;
+            Set<T> result;
             if ( priorRev != null ) {
-                result = priorRev.getList();
+                result = priorRev.getSet();
             }
             else {
-                result = new ArrayList<>();
+                result = new HashSet<>();
             }
 
             result.addAll( this.addedValues );
@@ -286,7 +286,7 @@ public class VList<T>
         }
 
         /**
-         * The items added to the list during this revision.
+         * The items added to the set during this revision.
          */
         List<T> addedValues;
 
@@ -296,7 +296,7 @@ public class VList<T>
         final AtomicReference<Revision<T>> priorRevision;
 
         /**
-         * The items removed from the list during this revision.
+         * The items removed from the set during this revision.
          */
         List<T> removedValues;
 
@@ -308,8 +308,8 @@ public class VList<T>
     }
 
     /**
-     * Reference to the latest revision. Revisions are kept in a custom linked list with the newest revision at
-     * the head of the list.
+     * Reference to the latest revision. Revisions are kept in a custom linked Set with the newest revision at
+     * the head of the set.
      */
     private final AtomicReference<Revision<T>> latestRevision;
 
