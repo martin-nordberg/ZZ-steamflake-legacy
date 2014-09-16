@@ -1,6 +1,6 @@
 package org.steamflake.metamodel.structure.entities;
 
-import org.steamflake.metamodel.elements.INamedElement;
+import org.steamflake.metamodel.elements.INamedEntity;
 import org.steamflake.metamodel.structure.relationships.INamespaceContainment;
 
 import java.util.Set;
@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
  * An abstract namespace is a naming structure distinguishing modules.
  */
 public interface IAbstractNamespace<ISelf extends IAbstractNamespace>
-    extends INamedElement<ISelf> {
+    extends INamedEntity<ISelf> {
 
     /**
      * @return the set of relationships to the namespaces that are children of this namespace.

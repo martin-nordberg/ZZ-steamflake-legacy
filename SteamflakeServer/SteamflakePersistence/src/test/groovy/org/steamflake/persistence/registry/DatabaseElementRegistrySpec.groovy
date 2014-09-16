@@ -1,7 +1,7 @@
 package org.steamflake.persistence.registry
 
 import fi.evident.dalesbred.Database
-import org.steamflake.metamodelimpl.registry.InMemoryModelElementRegistry
+import org.steamflake.metamodelimpl.registry.InMemoryElementRegistry
 import org.steamflake.persistence.h2database.H2DataSource
 import org.steamflake.utilities.revisions.StmTransaction
 import org.steamflake.utilities.revisions.StmTransactionContext
@@ -10,11 +10,11 @@ import spock.lang.Specification
 /**
  * Created by mnordberg on 9/8/14.
  */
-class DatabaseModelElementRegistrySpec extends Specification {
+class DatabaseElementRegistrySpec extends Specification {
 
     static H2DataSource dataSource
     Database database
-    DatabaseModelElementRegistry registry
+    DatabaseElementRegistry registry
     StmTransaction transaction
 
     def setupSpec() {
@@ -23,7 +23,7 @@ class DatabaseModelElementRegistrySpec extends Specification {
 
     def setup() {
         database = new Database(dataSource);
-        registry = new DatabaseModelElementRegistry(new InMemoryModelElementRegistry(), database);
+        registry = new DatabaseElementRegistry(new InMemoryElementRegistry(), database);
         transaction = StmTransactionContext.beginTransaction();
     }
 

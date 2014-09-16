@@ -1,12 +1,12 @@
 package org.steamflake.metamodel.structure.entities;
 
-import org.steamflake.metamodel.elements.INamedElement;
+import org.steamflake.metamodel.elements.INamedEntity;
 
 /**
  * An interface represents the behavior of a component.
  */
 public interface IInterface
-    extends INamedElement<IInterface> {
+    extends INamedEntity<IInterface> {
 
     // TBD: parent is component
 

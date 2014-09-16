@@ -1,12 +1,12 @@
 package org.steamflake.metamodel.structure.entities;
 
-import org.steamflake.metamodel.elements.INamedElement;
+import org.steamflake.metamodel.elements.INamedEntity;
 
 /**
  * A parameter represents one potential argument to a function.
  */
 public interface IParameter
-    extends INamedElement<IParameter> {
+    extends INamedEntity<IParameter> {
 
     // TBD: parent is function signature
 

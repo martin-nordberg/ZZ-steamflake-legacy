@@ -1,17 +1,17 @@
 package org.steamflake.metamodelimpl.elements;
 
-import org.steamflake.metamodel.elements.INamedElement;
+import org.steamflake.metamodel.elements.INamedEntity;
 import org.steamflake.metamodel.elements.Ref;
 import org.steamflake.utilities.revisions.V;
 
 /**
- * Abstract base class for named model elements
+ * Abstract base class for named entities.
  */
-public abstract class AbstractNamedElement<ISelf extends INamedElement>
-    extends AbstractModelElement<ISelf>
-    implements INamedElement<ISelf> {
+public abstract class AbstractNamedEntity<ISelf extends INamedEntity>
+    extends AbstractEntity<ISelf>
+    implements INamedEntity<ISelf> {
 
-    protected AbstractNamedElement( Ref<ISelf> self, String name, String summary ) {
+    protected AbstractNamedEntity( Ref<ISelf> self, String name, String summary ) {
         super( self, summary );
         this.name = new V<>( name );
     }
@@ -29,7 +29,7 @@ public abstract class AbstractNamedElement<ISelf extends INamedElement>
     }
 
     /**
-     * The name of this model element.
+     * The name of this entity.
      */
     private final V<String> name;
 

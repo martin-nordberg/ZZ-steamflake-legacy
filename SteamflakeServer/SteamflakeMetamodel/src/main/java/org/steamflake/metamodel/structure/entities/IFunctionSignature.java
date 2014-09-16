@@ -1,6 +1,6 @@
 package org.steamflake.metamodel.structure.entities;
 
-import org.steamflake.metamodel.elements.INamedElement;
+import org.steamflake.metamodel.elements.INamedEntity;
 
 import java.util.UUID;
 
@@ -8,7 +8,7 @@ import java.util.UUID;
  * A function signature represents the name and parameters of a function.
  */
 public interface IFunctionSignature<ISelf extends IFunctionSignature>
-    extends INamedElement<ISelf> {
+    extends INamedEntity<ISelf> {
 
     /**
      * Adds a new parameter to this function.

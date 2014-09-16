@@ -2,14 +2,14 @@ package org.steamflake.metamodelimpl.structure.entities;
 
 import org.steamflake.metamodel.elements.Ref;
 import org.steamflake.metamodel.structure.entities.IParameter;
-import org.steamflake.metamodelimpl.elements.AbstractNamedElement;
+import org.steamflake.metamodelimpl.elements.AbstractNamedEntity;
 import org.steamflake.utilities.revisions.V;
 
 /**
  * Implementation of IParemeter.
  */
 public final class Parameter
-    extends AbstractNamedElement<IParameter>
+    extends AbstractNamedEntity<IParameter>
     implements IParameter {
 
     /**

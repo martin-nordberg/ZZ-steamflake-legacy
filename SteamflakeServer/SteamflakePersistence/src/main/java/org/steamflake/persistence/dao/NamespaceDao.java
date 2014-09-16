@@ -4,8 +4,7 @@ import fi.evident.dalesbred.Database;
 import fi.evident.dalesbred.instantiation.Instantiator;
 import fi.evident.dalesbred.instantiation.InstantiatorArguments;
 import org.steamflake.metamodel.elements.Ref;
-import org.steamflake.metamodel.registry.IModelElementRegistry;
-import org.steamflake.metamodel.structure.entities.IAbstractNamespace;
+import org.steamflake.metamodel.registry.IElementRegistry;
 import org.steamflake.metamodel.structure.entities.INamespace;
 import org.steamflake.metamodelimpl.structure.entities.Namespace;
 
@@ -17,7 +16,7 @@ import java.util.UUID;
  */
 public class NamespaceDao {
 
-    public NamespaceDao( Database database, IModelElementRegistry registry ) {
+    public NamespaceDao( Database database, IElementRegistry registry ) {
 
         this.database = database;
         this.registry = registry;
@@ -31,21 +30,21 @@ public class NamespaceDao {
     public void createNamespace( INamespace namespace ) {
 
         this.database.withVoidTransaction( tx -> {
-            this.database.update( "INSERT INTO MODEL_ELEMENT (ID, SUMMARY, TYPE) VALUES (?, ?, 'Namespace')", namespace.getId(), namespace.getSummary() );
-            this.database.update( "INSERT INTO NAMED_ELEMENT (ID, NAME) VALUES (?, ?)", namespace.getId(), namespace.getName() );
+            this.database.update( "INSERT INTO ENTITY (ID, SUMMARY, TYPE) VALUES (?, ?, 'Namespace')", namespace.getId(), namespace.getSummary() );
+            this.database.update( "INSERT INTO NAMED_ENTITY (ID, NAME) VALUES (?, ?)", namespace.getId(), namespace.getName() );
             this.database.update( "INSERT INTO ABSTRACT_NAMESPACE (ID) VALUES (?)", namespace.getId() );
             this.database.update( "INSERT INTO NAMESPACE (ID) VALUES (?)", namespace.getId() );
         } );
 
-        this.registry.registerModelElement( namespace.getSelf() );
+        this.registry.registerEntity( namespace.getSelf() );
 
     }
 
     public void deleteNamespace( UUID namespaceId ) {
 
-        this.registry.unregisterModelElement( namespaceId );
+        this.registry.unregisterEntity( namespaceId );
 
-        this.database.update( "UPDATE MODEL_ELEMENT SET DESTROYED = TRUE WHERE ID = ?", namespaceId );
+        this.database.update( "UPDATE ENTITY SET DESTROYED = TRUE WHERE ID = ?", namespaceId );
 
     }
 
@@ -62,17 +61,17 @@ public class NamespaceDao {
     }
 
     /**
-     * Custom instantiator for namespaces with model element registry look up.
+     * Custom instantiator for namespaces with element registry look up.
      */
     private static class NamespaceInstantiator
         implements Instantiator<INamespace> {
 
         /**
-         * Constructs a new instantiator associated with the given model element registry.
+         * Constructs a new instantiator associated with the given element registry.
          *
          * @param registry the registry of objects to use for caching and for unique object identity.
          */
-        private NamespaceInstantiator( IModelElementRegistry registry ) {
+        private NamespaceInstantiator( IElementRegistry registry ) {
             this.registry = registry;
         }
 
@@ -89,7 +88,7 @@ public class NamespaceDao {
             final UUID id = UUID.fromString( (String) fields.getValues().get( 0 ) );
 
             // First see if it's already loaded.
-            Ref<INamespace> result = registry.lookUpModelElementByUuid( INamespace.class, id );
+            Ref<INamespace> result = registry.lookUpEntityByUuid( INamespace.class, id );
             if ( result.isLoaded() ) {
                 return result.get();
             }
@@ -102,18 +101,18 @@ public class NamespaceDao {
             Namespace namespace = new Namespace( result.orById( id ), name, summary );
 
             // Register it for future look ups.
-            this.registry.registerModelElement( namespace.getSelf() );
+            this.registry.registerEntity( namespace.getSelf() );
 
             return namespace;
 
         }
 
-        private final IModelElementRegistry registry;
+        private final IElementRegistry registry;
 
     }
 
     private final Database database;
 
-    private final IModelElementRegistry registry;
+    private final IElementRegistry registry;
 
 }

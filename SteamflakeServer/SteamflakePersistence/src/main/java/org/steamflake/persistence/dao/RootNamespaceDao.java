@@ -4,7 +4,7 @@ import fi.evident.dalesbred.Database;
 import fi.evident.dalesbred.instantiation.Instantiator;
 import fi.evident.dalesbred.instantiation.InstantiatorArguments;
 import org.steamflake.metamodel.elements.Ref;
-import org.steamflake.metamodel.registry.IModelElementRegistry;
+import org.steamflake.metamodel.registry.IElementRegistry;
 import org.steamflake.metamodel.structure.entities.IRootNamespace;
 import org.steamflake.metamodelimpl.structure.entities.RootNamespace;
 
@@ -16,7 +16,7 @@ import java.util.UUID;
  */
 public class RootNamespaceDao {
 
-    public RootNamespaceDao( Database database, IModelElementRegistry registry ) {
+    public RootNamespaceDao( Database database, IElementRegistry registry ) {
 
         this.database = database;
 
@@ -44,17 +44,17 @@ public class RootNamespaceDao {
     }
 
     /**
-     * Custom instantiator for root namespaces with model element registry look up.
+     * Custom instantiator for root namespaces with element registry look up.
      */
     private static class RootNamespaceInstantiator
         implements Instantiator<IRootNamespace> {
 
         /**
-         * Constructs a new instantiator associated with the given model element registry.
+         * Constructs a new instantiator associated with the given element registry.
          *
          * @param registry the registry of objects to use for caching and for unique object identity.
          */
-        private RootNamespaceInstantiator( IModelElementRegistry registry ) {
+        private RootNamespaceInstantiator( IElementRegistry registry ) {
             this.registry = registry;
         }
 
@@ -71,7 +71,7 @@ public class RootNamespaceDao {
             final UUID id = UUID.fromString( (String) fields.getValues().get( 0 ) );
 
             // First see if it's already loaded.
-            Ref<IRootNamespace> result = registry.lookUpModelElementByUuid( IRootNamespace.class, id );
+            Ref<IRootNamespace> result = registry.lookUpEntityByUuid( IRootNamespace.class, id );
             if ( result.isLoaded() ) {
                 return result.get();
             }
@@ -83,13 +83,13 @@ public class RootNamespaceDao {
             RootNamespace rootNamespace = new RootNamespace( result.orById( id ), summary );
 
             // Register it for future look ups.
-            this.registry.registerModelElement( rootNamespace.getSelf() );
+            this.registry.registerEntity( rootNamespace.getSelf() );
 
             return rootNamespace;
 
         }
 
-        private final IModelElementRegistry registry;
+        private final IElementRegistry registry;
 
     }
 

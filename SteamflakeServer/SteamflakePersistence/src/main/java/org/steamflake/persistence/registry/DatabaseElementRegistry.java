@@ -1,10 +1,10 @@
 package org.steamflake.persistence.registry;
 
 import fi.evident.dalesbred.Database;
-import org.steamflake.metamodel.elements.IModelElement;
-import org.steamflake.metamodel.elements.IModelElementLookUp;
+import org.steamflake.metamodel.elements.IEntity;
+import org.steamflake.metamodel.elements.IElementLookUp;
 import org.steamflake.metamodel.elements.Ref;
-import org.steamflake.metamodel.registry.IModelElementRegistry;
+import org.steamflake.metamodel.registry.IElementRegistry;
 import org.steamflake.metamodel.structure.entities.IRootNamespace;
 import org.steamflake.persistence.dao.NamespaceDao;
 import org.steamflake.persistence.dao.RootNamespaceDao;
@@ -12,15 +12,15 @@ import org.steamflake.persistence.dao.RootNamespaceDao;
 import java.util.UUID;
 
 /**
- * Model registry implementation that does database looks for model elements.
+ * Registry implementation that does database look ups for elements.
  */
-public final class DatabaseModelElementRegistry
-    implements IModelElementLookUp {
+public final class DatabaseElementRegistry
+    implements IElementLookUp {
 
     /**
-     * Constructs a new model element registry.
+     * Constructs a new database-backed element look up facility.
      */
-    public DatabaseModelElementRegistry( IModelElementRegistry registry, Database database ) {
+    public DatabaseElementRegistry( IElementRegistry registry, Database database ) {
         this.database = database;
         this.registry = registry;
         this.rootNamespaceId = null;
@@ -28,19 +28,19 @@ public final class DatabaseModelElementRegistry
 
     @SuppressWarnings("unchecked")
     @Override
-    public final <IElement extends IModelElement> Ref<IElement> lookUpModelElementByUuid( Class<IElement> modelElementType, UUID id ) {
+    public final <IElement extends IEntity> Ref<IElement> lookUpEntityByUuid( Class<IElement> entityType, UUID id ) {
 
-        String typeName = modelElementType.getSimpleName();
+        String typeName = entityType.getSimpleName();
 
-        // TBD: will not be easy to make this work for abstract model element types
+        // TBD: will not be easy to make this work for abstract entity types
 
         switch ( typeName ) {
             case "INamespace":
-                return this.lookUpNamespace( modelElementType, id );
+                return this.lookUpNamespace( entityType, id );
             case "IRootNamespace":
                 return (Ref<IElement>) this.lookUpRootNamespace();
             default:
-                throw new IllegalArgumentException( "Unrecognized model element type name: " + modelElementType.getName() );
+                throw new IllegalArgumentException( "Unrecognized entity type name: " + entityType.getName() );
         }
 
     }
@@ -54,7 +54,7 @@ public final class DatabaseModelElementRegistry
 
         // First try a look up in the associated registry.
         if ( this.rootNamespaceId != null ) {
-            Ref<IRootNamespace> result = this.registry.lookUpModelElementByUuid( IRootNamespace.class, this.rootNamespaceId );
+            Ref<IRootNamespace> result = this.registry.lookUpEntityByUuid( IRootNamespace.class, this.rootNamespaceId );
 
             if ( !result.isMissing() ) {
                 return result;
@@ -84,14 +84,14 @@ public final class DatabaseModelElementRegistry
      * @return the namespace found or null if not found.
      */
     @SuppressWarnings("unchecked")
-    private <IElement extends IModelElement> Ref<IElement> lookUpNamespace( Class<IElement> modelElementType, UUID id ) {
+    private <IElement extends IEntity> Ref<IElement> lookUpNamespace( Class<IElement> entityType, UUID id ) {
 
         // First try a look up in the associated registry.
-        return this.registry.lookUpModelElementByUuid( modelElementType, id ).orIfMissing( () -> {
+        return this.registry.lookUpEntityByUuid( entityType, id ).orIfMissing( () -> {
 
             // If missing, find the namespace in the database.
             NamespaceDao dao = new NamespaceDao( this.database, this.registry );
-            IModelElement namespace = dao.findNamespaceByUuid( id );
+            IEntity namespace = dao.findNamespaceByUuid( id );
 
             if ( namespace == null ) {
                 return Ref.missing();
@@ -105,7 +105,7 @@ public final class DatabaseModelElementRegistry
 
     private final Database database;
 
-    private final IModelElementRegistry registry;
+    private final IElementRegistry registry;
 
     private UUID rootNamespaceId;
 

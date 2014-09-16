@@ -1,25 +1,25 @@
 package org.steamflake.metamodelimpl.elements;
 
-import org.steamflake.metamodel.elements.IModelElement;
+import org.steamflake.metamodel.elements.IEntity;
 import org.steamflake.metamodel.elements.Ref;
 import org.steamflake.utilities.revisions.V;
 
 import java.util.UUID;
 
 /**
- * Abstract base class for classes implementing IModelElement.
+ * Abstract base class for classes implementing IEntity.
  */
-public abstract class AbstractModelElement<ISelf extends IModelElement>
-    implements IModelElement<ISelf> {
+public abstract class AbstractEntity<ISelf extends IEntity>
+    implements IEntity<ISelf> {
 
     /**
-     * Constructs a new model element.
+     * Constructs a new entity.
      *
      * @param self            the shared reference to this object from the element registry.
-     * @param summary         a short summary of the model element.
+     * @param summary         a short summary of the entity.
      */
     @SuppressWarnings("unchecked")
-    protected AbstractModelElement( Ref<ISelf> self, String summary ) {
+    protected AbstractEntity( Ref<ISelf> self, String summary ) {
 
         this.self = self.set( (ISelf) this );
         this.summary = new V<>( summary );
@@ -38,7 +38,7 @@ public abstract class AbstractModelElement<ISelf extends IModelElement>
             return false;
         }
 
-        return self.getId().equals( ((AbstractModelElement) that).self.getId() );
+        return self.getId().equals( ((AbstractEntity) that).self.getId() );
 
     }
 
@@ -75,7 +75,7 @@ public abstract class AbstractModelElement<ISelf extends IModelElement>
     private final Ref<ISelf> self;
 
     /**
-     * A short summary of this model element.
+     * A short summary of this entity.
      */
     private final V<String> summary;
 

@@ -1,6 +1,6 @@
 package org.steamflake.metamodel.structure.relationships;
 
-import org.steamflake.metamodel.elements.IModelRelationship;
+import org.steamflake.metamodel.elements.IRelationship;
 import org.steamflake.metamodel.structure.entities.IModule;
 import org.steamflake.metamodel.structure.entities.INamespace;
 
@@ -8,7 +8,7 @@ import org.steamflake.metamodel.structure.entities.INamespace;
  * Relationship for the containment of modules by namespaces.
  */
 public interface IModuleContainment
-    extends IModelRelationship<INamespace, IModule>
+    extends IRelationship<INamespace, IModule>
 {
 
     /**

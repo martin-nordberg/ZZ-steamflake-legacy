@@ -1,15 +1,15 @@
 package org.steamflake.metamodelimpl.elements;
 
-import org.steamflake.metamodel.elements.IModelElement;
-import org.steamflake.metamodel.elements.IModelRelationship;
+import org.steamflake.metamodel.elements.IEntity;
+import org.steamflake.metamodel.elements.IRelationship;
 
 /**
  * Abstract base class for relationship implementations.
  */
-public abstract class AbstractModelRelationship<IFrom extends IModelElement, ITo extends IModelElement>
-    implements IModelRelationship<IFrom, ITo> {
+public abstract class AbstractRelationship<IFrom extends IEntity, ITo extends IEntity>
+    implements IRelationship<IFrom, ITo> {
 
-    protected AbstractModelRelationship( IFrom from, ITo to ) {
+    protected AbstractRelationship( IFrom from, ITo to ) {
         this.from = from;
         this.to = to;
     }

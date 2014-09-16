@@ -3,8 +3,7 @@ package org.steamflake.metamodelimpl.structure.entities;
 import org.steamflake.metamodel.elements.Ref;
 import org.steamflake.metamodel.structure.entities.IFunctionSignature;
 import org.steamflake.metamodel.structure.entities.IParameter;
-import org.steamflake.metamodelimpl.elements.AbstractNamedElement;
-import org.steamflake.utilities.revisions.V;
+import org.steamflake.metamodelimpl.elements.AbstractNamedEntity;
 
 import java.util.UUID;
 
@@ -12,7 +11,7 @@ import java.util.UUID;
  * Abstract base class for implementations of IFunctionSignature.
  */
 public abstract class AbstractFunctionSignature<ISelf extends IFunctionSignature>
-    extends AbstractNamedElement<ISelf>
+    extends AbstractNamedEntity<ISelf>
     implements IFunctionSignature<ISelf> {
 
     protected AbstractFunctionSignature( Ref<ISelf> self, String name, String summary ) {

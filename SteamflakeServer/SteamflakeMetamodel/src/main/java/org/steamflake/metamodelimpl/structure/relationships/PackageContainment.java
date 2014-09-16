@@ -3,14 +3,14 @@ package org.steamflake.metamodelimpl.structure.relationships;
 import org.steamflake.metamodel.structure.entities.IAbstractPackage;
 import org.steamflake.metamodel.structure.entities.IPackage;
 import org.steamflake.metamodel.structure.relationships.IPackageContainment;
-import org.steamflake.metamodelimpl.elements.AbstractModelRelationship;
+import org.steamflake.metamodelimpl.elements.AbstractRelationship;
 import org.steamflake.utilities.revisions.V;
 
 /**
  * Concrete implementation of package containment relationship.
  */
 public class PackageContainment
-    extends AbstractModelRelationship<IAbstractPackage,IPackage>
+    extends AbstractRelationship<IAbstractPackage,IPackage>
     implements IPackageContainment {
 
     protected PackageContainment( IAbstractPackage containingPackage, IPackage containedPackage, boolean isExported ) {

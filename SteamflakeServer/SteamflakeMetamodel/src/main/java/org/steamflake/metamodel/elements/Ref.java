@@ -9,26 +9,26 @@ import java.util.function.Supplier;
  * Reference to an object by UUID and ordinary Java reference. Supports lazy loading (or non-loading) of
  * related objects. Provides Optional-like handling of missing values.
  */
-public final class Ref<IElement extends IModelElement> {
+public final class Ref<IElement extends IEntity> {
 
     /**
-     * Constructs a new reference to a model element with given ID.
-     * @param id the unique ID of the model element.
-     * @param modelElement the model element itself.
+     * Constructs a new reference to an entity with given ID.
+     * @param id the unique ID of the entity.
+     * @param entity the entity itself.
      */
-    private Ref( UUID id, IElement modelElement ) {
+    private Ref( UUID id, IElement entity ) {
         this.id = id;
-        this.modelElement = modelElement;
+        this.entity = entity;
     }
 
     /**
-     * Constructs a new reference object with the ID of a model element that has not yet been loaded.
+     * Constructs a new reference object with the ID of an entity that has not yet been loaded.
      *
-     * @param id         the unique ID of the model element.
-     * @param <IElement> the type of model element.
+     * @param id         the unique ID of the entity.
+     * @param <IElement> the type of entity.
      * @return the new reference.
      */
-    public static <IElement extends IModelElement> Ref<IElement> byId( UUID id ) {
+    public static <IElement extends IEntity> Ref<IElement> byId( UUID id ) {
         Objects.requireNonNull( id );
         return new Ref<>( id, null );
     }
@@ -36,24 +36,24 @@ public final class Ref<IElement extends IModelElement> {
     /**
      * Returns the equivalent of a null reference.
      *
-     * @param <T> the type of model element referenced.
+     * @param <T> the type of entity referenced.
      * @return the null reference
      */
     @SuppressWarnings("unchecked")
-    public static <T extends IModelElement> Ref<T> missing() {
+    public static <T extends IEntity> Ref<T> missing() {
         return Ref.MISSING;
     }
 
     /**
-     * Constructs a new reference object to a given model element.
+     * Constructs a new reference object to a given entity.
      *
-     * @param modelElement the model element referenced.
-     * @param <IElement>   the type of model element.
+     * @param entity the entity referenced.
+     * @param <IElement>   the type of entity.
      * @return the new reference.
      */
-    public static <IElement extends IModelElement> Ref<IElement> to( IElement modelElement ) {
-        Objects.requireNonNull( modelElement );
-        return new Ref<>( modelElement.getId(), modelElement );
+    public static <IElement extends IEntity> Ref<IElement> to( IElement entity ) {
+        Objects.requireNonNull( entity );
+        return new Ref<>( entity.getId(), entity );
     }
 
     /**
@@ -79,17 +79,17 @@ public final class Ref<IElement extends IModelElement> {
     }
 
     /**
-     * Gets the referenced model element.
+     * Gets the referenced entity.
      *
-     * @return the referenced model element.
+     * @return the referenced entity.
      */
     public final IElement get() {
-        Objects.requireNonNull( this.modelElement );
-        return this.modelElement;
+        Objects.requireNonNull( this.entity );
+        return this.entity;
     }
 
     /**
-     * @return the unique ID of the model element.
+     * @return the unique ID of the entity.
      */
     public final UUID getId() {
         Objects.requireNonNull( this.id );
@@ -97,7 +97,7 @@ public final class Ref<IElement extends IModelElement> {
     }
 
     /**
-     * @return the hash code of this reference (same as hash code of UUID which is same as model element).
+     * @return the hash code of this reference (same as hash code of UUID which is same as entity).
      */
     @Override
     public final int hashCode() {
@@ -105,13 +105,13 @@ public final class Ref<IElement extends IModelElement> {
     }
 
     /**
-     * If a model element is loaded, invokes a callback with the element, otherwise do nothing.
+     * If an entity is loaded, invokes a callback with the element, otherwise do nothing.
      *
-     * @param consumer function to be executed if a model element is loaded.
+     * @param consumer function to be executed if an entity is loaded.
      */
     public final void ifLoaded( Consumer<? super IElement> consumer ) {
-        if ( this.modelElement != null ) {
-            consumer.accept( this.modelElement );
+        if ( this.entity != null ) {
+            consumer.accept( this.entity );
         }
     }
 
@@ -131,7 +131,7 @@ public final class Ref<IElement extends IModelElement> {
     /**
      * If the reference is not missing, invoke a callback with the element ID, otherwise do nothing.
      *
-     * @param consumer function to be executed if a model element ID is available.
+     * @param consumer function to be executed if an entity ID is available.
      */
     public final void ifNotMissing( Consumer<UUID> consumer ) {
         if ( this.id != null ) {
@@ -143,7 +143,7 @@ public final class Ref<IElement extends IModelElement> {
      * @return whether the value for the referenced ID is loaded in memory.
      */
     public final boolean isLoaded() {
-        return this.modelElement != null;
+        return this.entity != null;
     }
 
     /**
@@ -184,26 +184,26 @@ public final class Ref<IElement extends IModelElement> {
     }
 
     /**
-     * Gets the referenced model element, looking it up by UUID if needed.
+     * Gets the referenced entity, looking it up by UUID if needed.
      *
      * @param type     the type of this Ref
-     * @param registry a facility for looking up the referenced model element by UUID if needed.
-     * @return the referenced model element.
+     * @param registry a facility for looking up the referenced entity by UUID if needed.
+     * @return the referenced entity.
      */
-    public final IElement orLookUp( Class<IElement> type, IModelElementLookUp registry ) {
+    public final IElement orLookUp( Class<IElement> type, IElementLookUp registry ) {
 
         Objects.requireNonNull( this.id );
 
-        if ( this.modelElement == null ) {
-            this.modelElement = registry.lookUpModelElementByUuid( type, this.id ).get();
+        if ( this.entity == null ) {
+            this.entity = registry.lookUpEntityByUuid( type, this.id ).get();
         }
 
-        return this.modelElement;
+        return this.entity;
 
     }
 
     /**
-     * Returns the contained model element, if loaded, otherwise throws an exception created by the provided supplier.
+     * Returns the contained entity, if loaded, otherwise throws an exception created by the provided supplier.
      *
      * @param <X>               type of the exception to be thrown.
      * @param exceptionSupplier the supplier that will return the exception to be thrown.
@@ -211,25 +211,25 @@ public final class Ref<IElement extends IModelElement> {
      * @throws X if there is no value present.
      */
     public final <X extends Throwable> IElement orThrow( Supplier<? extends X> exceptionSupplier ) throws X {
-        if ( this.modelElement == null ) {
+        if ( this.entity == null ) {
             throw exceptionSupplier.get();
         }
 
-        return this.modelElement;
+        return this.entity;
     }
 
     /**
-     * Sets the referenced model element.
-     * @param modelElement the model element to bereferenced by this object.
-     * @return this reference object with the model element set.
+     * Sets the referenced entity.
+     * @param entity the entity to bereferenced by this object.
+     * @return this reference object with the entity set.
      */
-    public Ref<IElement> set( IElement modelElement ) {
+    public Ref<IElement> set( IElement entity ) {
 
-        if ( this.modelElement != null ) {
+        if ( this.entity != null ) {
             throw new IllegalStateException( "Cannot change reference once set." );
         }
 
-        this.modelElement = modelElement;
+        this.entity = entity;
 
         return this;
 
@@ -247,13 +247,13 @@ public final class Ref<IElement extends IModelElement> {
     private static final Ref MISSING = new Ref( null, null );
 
     /**
-     * The unique ID of the referenced model element.
+     * The unique ID of the referenced entity.
      */
     private final UUID id;
 
     /**
-     * The referenced model element itself.
+     * The referenced entity itself.
      */
-    private IElement modelElement;
+    private IElement entity;
 
 }

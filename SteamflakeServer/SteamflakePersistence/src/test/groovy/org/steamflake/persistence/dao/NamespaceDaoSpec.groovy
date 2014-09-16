@@ -4,7 +4,7 @@ import fi.evident.dalesbred.Database
 import org.steamflake.metamodel.structure.entities.IAbstractNamespace
 import org.steamflake.metamodel.structure.entities.INamespace
 import org.steamflake.metamodel.structure.entities.IRootNamespace
-import org.steamflake.metamodelimpl.registry.InMemoryModelElementRegistry
+import org.steamflake.metamodelimpl.registry.InMemoryElementRegistry
 import org.steamflake.persistence.h2database.H2DataSource
 import org.steamflake.utilities.revisions.StmTransaction
 import org.steamflake.utilities.revisions.StmTransactionContext
@@ -29,7 +29,7 @@ class NamespaceDaoSpec extends Specification {
     }
 
     def setup() {
-        def cache = new InMemoryModelElementRegistry()
+        def cache = new InMemoryElementRegistry()
         database = new Database(dataSource);
         rootDao = new RootNamespaceDao(database, cache);
         dao = new NamespaceDao(database, cache);

@@ -1,6 +1,6 @@
 package org.steamflake.metamodel.structure.relationships;
 
-import org.steamflake.metamodel.elements.IModelRelationship;
+import org.steamflake.metamodel.elements.IRelationship;
 import org.steamflake.metamodel.structure.entities.IAbstractPackage;
 import org.steamflake.metamodel.structure.entities.IPackage;
 
@@ -8,7 +8,7 @@ import org.steamflake.metamodel.structure.entities.IPackage;
  * Parent/child relationship from abstract packages to packages.
  */
 public interface IPackageContainment
-    extends IModelRelationship<IAbstractPackage,IPackage> {
+    extends IRelationship<IAbstractPackage,IPackage> {
 
     /**
      * @return the child packages of the relationship.
