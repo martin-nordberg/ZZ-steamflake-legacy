@@ -27,7 +27,7 @@ public class AbstractPackage<ISelf extends IAbstractPackage>
 
     @Override
     public final IPackage makePackage( UUID id, String name, String summary ) {
-        return new Package( Ref.byId( id ), name, summary );
+        return new Package( this.getSelf().makeRefById( IPackage.class, id ), name, summary );
     }
 
 

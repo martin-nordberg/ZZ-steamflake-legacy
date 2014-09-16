@@ -25,7 +25,7 @@ public abstract class AbstractNamespace<ISelf extends IAbstractNamespace>
 
     @Override
     public final INamespace makeNamespace( UUID id, String name, String summary ) {
-        return new Namespace( Ref.byId( id ), name, summary );
+        return new Namespace( this.getSelf().makeRefById( INamespace.class, id ), name, summary );
     }
 
     @Override

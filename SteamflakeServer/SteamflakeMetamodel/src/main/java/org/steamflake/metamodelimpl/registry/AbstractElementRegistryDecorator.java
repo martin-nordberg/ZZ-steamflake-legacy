@@ -1,7 +1,6 @@
 package org.steamflake.metamodelimpl.registry;
 
-import org.steamflake.metamodel.elements.IEntity;
-import org.steamflake.metamodel.elements.Ref;
+import org.steamflake.metamodel.elements.*;
 import org.steamflake.metamodel.registry.IElementRegistry;
 
 import java.util.Objects;
@@ -14,6 +13,7 @@ import java.util.UUID;
  * registry. Also, the inner registry could be much longer-loved than an outer one.
  */
 public abstract class AbstractElementRegistryDecorator
+    extends AbstractElementLookUp
     implements IElementRegistry {
 
     /**

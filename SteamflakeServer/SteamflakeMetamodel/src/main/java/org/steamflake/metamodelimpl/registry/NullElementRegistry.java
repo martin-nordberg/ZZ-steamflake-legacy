@@ -10,6 +10,7 @@ import java.util.UUID;
  * Do nothing/find nothing element registry.
  */
 public final class NullElementRegistry
+    extends AbstractElementLookUp
     implements IElementRegistry {
 
     @Override

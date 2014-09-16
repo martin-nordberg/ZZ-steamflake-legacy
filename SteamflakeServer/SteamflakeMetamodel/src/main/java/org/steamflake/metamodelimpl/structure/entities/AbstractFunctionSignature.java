@@ -20,7 +20,7 @@ public abstract class AbstractFunctionSignature<ISelf extends IFunctionSignature
 
     @Override
     public final IParameter makeParameter( UUID id, String name, String summary, int sequence ) {
-        return new Parameter( Ref.byId( id ), name, summary, sequence );
+        return new Parameter( this.getSelf().makeRefById( IParameter.class, id ), name, summary, sequence );
     }
 
 }

@@ -6,9 +6,6 @@ import org.steamflake.metamodel.structure.entities.IModule;
 import org.steamflake.metamodel.structure.entities.INamespace;
 import org.steamflake.metamodel.structure.relationships.IModuleContainment;
 import org.steamflake.metamodel.structure.relationships.INamespaceContainment;
-import org.steamflake.metamodelimpl.structure.relationships.ModuleContainment;
-import org.steamflake.utilities.revisions.V;
-import org.steamflake.utilities.revisions.VSet;
 
 import java.util.Set;
 import java.util.UUID;
@@ -43,7 +40,7 @@ public final class Namespace
 
     @Override
     public final IModule makeModule( UUID id, String name, String summary, String version ) {
-        return new Module( Ref.byId( id ), name, summary, version );
+        return new Module( this.getSelf().makeRefById( IModule.class, id ), name, summary, version );
     }
 
     @Override

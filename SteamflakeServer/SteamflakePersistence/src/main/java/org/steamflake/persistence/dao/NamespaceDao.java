@@ -4,6 +4,7 @@ import fi.evident.dalesbred.Database;
 import fi.evident.dalesbred.instantiation.Instantiator;
 import fi.evident.dalesbred.instantiation.InstantiatorArguments;
 import org.steamflake.metamodel.elements.Ref;
+import org.steamflake.metamodel.elements.RefSource;
 import org.steamflake.metamodel.registry.IElementRegistry;
 import org.steamflake.metamodel.structure.entities.INamespace;
 import org.steamflake.metamodelimpl.structure.entities.Namespace;
@@ -87,8 +88,10 @@ public class NamespaceDao {
 
             final UUID id = UUID.fromString( (String) fields.getValues().get( 0 ) );
 
+            RefSource<INamespace> refSource = this.registry.getRefSource( INamespace.class );
+
             // First see if it's already loaded.
-            Ref<INamespace> result = registry.lookUpEntityByUuid( INamespace.class, id );
+            Ref<INamespace> result = refSource.lookUpEntityByUuid( id );
             if ( result.isLoaded() ) {
                 return result.get();
             }
@@ -98,7 +101,7 @@ public class NamespaceDao {
             final String summary = (String) fields.getValues().get( 2 );
 
             // Create the namespace.
-            Namespace namespace = new Namespace( result.orById( id ), name, summary );
+            Namespace namespace = new Namespace( result.orById( refSource, id ), name, summary );
 
             // Register it for future look ups.
             this.registry.registerEntity( namespace.getSelf() );

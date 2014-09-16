@@ -19,7 +19,7 @@ public abstract class AbstractComponent<ISelf extends IComponent>
 
     @Override
     public final IClass makeClass( UUID id, String name, String summary ) {
-        return new Class( Ref.byId( id ), name, summary );
+        return new Class( this.getSelf().makeRefById( IClass.class, id ), name, summary );
     }
 
 }

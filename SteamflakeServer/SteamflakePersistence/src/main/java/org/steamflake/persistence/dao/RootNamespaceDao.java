@@ -4,6 +4,7 @@ import fi.evident.dalesbred.Database;
 import fi.evident.dalesbred.instantiation.Instantiator;
 import fi.evident.dalesbred.instantiation.InstantiatorArguments;
 import org.steamflake.metamodel.elements.Ref;
+import org.steamflake.metamodel.elements.RefSource;
 import org.steamflake.metamodel.registry.IElementRegistry;
 import org.steamflake.metamodel.structure.entities.IRootNamespace;
 import org.steamflake.metamodelimpl.structure.entities.RootNamespace;
@@ -70,8 +71,10 @@ public class RootNamespaceDao {
 
             final UUID id = UUID.fromString( (String) fields.getValues().get( 0 ) );
 
+            RefSource<IRootNamespace> refSource = this.registry.getRefSource( IRootNamespace.class );
+
             // First see if it's already loaded.
-            Ref<IRootNamespace> result = registry.lookUpEntityByUuid( IRootNamespace.class, id );
+            Ref<IRootNamespace> result = refSource.lookUpEntityByUuid( id );
             if ( result.isLoaded() ) {
                 return result.get();
             }
@@ -80,7 +83,7 @@ public class RootNamespaceDao {
             final String summary = (String) fields.getValues().get( 1 );
 
             // Create the root namespace.
-            RootNamespace rootNamespace = new RootNamespace( result.orById( id ), summary );
+            RootNamespace rootNamespace = new RootNamespace( result.orById( refSource, id ), summary );
 
             // Register it for future look ups.
             this.registry.registerEntity( rootNamespace.getSelf() );

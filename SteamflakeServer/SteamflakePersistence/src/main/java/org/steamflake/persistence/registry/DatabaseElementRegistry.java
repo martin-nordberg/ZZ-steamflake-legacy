@@ -1,11 +1,12 @@
 package org.steamflake.persistence.registry;
 
 import fi.evident.dalesbred.Database;
-import org.steamflake.metamodel.elements.IEntity;
 import org.steamflake.metamodel.elements.IElementLookUp;
+import org.steamflake.metamodel.elements.IEntity;
 import org.steamflake.metamodel.elements.Ref;
 import org.steamflake.metamodel.registry.IElementRegistry;
 import org.steamflake.metamodel.structure.entities.IRootNamespace;
+import org.steamflake.metamodelimpl.registry.AbstractElementLookUp;
 import org.steamflake.persistence.dao.NamespaceDao;
 import org.steamflake.persistence.dao.RootNamespaceDao;
 
@@ -15,6 +16,7 @@ import java.util.UUID;
  * Registry implementation that does database look ups for elements.
  */
 public final class DatabaseElementRegistry
+    extends AbstractElementLookUp
     implements IElementLookUp {
 
     /**
