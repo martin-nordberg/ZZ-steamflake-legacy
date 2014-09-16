@@ -3,8 +3,8 @@ package org.steamflake.metamodel.elements;
 /**
  * Interface to an abstract named model element.
  */
-public interface INamedElement<ISelf extends INamedElement, IParent extends INamedContainerElement>
-    extends IModelElement<ISelf, IParent> {
+public interface INamedElement<ISelf extends INamedElement>
+    extends IModelElement<ISelf> {
 
     /**
      * @return the name of this model element.

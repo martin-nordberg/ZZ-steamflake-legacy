@@ -5,7 +5,7 @@ import org.steamflake.metamodel.elements.IModelElement;
 import org.steamflake.metamodel.elements.IModelElementLookUp;
 import org.steamflake.metamodel.elements.Ref;
 import org.steamflake.metamodel.registry.IModelElementRegistry;
-import org.steamflake.metamodel.structure.IRootNamespace;
+import org.steamflake.metamodel.structure.entities.IRootNamespace;
 import org.steamflake.persistence.dao.NamespaceDao;
 import org.steamflake.persistence.dao.RootNamespaceDao;
 

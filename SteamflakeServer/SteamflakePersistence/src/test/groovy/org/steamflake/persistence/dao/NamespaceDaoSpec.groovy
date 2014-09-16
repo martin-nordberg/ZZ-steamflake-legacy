@@ -1,9 +1,9 @@
 package org.steamflake.persistence.dao
 
 import fi.evident.dalesbred.Database
-import org.steamflake.metamodel.structure.IAbstractNamespace
-import org.steamflake.metamodel.structure.INamespace
-import org.steamflake.metamodel.structure.IRootNamespace
+import org.steamflake.metamodel.structure.entities.IAbstractNamespace
+import org.steamflake.metamodel.structure.entities.INamespace
+import org.steamflake.metamodel.structure.entities.IRootNamespace
 import org.steamflake.metamodelimpl.registry.InMemoryModelElementRegistry
 import org.steamflake.persistence.h2database.H2DataSource
 import org.steamflake.utilities.revisions.StmTransaction

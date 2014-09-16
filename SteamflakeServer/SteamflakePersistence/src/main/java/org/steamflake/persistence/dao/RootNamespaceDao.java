@@ -5,8 +5,8 @@ import fi.evident.dalesbred.instantiation.Instantiator;
 import fi.evident.dalesbred.instantiation.InstantiatorArguments;
 import org.steamflake.metamodel.elements.Ref;
 import org.steamflake.metamodel.registry.IModelElementRegistry;
-import org.steamflake.metamodel.structure.IRootNamespace;
-import org.steamflake.metamodelimpl.structure.RootNamespace;
+import org.steamflake.metamodel.structure.entities.IRootNamespace;
+import org.steamflake.metamodelimpl.structure.entities.RootNamespace;
 
 import java.util.List;
 import java.util.UUID;

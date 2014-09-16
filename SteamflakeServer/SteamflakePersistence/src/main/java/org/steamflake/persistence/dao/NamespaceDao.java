@@ -5,9 +5,9 @@ import fi.evident.dalesbred.instantiation.Instantiator;
 import fi.evident.dalesbred.instantiation.InstantiatorArguments;
 import org.steamflake.metamodel.elements.Ref;
 import org.steamflake.metamodel.registry.IModelElementRegistry;
-import org.steamflake.metamodel.structure.IAbstractNamespace;
-import org.steamflake.metamodel.structure.INamespace;
-import org.steamflake.metamodelimpl.structure.Namespace;
+import org.steamflake.metamodel.structure.entities.IAbstractNamespace;
+import org.steamflake.metamodel.structure.entities.INamespace;
+import org.steamflake.metamodelimpl.structure.entities.Namespace;
 
 import java.util.List;
 import java.util.UUID;
@@ -32,11 +32,9 @@ public class NamespaceDao {
 
         this.database.withVoidTransaction( tx -> {
             this.database.update( "INSERT INTO MODEL_ELEMENT (ID, SUMMARY, TYPE) VALUES (?, ?, 'Namespace')", namespace.getId(), namespace.getSummary() );
-            this.database.update( "INSERT INTO CONTAINER_ELEMENT (ID) VALUES (?)", namespace.getId() );
             this.database.update( "INSERT INTO NAMED_ELEMENT (ID, NAME) VALUES (?, ?)", namespace.getId(), namespace.getName() );
-            this.database.update( "INSERT INTO NAMED_CONTAINER_ELEMENT (ID) VALUES (?)", namespace.getId() );
             this.database.update( "INSERT INTO ABSTRACT_NAMESPACE (ID) VALUES (?)", namespace.getId() );
-            this.database.update( "INSERT INTO NAMESPACE (ID, PARENT_CONTAINER_ID) VALUES (?, ?)", namespace.getId(), namespace.getParentContainerId() );
+            this.database.update( "INSERT INTO NAMESPACE (ID) VALUES (?)", namespace.getId() );
         } );
 
         this.registry.registerModelElement( namespace.getSelf() );
@@ -53,13 +51,13 @@ public class NamespaceDao {
 
     public INamespace findNamespaceByUuid( UUID namespaceId ) {
 
-        return this.database.findUniqueOrNull( INamespace.class, "SELECT TO_CHAR(ID), TO_CHAR(PARENT_CONTAINER_ID), NAME, SUMMARY FROM V_NAMESPACE WHERE ID = ?", namespaceId );
+        return this.database.findUniqueOrNull( INamespace.class, "SELECT TO_CHAR(ID), NAME, SUMMARY FROM V_NAMESPACE WHERE ID = ?", namespaceId );
 
     }
 
     public List<? extends INamespace> findNamespacesAll() {
 
-        return this.database.findAll( INamespace.class, "SELECT TO_CHAR(ID), TO_CHAR(PARENT_CONTAINER_ID), NAME, SUMMARY FROM V_NAMESPACE" );
+        return this.database.findAll( INamespace.class, "SELECT TO_CHAR(ID), NAME, SUMMARY FROM V_NAMESPACE" );
 
     }
 
@@ -97,21 +95,11 @@ public class NamespaceDao {
             }
 
             // Get the attributes from the database result.
-            final UUID parentId = UUID.fromString( (String) fields.getValues().get( 1 ) );
-            final String name = (String) fields.getValues().get( 2 );
-            final String summary = (String) fields.getValues().get( 3 );
-
-            // Look up the parent.
-            Ref<IAbstractNamespace> parent = registry.lookUpModelElementByUuid( IAbstractNamespace.class, parentId );
-
-            // If parent not found, register a reference to it.
-            if ( parent.isMissing() ) {
-                parent = Ref.byId( parentId );
-                registry.registerModelElement( parent );
-            }
+            final String name = (String) fields.getValues().get( 1 );
+            final String summary = (String) fields.getValues().get( 2 );
 
             // Create the namespace.
-            Namespace namespace = new Namespace( result.orById( id ), parent, name, summary );
+            Namespace namespace = new Namespace( result.orById( id ), name, summary );
 
             // Register it for future look ups.
             this.registry.registerModelElement( namespace.getSelf() );
