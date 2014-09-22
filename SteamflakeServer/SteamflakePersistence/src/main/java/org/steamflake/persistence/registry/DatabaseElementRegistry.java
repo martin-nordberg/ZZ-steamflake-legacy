@@ -21,6 +21,7 @@ public final class DatabaseElementRegistry
 
     /**
      * Constructs a new database-backed element look up facility.
+     * TBD: The registry should persist, but the database comes and goes.
      */
     public DatabaseElementRegistry( IElementRegistry registry, Database database ) {
         this.database = database;

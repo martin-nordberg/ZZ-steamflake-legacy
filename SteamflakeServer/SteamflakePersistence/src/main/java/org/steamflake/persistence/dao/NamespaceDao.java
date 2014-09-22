@@ -31,10 +31,10 @@ public class NamespaceDao {
     public void createNamespace( INamespace namespace ) {
 
         this.database.withVoidTransaction( tx -> {
-            this.database.update( "INSERT INTO ENTITY (ID, SUMMARY, TYPE) VALUES (?, ?, 'Namespace')", namespace.getId(), namespace.getSummary() );
-            this.database.update( "INSERT INTO NAMED_ENTITY (ID, NAME) VALUES (?, ?)", namespace.getId(), namespace.getName() );
+            this.database.update( "INSERT INTO ENTITY (ID, TYPE) VALUES (?, 'Namespace')", namespace.getId() );
+            this.database.update( "INSERT INTO NAMED_ENTITY (ID) VALUES (?)", namespace.getId() );
             this.database.update( "INSERT INTO ABSTRACT_NAMESPACE (ID) VALUES (?)", namespace.getId() );
-            this.database.update( "INSERT INTO NAMESPACE (ID) VALUES (?)", namespace.getId() );
+            this.database.update( "INSERT INTO NAMESPACE (ID, NAME, SUMMARY) VALUES (?, ?, ?)", namespace.getId(), namespace.getName(), namespace.getSummary() );
         } );
 
         this.registry.registerEntity( namespace.getSelf() );
@@ -45,7 +45,7 @@ public class NamespaceDao {
 
         this.registry.unregisterEntity( namespaceId );
 
-        this.database.update( "UPDATE ENTITY SET DESTROYED = TRUE WHERE ID = ?", namespaceId );
+        this.database.update( "UPDATE NAMESPACE SET DESTROYED = TRUE WHERE ID = ?", namespaceId );
 
     }
 

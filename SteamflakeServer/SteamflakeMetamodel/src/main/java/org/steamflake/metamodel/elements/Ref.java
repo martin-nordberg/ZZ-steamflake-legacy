@@ -7,12 +7,12 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- * Reference to an object by UUID and ordinary Java reference. Supports lazy loading (or non-loading) of
- * related objects. Provides Optional-like handling of missing values.
+ * Reference to an entity by UUID and ordinary Java reference. Useful for lazy loading (or non-loading) of
+ * related entities. Provides Optional-like handling of missing values.
  *
- * @param <IElement> the type of entity referenced.
+ * @param <Entity> the type of entity referenced.
  */
-public final class Ref<IElement extends IEntity> {
+public final class Ref<Entity extends IEntity> {
 
     /**
      * Constructs a new reference to an entity with given ID.
@@ -20,7 +20,7 @@ public final class Ref<IElement extends IEntity> {
      * @param id the unique ID of the entity.
      * @param entity the entity itself.
      */
-    private Ref( RefSource<IElement> refSource, UUID id, IElement entity ) {
+    private Ref( RefSource<Entity> refSource, UUID id, Entity entity ) {
         Objects.requireNonNull( refSource );
         this.refSource = refSource;
         this.id = id;
@@ -43,25 +43,12 @@ public final class Ref<IElement extends IEntity> {
     /**
      * Returns the equivalent of a null reference.
      *
-     * @param <T> the type of entity referenced.
+     * @param <Entity> the type of entity referenced.
      * @return the null reference
      */
     @SuppressWarnings("unchecked")
-    public static <T extends IEntity> Ref<T> missing() {
+    public static <Entity extends IEntity> Ref<Entity> missing() {
         return Ref.MISSING;
-    }
-
-    /**
-     * Constructs a new reference object to a given entity.
-     *
-     * @param entity the entity referenced.
-     * @param <IElement>   the type of entity.
-     * @return the new reference.
-     */
-    @SuppressWarnings("unchecked")
-    public static <IElement extends IEntity> Ref<IElement> to( RefSource<IElement> refSource, IElement entity ) {
-        Objects.requireNonNull( entity );
-        return new Ref<>( refSource, entity.getId(), entity );
     }
 
     /**
@@ -78,11 +65,15 @@ public final class Ref<IElement extends IEntity> {
             return true;
         }
 
-        if ( that == null || getClass() != that.getClass() ) {
+        if ( that == null ) {
             return false;
         }
 
-        return that instanceof Ref && Objects.equals( this.id, ((Ref<?>) that).id );
+        if ( !(that instanceof Ref) ) {
+            return false;
+        }
+
+        return Objects.equals( this.id, ((Ref<?>) that).id );
 
     }
 
@@ -91,15 +82,16 @@ public final class Ref<IElement extends IEntity> {
      *
      * @return the referenced entity.
      */
-    public final IElement get() {
+    public final Entity get() {
 
         Objects.requireNonNull( this.id );
 
         if ( this.entity.get() == null ) {
-            this.entity.set( refSource.lookUpEntityByUuid( this.id ).get() );
+            this.entity.set( this.refSource.lookUpEntityByUuid( this.id ).get() );
         }
 
         Objects.requireNonNull( this.entity.get() );
+
         return this.entity.get();
 
     }
@@ -125,7 +117,7 @@ public final class Ref<IElement extends IEntity> {
      *
      * @param consumer function to be executed if an entity is loaded.
      */
-    public final Ref<IElement> ifLoaded( Consumer<? super IElement> consumer ) {
+    public final Ref<Entity> ifLoaded( Consumer<? super Entity> consumer ) {
         if ( this.entity.get() != null ) {
             consumer.accept( this.entity.get() );
         }
@@ -137,7 +129,7 @@ public final class Ref<IElement extends IEntity> {
      *
      * @param consumer function to be executed if an entity ID is not available.
      */
-    public final Ref<IElement> ifMissing( Supplier<Void> consumer ) {
+    public final Ref<Entity> ifMissing( Supplier<Void> consumer ) {
         if ( this.id == null ) {
             consumer.get();
         }
@@ -151,7 +143,7 @@ public final class Ref<IElement extends IEntity> {
      * @param exceptionSupplier the supplier that will return the exception to be thrown.
      * @throws X if there is no ID present.
      */
-    public final <X extends Throwable> Ref<IElement> ifMissingThrow( Supplier<? extends X> exceptionSupplier ) throws X {
+    public final <X extends Throwable> Ref<Entity> ifMissingThrow( Supplier<? extends X> exceptionSupplier ) throws X {
         if ( this.id == null ) {
             throw exceptionSupplier.get();
         }
@@ -163,7 +155,7 @@ public final class Ref<IElement extends IEntity> {
      *
      * @param consumer function to be executed if an entity is loaded.
      */
-    public final Ref<IElement> ifNotLoaded( Consumer<UUID> consumer ) {
+    public final Ref<Entity> ifNotLoaded( Consumer<UUID> consumer ) {
         if ( this.entity.get() == null ) {
             consumer.accept( this.id );
         }
@@ -175,7 +167,7 @@ public final class Ref<IElement extends IEntity> {
      *
      * @param consumer function to be executed if an entity ID is available.
      */
-    public final Ref<IElement> ifNotMissing( Consumer<UUID> consumer ) {
+    public final Ref<Entity> ifNotMissing( Consumer<UUID> consumer ) {
         if ( this.id != null ) {
             consumer.accept( this.id );
         }
@@ -200,10 +192,10 @@ public final class Ref<IElement extends IEntity> {
      * Constructs a reference to another type but using the same source as this reference.
      * @param entityType the type of entity to reference.
      * @param id the unique ID of the referenced entity.
-     * @param <IOtherElement> the type of the referenced entity.
+     * @param <OtherEntity> the type of the referenced entity.
      * @return the new reference by ID using the same look up source as this reference.
      */
-    public final <IOtherElement extends IEntity> Ref<IOtherElement> makeRefById( Class<IOtherElement> entityType, UUID id ) {
+    public final <OtherEntity extends IEntity> Ref<OtherEntity> makeRefById( Class<OtherEntity> entityType, UUID id ) {
         return Ref.byId( this.refSource.getSource( entityType ), id );
     }
 
@@ -213,7 +205,7 @@ public final class Ref<IElement extends IEntity> {
      * @param id the unique ID expected for the reference.
      * @return this reference or if missing, a new one with given ID.
      */
-    public final Ref<IElement> orById( RefSource<IElement> refSource, UUID id ) {
+    public final Ref<Entity> orById( RefSource<Entity> refSource, UUID id ) {
 
         if ( this.id == null ) {
             return Ref.byId( refSource, id );
@@ -228,7 +220,7 @@ public final class Ref<IElement extends IEntity> {
      * @param supplier a callback that will provide the reference if needed.
      * @return this reference or if missing, a new one as supplied dynamically.
      */
-    public final Ref<IElement> orIfMissing( Supplier<Ref<IElement>> supplier ) {
+    public final Ref<Entity> orIfMissing( Supplier<Ref<Entity>> supplier ) {
 
         if ( this.id == null ) {
             return supplier.get();
@@ -246,7 +238,7 @@ public final class Ref<IElement extends IEntity> {
      * @return the present value.
      * @throws X if there is no value present.
      */
-    public final <X extends Throwable> IElement orThrow( Supplier<? extends X> exceptionSupplier ) throws X {
+    public final <X extends Throwable> Entity orThrow( Supplier<? extends X> exceptionSupplier ) throws X {
         if ( this.entity.get() == null ) {
             throw exceptionSupplier.get();
         }
@@ -259,7 +251,7 @@ public final class Ref<IElement extends IEntity> {
      * @param entity the entity to be referenced by this object.
      * @return this reference object with the entity set.
      */
-    public Ref<IElement> set( IElement entity ) {
+    public Ref<Entity> set( Entity entity ) {
 
         if ( !this.entity.compareAndSet( null, entity ) ) {
             if ( !this.get().equals( entity ) ) {
@@ -299,11 +291,11 @@ public final class Ref<IElement extends IEntity> {
     /**
      * The referenced entity itself.
      */
-    private AtomicReference<IElement> entity;
+    private AtomicReference<Entity> entity;
 
     /**
      * The source of the entity if a look-up is needed.
      */
-    private final RefSource<IElement> refSource;
+    private final RefSource<Entity> refSource;
 
 }
