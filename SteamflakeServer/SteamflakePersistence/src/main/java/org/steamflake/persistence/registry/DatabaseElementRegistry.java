@@ -85,7 +85,7 @@ public final class DatabaseElementRegistry
      * Looks up a namespace.
      *
      * @param id the unique ID of the namespace to find.
-     * @return the namespace found or null if not found.
+     * @return the namespace found or Ref.missing if not found.
      */
     @SuppressWarnings("unchecked")
     private <Element extends IElement> Ref<Element> lookUpNamespace( Class<Element> elementType, UUID id ) {

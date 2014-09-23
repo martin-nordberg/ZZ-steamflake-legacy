@@ -45,19 +45,19 @@ public class NamespaceDao {
 
         this.registry.unregisterElement( namespaceId );
 
-        this.database.update( "DELETE FROM ENTITY WHERE ID = ?", namespaceId );
+        this.database.update( "UPDATE NAMESPACE SET DESTROYED = TRUE WHERE ID = ?", namespaceId );
 
     }
 
     public INamespace findNamespaceByUuid( UUID namespaceId ) {
 
-        return this.database.findUniqueOrNull( INamespace.class, "SELECT TO_CHAR(ID), NAME, SUMMARY FROM NAMESPACE WHERE ID = ?", namespaceId );
+        return this.database.findUniqueOrNull( INamespace.class, "SELECT TO_CHAR(ID), NAME, SUMMARY FROM V_NAMESPACE WHERE ID = ?", namespaceId );
 
     }
 
     public List<? extends INamespace> findNamespacesAll() {
 
-        return this.database.findAll( INamespace.class, "SELECT TO_CHAR(ID), NAME, SUMMARY FROM NAMESPACE" );
+        return this.database.findAll( INamespace.class, "SELECT TO_CHAR(ID), NAME, SUMMARY FROM V_NAMESPACE" );
 
     }
 
