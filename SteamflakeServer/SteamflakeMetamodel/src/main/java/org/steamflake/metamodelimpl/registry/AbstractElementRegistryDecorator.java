@@ -26,14 +26,14 @@ public abstract class AbstractElementRegistryDecorator
     }
 
     @Override
-    public final <IElement extends IEntity> Ref<IElement> lookUpEntityByUuid( Class<IElement> entityType, UUID id ) {
+    public final <Element extends IElement> Ref<Element> lookUpElementByUuid( Class<Element> entityType, UUID id ) {
 
         // Try the inner registry first.
-        Ref<IElement> result = this.delegate.lookUpEntityByUuid( entityType, id );
+        Ref<Element> result = this.delegate.lookUpElementByUuid( entityType, id );
 
         // If not found, do our own look up.
         if ( result.isMissing() ) {
-            result = this.doLookUpEntityByUuid( entityType, id );
+            result = this.doLookUpElementByUuid( entityType, id );
         }
 
         return result;
@@ -41,24 +41,24 @@ public abstract class AbstractElementRegistryDecorator
     }
 
     @Override
-    public final void registerEntity( Ref<? extends IEntity> entity ) {
+    public final void registerElement( Ref<? extends IElement> element ) {
 
-        entity.ifMissingThrow( NullPointerException::new );
+        element.ifMissingThrow( NullPointerException::new );
 
-        this.delegate.registerEntity( entity );
+        this.delegate.registerElement( element );
 
-        this.doRegisterEntity( entity );
+        this.doRegisterElement( element );
 
     }
 
     @Override
-    public final void unregisterEntity( UUID entityId ) {
+    public final void unregisterElement( UUID elementId ) {
 
-        Objects.requireNonNull( entityId );
+        Objects.requireNonNull( elementId );
 
-        this.doUnregisterEntity( entityId );
+        this.doUnregisterElement( elementId );
 
-        this.delegate.unregisterEntity( entityId );
+        this.delegate.unregisterElement( elementId );
 
     }
 
@@ -67,24 +67,24 @@ public abstract class AbstractElementRegistryDecorator
      *
      * @param entityType the type of element expected.
      * @param id               the unique ID of the element.
-     * @param <IElement>       the type of the element.
+     * @param <Element>       the type of the element.
      * @return the element found or Ref.missing() if not registered.
      */
-    protected abstract <IElement extends IEntity> Ref<IElement> doLookUpEntityByUuid( Class<IElement> entityType, UUID id );
+    protected abstract <Element extends IElement> Ref<Element> doLookUpElementByUuid( Class<Element> entityType, UUID id );
 
     /**
      * Registers an entity.
      *
      * @param entity the entity to register.
      */
-    protected abstract void doRegisterEntity( Ref<? extends IEntity> entity );
+    protected abstract void doRegisterElement( Ref<? extends IElement> entity );
 
     /**
      * Unregisters an entity given its unique ID.
      *
-     * @param entityId the unique ID of the element to unregister.
+     * @param elementId the unique ID of the element to unregister.
      */
-    protected abstract void doUnregisterEntity( UUID entityId );
+    protected abstract void doUnregisterElement( UUID elementId );
 
     /**
      * @return the inner registry wrapped by this one.

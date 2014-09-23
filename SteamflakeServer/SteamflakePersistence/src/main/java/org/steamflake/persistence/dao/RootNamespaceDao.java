@@ -34,13 +34,7 @@ public class RootNamespaceDao {
      */
     public IRootNamespace findRootNamespace() {
 
-        List<IRootNamespace> result = this.database.findAll( IRootNamespace.class, "SELECT TO_CHAR(ID), SUMMARY FROM V_ROOT_NAMESPACE" );
-
-        if ( result.isEmpty() ) {
-            return null;
-        }
-
-        return result.get( 0 );
+        return this.database.findUniqueOrNull( IRootNamespace.class, "SELECT TO_CHAR(ID), SUMMARY FROM ROOT_NAMESPACE" );
 
     }
 
@@ -74,7 +68,7 @@ public class RootNamespaceDao {
             RefSource<IRootNamespace> refSource = this.registry.getRefSource( IRootNamespace.class );
 
             // First see if it's already loaded.
-            Ref<IRootNamespace> result = refSource.lookUpEntityByUuid( id );
+            Ref<IRootNamespace> result = refSource.lookUpElementByUuid( id );
             if ( result.isLoaded() ) {
                 return result.get();
             }
@@ -86,7 +80,7 @@ public class RootNamespaceDao {
             RootNamespace rootNamespace = new RootNamespace( result.orById( refSource, id ), summary );
 
             // Register it for future look ups.
-            this.registry.registerEntity( rootNamespace.getSelf() );
+            this.registry.registerElement( rootNamespace.getSelf() );
 
             return rootNamespace;
 

@@ -9,21 +9,21 @@ import java.util.UUID;
 public interface IElementLookUp {
 
     /**
-     * Finds a ref-source for given entity type.
-     * @param entityType the type of entity.
-     * @param <Entity> the type of entity.
-     * @return the reference source for the given entity type using this look up.
+     * Finds a ref-source for given element type.
+     * @param elementType the type of element.
+     * @param <Element> the type of element.
+     * @return the reference source for the given element type using this look up.
      */
-    <Entity extends IEntity> RefSource<Entity> getRefSource( Class<Entity> entityType );
+    <Element extends IElement> RefSource<Element> getRefSource( Class<Element> elementType );
 
     /**
-     * Finds the entity with given UUID.
+     * Finds the element with given UUID.
      *
-     * @param entityType the type of entity to find.
-     * @param id               the unique ID of the entity to find.
-     * @param <Entity>       the type of entity to find.
-     * @return the entity found or Ref.missing() if not registered.
+     * @param elementType the type of entity to find.
+     * @param id               the unique ID of the element to find.
+     * @param <Element>       the type of element to find.
+     * @return the element found or Ref.missing() if not registered.
      */
-    <Entity extends IEntity> Ref<Entity> lookUpEntityByUuid( Class<Entity> entityType, UUID id );
+    <Element extends IElement> Ref<Element> lookUpElementByUuid( Class<Element> elementType, UUID id );
 
 }

@@ -37,27 +37,27 @@ public class NamespaceDao {
             this.database.update( "INSERT INTO NAMESPACE (ID, NAME, SUMMARY) VALUES (?, ?, ?)", namespace.getId(), namespace.getName(), namespace.getSummary() );
         } );
 
-        this.registry.registerEntity( namespace.getSelf() );
+        this.registry.registerElement( namespace.getSelf() );
 
     }
 
     public void deleteNamespace( UUID namespaceId ) {
 
-        this.registry.unregisterEntity( namespaceId );
+        this.registry.unregisterElement( namespaceId );
 
-        this.database.update( "UPDATE NAMESPACE SET DESTROYED = TRUE WHERE ID = ?", namespaceId );
+        this.database.update( "DELETE FROM ENTITY WHERE ID = ?", namespaceId );
 
     }
 
     public INamespace findNamespaceByUuid( UUID namespaceId ) {
 
-        return this.database.findUniqueOrNull( INamespace.class, "SELECT TO_CHAR(ID), NAME, SUMMARY FROM V_NAMESPACE WHERE ID = ?", namespaceId );
+        return this.database.findUniqueOrNull( INamespace.class, "SELECT TO_CHAR(ID), NAME, SUMMARY FROM NAMESPACE WHERE ID = ?", namespaceId );
 
     }
 
     public List<? extends INamespace> findNamespacesAll() {
 
-        return this.database.findAll( INamespace.class, "SELECT TO_CHAR(ID), NAME, SUMMARY FROM V_NAMESPACE" );
+        return this.database.findAll( INamespace.class, "SELECT TO_CHAR(ID), NAME, SUMMARY FROM NAMESPACE" );
 
     }
 
@@ -91,7 +91,7 @@ public class NamespaceDao {
             RefSource<INamespace> refSource = this.registry.getRefSource( INamespace.class );
 
             // First see if it's already loaded.
-            Ref<INamespace> result = refSource.lookUpEntityByUuid( id );
+            Ref<INamespace> result = refSource.lookUpElementByUuid( id );
             if ( result.isLoaded() ) {
                 return result.get();
             }
@@ -104,7 +104,7 @@ public class NamespaceDao {
             Namespace namespace = new Namespace( result.orById( refSource, id ), name, summary );
 
             // Register it for future look ups.
-            this.registry.registerEntity( namespace.getSelf() );
+            this.registry.registerElement( namespace.getSelf() );
 
             return namespace;
 

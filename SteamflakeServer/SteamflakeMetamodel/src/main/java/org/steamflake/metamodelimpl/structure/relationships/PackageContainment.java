@@ -1,5 +1,6 @@
 package org.steamflake.metamodelimpl.structure.relationships;
 
+import org.steamflake.metamodel.elements.Ref;
 import org.steamflake.metamodel.structure.entities.IAbstractPackage;
 import org.steamflake.metamodel.structure.entities.IPackage;
 import org.steamflake.metamodel.structure.relationships.IPackageContainment;
@@ -10,11 +11,11 @@ import org.steamflake.utilities.revisions.V;
  * Concrete implementation of package containment relationship.
  */
 public class PackageContainment
-    extends AbstractRelationship<IAbstractPackage,IPackage>
+    extends AbstractRelationship<IPackageContainment,IAbstractPackage,IPackage>
     implements IPackageContainment {
 
-    protected PackageContainment( IAbstractPackage containingPackage, IPackage containedPackage, boolean isExported ) {
-        super( containingPackage, containedPackage );
+    protected PackageContainment( Ref<IPackageContainment> self, IAbstractPackage containingPackage, IPackage containedPackage, boolean isExported ) {
+        super( self, containingPackage, containedPackage );
         this.isExported = new V<>( isExported );
     }
 

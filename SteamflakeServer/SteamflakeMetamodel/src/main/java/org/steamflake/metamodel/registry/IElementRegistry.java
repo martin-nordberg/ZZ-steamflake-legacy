@@ -1,5 +1,6 @@
 package org.steamflake.metamodel.registry;
 
+import org.steamflake.metamodel.elements.IElement;
 import org.steamflake.metamodel.elements.IEntity;
 import org.steamflake.metamodel.elements.IElementLookUp;
 import org.steamflake.metamodel.elements.Ref;
@@ -13,17 +14,17 @@ public interface IElementRegistry
     extends IElementLookUp {
 
     /**
-     * Adds an entity to this registry.
+     * Adds an element to this registry.
      *
-     * @param entity the entity to be added.
+     * @param element the entity to be added.
      */
-    void registerEntity( Ref<? extends IEntity> entity );
+    void registerElement( Ref<? extends IElement> element );
 
     /**
      * Removes an entity from this registry.
      *
-     * @param entityId the unique ID of the entity to remove.
+     * @param elementId the unique ID of the entity to remove.
      */
-    void unregisterEntity( UUID entityId );
+    void unregisterElement( UUID elementId );
 
 }

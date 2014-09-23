@@ -8,7 +8,7 @@ import org.steamflake.metamodel.structure.entities.INamespace;
  * Relationship for the containment of modules by namespaces.
  */
 public interface IModuleContainment
-    extends IRelationship<INamespace, IModule>
+    extends IRelationship<IModuleContainment, INamespace, IModule>
 {
 
     /**

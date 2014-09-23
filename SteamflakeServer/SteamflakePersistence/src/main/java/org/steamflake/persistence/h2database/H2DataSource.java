@@ -18,22 +18,34 @@ import java.util.logging.Logger;
 public class H2DataSource
     implements AutoCloseable, DataSource {
 
-    public H2DataSource() throws Exception {
+    /**
+     * Constructs a new H2 data source.
+     */
+    public H2DataSource() {
+
+        // Read the database configuration.
         Configuration config = new Configuration( H2DataSource.class );
         String url = config.readString( "url" );
         String username = config.readString( "username" );
+        String password = config.readString( "password" );
 
         LOG.info( "Opening data source: URL = {}, User Name = {}", url, username );
 
-        this.connectionPool = JdbcConnectionPool.create( url, username, config.readString( "password" ) );
+        // Create a connection pool.
+        this.connectionPool = JdbcConnectionPool.create( url, username, password );
 
+        // Update the schema if needed.
         DatabaseMigration.updateDatabaseSchema( this );
+
     }
 
     @Override
     public void close() {
+
         LOG.info( "Closing data source" );
+
         this.connectionPool.dispose();
+
     }
 
     @Override
@@ -81,8 +93,10 @@ public class H2DataSource
         return this.connectionPool.unwrap( iface );
     }
 
+    /** The logger for this class. */
     private static final org.apache.logging.log4j.Logger LOG = LogManager.getLogger();
 
+    /** The underlying connection pool delegated to by this data source. */
     private final JdbcConnectionPool connectionPool;
 
 }

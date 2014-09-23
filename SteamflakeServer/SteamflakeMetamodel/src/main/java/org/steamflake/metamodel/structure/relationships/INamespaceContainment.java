@@ -8,7 +8,7 @@ import org.steamflake.metamodel.structure.entities.INamespace;
  * Parent/child relationship from abstract namespaces to namespaces.
  */
 public interface INamespaceContainment
-    extends IRelationship<IAbstractNamespace,INamespace> {
+    extends IRelationship<INamespaceContainment,IAbstractNamespace,INamespace> {
 
     /**
      * @return the child namespace of the relationship.

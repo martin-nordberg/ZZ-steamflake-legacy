@@ -1,9 +1,6 @@
 package org.steamflake.metamodelimpl.registry;
 
-import org.steamflake.metamodel.elements.IElementLookUp;
-import org.steamflake.metamodel.elements.IEntity;
-import org.steamflake.metamodel.elements.INamedEntity;
-import org.steamflake.metamodel.elements.RefSource;
+import org.steamflake.metamodel.elements.*;
 import org.steamflake.metamodel.structure.entities.IAbstractNamespace;
 import org.steamflake.metamodel.structure.entities.INamespace;
 import org.steamflake.metamodel.structure.entities.IRootNamespace;
@@ -23,12 +20,12 @@ public abstract class AbstractElementLookUp
 
     @SuppressWarnings("unchecked")
     @Override
-    public <IElement extends IEntity> RefSource<IElement> getRefSource( Class<IElement> entityType ) {
-        return (RefSource<IElement>) this.refSources.get( entityType );
+    public <Element extends IElement> RefSource<Element> getRefSource( Class<Element> elementType ) {
+        return (RefSource<Element>) this.refSources.get( elementType );
     }
 
-    private Map<Class<? extends IEntity>, RefSource<? extends IEntity>> defineRefSources() {
-        Map<Class<? extends IEntity>, RefSource<? extends IEntity>> result = new HashMap<>();
+    private Map<Class<? extends IElement>, RefSource<? extends IElement>> defineRefSources() {
+        Map<Class<? extends IElement>, RefSource<? extends IElement>> result = new HashMap<>();
 
         result.put( IEntity.class, new RefSource<>( IEntity.class, this ) );
         result.put( INamedEntity.class, new RefSource<>( INamedEntity.class, this ) );
@@ -39,6 +36,6 @@ public abstract class AbstractElementLookUp
         return result;
     }
 
-    private final Map<Class<? extends IEntity>, RefSource<? extends IEntity>> refSources;
+    private final Map<Class<? extends IElement>, RefSource<? extends IElement>> refSources;
 
 }

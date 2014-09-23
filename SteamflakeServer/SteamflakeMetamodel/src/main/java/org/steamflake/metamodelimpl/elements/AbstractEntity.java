@@ -4,12 +4,11 @@ import org.steamflake.metamodel.elements.IEntity;
 import org.steamflake.metamodel.elements.Ref;
 import org.steamflake.utilities.revisions.V;
 
-import java.util.UUID;
-
 /**
  * Abstract base class for classes implementing IEntity.
  */
 public abstract class AbstractEntity<ISelf extends IEntity>
+    extends AbstractElement<ISelf>
     implements IEntity<ISelf> {
 
     /**
@@ -20,46 +19,15 @@ public abstract class AbstractEntity<ISelf extends IEntity>
      */
     @SuppressWarnings("unchecked")
     protected AbstractEntity( Ref<ISelf> self, String summary ) {
+        super( self );
 
-        this.self = self.set( (ISelf) this );
         this.summary = new V<>( summary );
 
-    }
-
-    @SuppressWarnings("SimplifiableIfStatement")
-    @Override
-    public final boolean equals( Object that ) {
-
-        if ( this == that ) {
-            return true;
-        }
-
-        if ( that == null || getClass() != that.getClass() ) {
-            return false;
-        }
-
-        return self.getId().equals( ((AbstractEntity) that).self.getId() );
-
-    }
-
-    @Override
-    public final UUID getId() {
-        return this.self.getId();
-    }
-
-    @Override
-    public final Ref<ISelf> getSelf() {
-        return this.self;
     }
 
     @Override
     public final String getSummary() {
         return this.summary.get();
-    }
-
-    @Override
-    public final int hashCode() {
-        return this.self.getId().hashCode();
     }
 
     @SuppressWarnings("unchecked")
@@ -68,11 +36,6 @@ public abstract class AbstractEntity<ISelf extends IEntity>
         this.summary.set( summary );
         return (ISelf) this;
     }
-
-    /**
-     * A shareable reference to this object.
-     */
-    private final Ref<ISelf> self;
 
     /**
      * A short summary of this entity.

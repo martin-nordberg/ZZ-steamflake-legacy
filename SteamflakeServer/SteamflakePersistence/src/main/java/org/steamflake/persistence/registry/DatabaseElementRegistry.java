@@ -1,6 +1,7 @@
 package org.steamflake.persistence.registry;
 
 import fi.evident.dalesbred.Database;
+import org.steamflake.metamodel.elements.IElement;
 import org.steamflake.metamodel.elements.IElementLookUp;
 import org.steamflake.metamodel.elements.IEntity;
 import org.steamflake.metamodel.elements.Ref;
@@ -31,7 +32,7 @@ public final class DatabaseElementRegistry
 
     @SuppressWarnings("unchecked")
     @Override
-    public final <IElement extends IEntity> Ref<IElement> lookUpEntityByUuid( Class<IElement> entityType, UUID id ) {
+    public final <Element extends IElement> Ref<Element> lookUpElementByUuid( Class<Element> entityType, UUID id ) {
 
         String typeName = entityType.getSimpleName();
 
@@ -41,7 +42,7 @@ public final class DatabaseElementRegistry
             case "INamespace":
                 return this.lookUpNamespace( entityType, id );
             case "IRootNamespace":
-                return (Ref<IElement>) this.lookUpRootNamespace();
+                return (Ref<Element>) this.lookUpRootNamespace();
             default:
                 throw new IllegalArgumentException( "Unrecognized entity type name: " + entityType.getName() );
         }
@@ -57,7 +58,7 @@ public final class DatabaseElementRegistry
 
         // First try a look up in the associated registry.
         if ( this.rootNamespaceId != null ) {
-            Ref<IRootNamespace> result = this.registry.lookUpEntityByUuid( IRootNamespace.class, this.rootNamespaceId );
+            Ref<IRootNamespace> result = this.registry.lookUpElementByUuid( IRootNamespace.class, this.rootNamespaceId );
 
             if ( !result.isMissing() ) {
                 return result;
@@ -87,10 +88,10 @@ public final class DatabaseElementRegistry
      * @return the namespace found or null if not found.
      */
     @SuppressWarnings("unchecked")
-    private <IElement extends IEntity> Ref<IElement> lookUpNamespace( Class<IElement> entityType, UUID id ) {
+    private <Element extends IElement> Ref<Element> lookUpNamespace( Class<Element> elementType, UUID id ) {
 
         // First try a look up in the associated registry.
-        return this.registry.lookUpEntityByUuid( entityType, id ).orIfMissing( () -> {
+        return this.registry.lookUpElementByUuid( elementType, id ).orIfMissing( () -> {
 
             // If missing, find the namespace in the database.
             NamespaceDao dao = new NamespaceDao( this.database, this.registry );
@@ -100,7 +101,7 @@ public final class DatabaseElementRegistry
                 return Ref.missing();
             }
 
-            return (Ref<IElement>) namespace.getSelf();
+            return (Ref<Element>) namespace.getSelf();
 
         } );
 

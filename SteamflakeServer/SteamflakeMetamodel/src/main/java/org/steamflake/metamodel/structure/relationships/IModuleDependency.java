@@ -7,7 +7,7 @@ import org.steamflake.metamodel.structure.entities.IModule;
  * Interface to a module dependency.
  */
 public interface IModuleDependency
-    extends IRelationship<IModule,IModule> {
+    extends IRelationship<IModuleDependency, IModule,IModule> {
 
     default IModule getDependingModule() {
         return this.getFrom();

@@ -1,5 +1,6 @@
 package org.steamflake.metamodelimpl.registry;
 
+import org.steamflake.metamodel.elements.IElement;
 import org.steamflake.metamodel.elements.IEntity;
 import org.steamflake.metamodel.elements.Ref;
 import org.steamflake.metamodel.registry.IElementRegistry;
@@ -33,9 +34,9 @@ public final class InMemoryElementRegistry
 
     @SuppressWarnings("unchecked")
     @Override
-    public final <IElement extends IEntity> Ref<IElement> doLookUpEntityByUuid( Class<IElement> entityType, UUID id ) {
+    public final <Element extends IElement> Ref<Element> doLookUpElementByUuid( Class<Element> entityType, UUID id ) {
 
-        Ref<? extends IEntity> result = this.entities.get( id );
+        Ref<? extends IElement> result = this.entities.get( id );
 
         if ( result != null ) {
             if ( result.isLoaded() ) {
@@ -43,7 +44,7 @@ public final class InMemoryElementRegistry
                     throw new ClassCastException( "Attempted to retrieve entity with wrong type. Queried: " + entityType.getName() + " vs. Actual: " + result.get().getClass() );
                 }
             }
-            return (Ref<IElement>) result;
+            return (Ref<Element>) result;
         }
 
         return Ref.missing();
@@ -51,18 +52,18 @@ public final class InMemoryElementRegistry
     }
 
     @Override
-    public final void doRegisterEntity( Ref<? extends IEntity> entity ) {
-        this.entities.put( entity.getId(), entity );
+    public final void doRegisterElement( Ref<? extends IElement> element ) {
+        this.entities.put( element.getId(), element );
     }
 
     @Override
-    public final void doUnregisterEntity( UUID entityId ) {
-        this.entities.remove( entityId );
+    public final void doUnregisterElement( UUID elementId ) {
+        this.entities.remove( elementId );
     }
 
     /**
      * The underlying hash table that implements the look up.
      */
-    private final Map<UUID, Ref<? extends IEntity>> entities;
+    private final Map<UUID, Ref<? extends IElement>> entities;
 
 }

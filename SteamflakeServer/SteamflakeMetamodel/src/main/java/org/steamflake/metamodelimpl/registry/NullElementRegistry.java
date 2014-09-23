@@ -1,5 +1,6 @@
 package org.steamflake.metamodelimpl.registry;
 
+import org.steamflake.metamodel.elements.IElement;
 import org.steamflake.metamodel.elements.IEntity;
 import org.steamflake.metamodel.elements.Ref;
 import org.steamflake.metamodel.registry.IElementRegistry;
@@ -14,17 +15,17 @@ public final class NullElementRegistry
     implements IElementRegistry {
 
     @Override
-    public final <IElement extends IEntity> Ref<IElement> lookUpEntityByUuid( Class<IElement> entityType, UUID id ) {
+    public final <Element extends IElement> Ref<Element> lookUpElementByUuid( Class<Element> entityType, UUID id ) {
         return Ref.missing();
     }
 
     @Override
-    public final void registerEntity( Ref<? extends IEntity> entity ) {
+    public final void registerElement( Ref<? extends IElement> element ) {
         // do nothing
     }
 
     @Override
-    public final void unregisterEntity( UUID entityId ) {
+    public final void unregisterElement( UUID elementId ) {
         // do nothing
     }
 

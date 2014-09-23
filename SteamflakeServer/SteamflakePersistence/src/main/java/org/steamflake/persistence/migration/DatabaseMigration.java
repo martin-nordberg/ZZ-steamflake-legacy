@@ -20,20 +20,21 @@ public class DatabaseMigration {
 
         LOG.info( "Updating database schema..." );
 
-        // send Flyway logging to Log4j2
+        // Send Flyway logging to Log4j2.
         LogFactory.setLogCreator( new FlywayLog4j2Creator() );
 
-        // create the Flyway instance
+        // Create the Flyway instance.
         Flyway flyway = new Flyway();
 
-        // point it to the database
+        // Point it to the database.
         flyway.setDataSource( dataSource );
 
-        // start the migration
+        // Start the migration.
         flyway.migrate();
 
     }
 
+    /** The logger for this class. */
     private static final Logger LOG = LogManager.getLogger();
 
 }
