@@ -11,11 +11,53 @@ public class TransactionGarbageCollectionTest {
 
         new Thread( new MetricThread() ).start();
 
-        for ( int i=0; i<5 ; i+=1 ) {
+        for ( int i = 0; i < 5; i += 1 ) {
             new Thread( new WorkerThread() ).start();
         }
 
         new Thread( new GarbageCollectionThread() ).start();
+
+    }
+
+    static class GarbageCollectionThread
+        implements Runnable {
+
+        @Override
+        public void run() {
+
+            while ( Value.count.get() <= 10 ) {
+                Thread.yield();
+            }
+
+            while ( Value.count.get() > 10 ) {
+                try {
+                    Thread.sleep( 5000L );
+                    System.gc();
+                }
+                catch ( InterruptedException e ) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
+    }
+
+    static class MetricThread
+        implements Runnable {
+
+        @Override
+        public void run() {
+            int priorCount = -1;
+            int count = Value.count.get();
+            while ( count > 10 || priorCount < 10 ) {
+                if ( count != priorCount ) {
+                    System.out.println( count );
+                    priorCount = count;
+                }
+                count = Value.count.get();
+            }
+            System.out.println( count );
+        }
 
     }
 
@@ -31,12 +73,14 @@ public class TransactionGarbageCollectionTest {
             super.finalize();
         }
 
-        int myCount;
         static AtomicInteger count = new AtomicInteger( 0 );
+
+        int myCount;
 
     }
 
-    static class WorkerThread implements Runnable {
+    static class WorkerThread
+        implements Runnable {
 
         @Override
         public void run() {
@@ -62,46 +106,6 @@ public class TransactionGarbageCollectionTest {
 
         private V<Value> myValue;
 
-    }
-
-    static class MetricThread implements Runnable {
-
-        @Override
-        public void run() {
-            int priorCount = -1;
-            int count = Value.count.get();
-            while ( count > 10 || priorCount < 10 ) {
-                if ( count != priorCount ) {
-                    System.out.println( count );
-                    priorCount = count;
-                }
-                count = Value.count.get();
-            }
-            System.out.println( count );
-        }
-
-    }
-
-    static class GarbageCollectionThread implements Runnable {
-
-        @Override
-        public void run() {
-
-            while ( Value.count.get() <= 10 ) {
-                Thread.yield();
-            }
-
-            while ( Value.count.get() > 10 ) {
-                try {
-                    Thread.sleep( 5000L );
-                    System.gc();
-                }
-                catch ( InterruptedException e ) {
-                    e.printStackTrace();
-                }
-            }
-
-        }
     }
 
 }

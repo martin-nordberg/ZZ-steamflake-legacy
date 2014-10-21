@@ -1,10 +1,10 @@
 package org.steamflake.persistence.dao
 
 import fi.evident.dalesbred.Database
-import org.steamflake.metamodel.structure.entities.IAbstractNamespace
-import org.steamflake.metamodel.structure.entities.INamespace
-import org.steamflake.metamodel.structure.entities.IRootNamespace
-import org.steamflake.metamodelimpl.registry.InMemoryElementRegistry
+import org.steamflake.metamodel.api.structure.entities.IAbstractNamespace
+import org.steamflake.metamodel.api.structure.entities.INamespace
+import org.steamflake.metamodel.api.structure.entities.IRootNamespace
+import org.steamflake.metamodel.impl.registry.InMemoryElementRegistry
 import org.steamflake.persistence.h2database.H2DataSource
 import org.steamflake.utilities.revisions.StmTransaction
 import org.steamflake.utilities.revisions.StmTransactionContext

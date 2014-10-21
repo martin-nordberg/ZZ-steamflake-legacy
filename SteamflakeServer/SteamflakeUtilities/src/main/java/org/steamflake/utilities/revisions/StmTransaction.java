@@ -133,10 +133,14 @@ public class StmTransaction {
      */
     void commit() {
 
+        // TBD: notify observers of read & written items inside transaction -- use a callback interface
+
         // Make the synchronized changed to make the transaction permanent.
         if ( this.versionedItemsWritten.size() > 0 ) {
             writeTransaction( this );
         }
+
+        // TBD: notify observers of read & written items outside the transaction -- use a callback interface
 
         // No longer hang on to the items read.
         this.versionedItemsRead.clear();

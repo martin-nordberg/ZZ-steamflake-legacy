@@ -34,7 +34,9 @@ public class DatabaseMigration {
 
     }
 
-    /** The logger for this class. */
+    /**
+     * The logger for this class.
+     */
     private static final Logger LOG = LogManager.getLogger();
 
 }

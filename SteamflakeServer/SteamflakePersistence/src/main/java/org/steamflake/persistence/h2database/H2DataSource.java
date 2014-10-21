@@ -93,10 +93,14 @@ public class H2DataSource
         return this.connectionPool.unwrap( iface );
     }
 
-    /** The logger for this class. */
+    /**
+     * The logger for this class.
+     */
     private static final org.apache.logging.log4j.Logger LOG = LogManager.getLogger();
 
-    /** The underlying connection pool delegated to by this data source. */
+    /**
+     * The underlying connection pool delegated to by this data source.
+     */
     private final JdbcConnectionPool connectionPool;
 
 }

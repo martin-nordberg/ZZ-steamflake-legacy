@@ -28,7 +28,7 @@ public class V<T>
         this.latestRevision = new AtomicReference<>( null );
         this.latestRevision.set( new Revision<>( value, currentTransaction.getTargetRevisionNumber(), this.latestRevision.get() ) );
 
-        // keep track of everything we've written
+        // Keep track of everything we've written.
         currentTransaction.addVersionedItemWritten( this );
 
     }
@@ -63,7 +63,7 @@ public class V<T>
                 currentTransaction.setNewerRevisionSeen();
             }
 
-            // Rf revision is committed and older or equal to our source revision, read it.
+            // If revision is committed and older or equal to our source revision, read it.
             if ( revisionNumber <= sourceRevisionNumber && revisionNumber > 0 ) {
                 // Keep track of everything we've read.
                 currentTransaction.addVersionedItemRead( this );
@@ -74,9 +74,8 @@ public class V<T>
 
         }
 
-        assert false : "No revision found for transaction.";
+        throw new NullPointerException( "No revision found for transaction." );
 
-        return null;
     }
 
     /**
@@ -95,28 +94,36 @@ public class V<T>
         long sourceRevisionNumber = currentTransaction.getSourceRevisionNumber();
         long targetRevisionNumber = currentTransaction.getTargetRevisionNumber().get();
 
-        // loop through the revisions
+        // Loop through the revisions ...
         for ( Revision<T> revision = this.latestRevision.get(); revision != null; revision = revision.priorRevision.get() ) {
 
             final long revisionNumber = revision.revisionNumber.get();
 
-            // if previously written by the current transaction, just update to the newer value
+            // If previously written by the current transaction, just update to the newer value.
             if ( revisionNumber == targetRevisionNumber ) {
                 revision.value = value;
                 return;
             }
 
-            // if revision is committed and older or equal to our source revision, need a new one
+            // If revision is committed and older or equal to our source revision, need a new one.
             if ( revisionNumber <= sourceRevisionNumber && revisionNumber > 0 ) {
+
+                // ... except if not changed, treat as a read.
+                if ( value == revision.value ) {
+                    currentTransaction.addVersionedItemRead( this );
+                    return;
+                }
+
                 break;
+
             }
 
         }
 
-        // create the new revision at the front of the chain
+        // Create the new revision at the front of the chain.
         this.latestRevision.set( new Revision<>( value, currentTransaction.getTargetRevisionNumber(), this.latestRevision.get() ) );
 
-        // keep track of everything we've written
+        // Keep track of everything we've written.
         currentTransaction.addVersionedItemWritten( this );
 
     }
@@ -129,17 +136,17 @@ public class V<T>
 
         long sourceRevisionNumber = currentTransaction.getSourceRevisionNumber();
 
-        // loop through the revisions
+        // Loop through the revisions ...
         for ( Revision<T> revision = this.latestRevision.get(); revision != null; revision = revision.priorRevision.get() ) {
 
             final long revisionNumber = revision.revisionNumber.get();
 
-            // if find something newer, then transaction conflicts
+            // If find something newer, then transaction conflicts.
             if ( revisionNumber > sourceRevisionNumber ) {
                 throw new WriteConflictException();
             }
 
-            // if revision is committed and older or equal to our source revision, then done
+            // If revision is committed and older or equal to our source revision, then done.
             if ( revisionNumber <= sourceRevisionNumber && revisionNumber > 0 ) {
                 break;
             }

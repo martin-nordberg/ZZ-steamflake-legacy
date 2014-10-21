@@ -3,13 +3,11 @@ package org.steamflake.persistence.dao;
 import fi.evident.dalesbred.Database;
 import fi.evident.dalesbred.instantiation.Instantiator;
 import fi.evident.dalesbred.instantiation.InstantiatorArguments;
-import org.steamflake.metamodel.elements.Ref;
-import org.steamflake.metamodel.elements.RefSource;
-import org.steamflake.metamodel.registry.IElementRegistry;
-import org.steamflake.metamodel.structure.entities.IRootNamespace;
-import org.steamflake.metamodelimpl.structure.entities.RootNamespace;
+import org.steamflake.metamodel.api.elements.Ref;
+import org.steamflake.metamodel.api.registry.IElementRegistry;
+import org.steamflake.metamodel.api.structure.entities.IRootNamespace;
+import org.steamflake.metamodel.impl.structure.entities.RootNamespace;
 
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -65,19 +63,17 @@ public class RootNamespaceDao {
 
             final UUID id = UUID.fromString( (String) fields.getValues().get( 0 ) );
 
-            RefSource<IRootNamespace> refSource = this.registry.getRefSource( IRootNamespace.class );
-
             // First see if it's already loaded.
-            Ref<IRootNamespace> result = refSource.lookUpElementByUuid( id );
+            Ref<IRootNamespace> result = this.registry.lookUpElementByUuid( IRootNamespace.class, id );
             if ( result.isLoaded() ) {
-                return result.get();
+                return result.get( IRootNamespace.class );
             }
 
             // Get the attributes from the database result.
             final String summary = (String) fields.getValues().get( 1 );
 
             // Create the root namespace.
-            RootNamespace rootNamespace = new RootNamespace( result.orById( refSource, id ), summary );
+            RootNamespace rootNamespace = new RootNamespace( result.orById( id ), summary );
 
             // Register it for future look ups.
             this.registry.registerElement( rootNamespace.getSelf() );

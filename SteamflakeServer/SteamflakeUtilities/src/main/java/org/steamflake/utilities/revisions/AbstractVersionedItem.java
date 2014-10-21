@@ -4,6 +4,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Interface to a versioned value that supports clean up of obsolete or aborted versions.
+ * <p>
+ * TODO: make versioned items observable:
+ * void subscribe( boolean insideTransaction, Subscriber subscriber );
+ * void unsubscribe( Subscriber subscriber );
  */
 abstract class AbstractVersionedItem {
 
@@ -16,7 +20,7 @@ abstract class AbstractVersionedItem {
 
     @SuppressWarnings("SimplifiableIfStatement")
     @Override
-    public boolean equals( Object that ) {
+    public final boolean equals( Object that ) {
 
         if ( this == that ) {
             return true;
@@ -31,7 +35,7 @@ abstract class AbstractVersionedItem {
     }
 
     @Override
-    public int hashCode() {
+    public final int hashCode() {
         return hashCode;
     }
 
@@ -62,6 +66,6 @@ abstract class AbstractVersionedItem {
     /**
      * The sequential hash code of this versioned item.
      */
-    private int hashCode;
+    private final int hashCode;
 
 }

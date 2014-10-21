@@ -1,13 +1,13 @@
 package org.steamflake.persistence.registry;
 
 import fi.evident.dalesbred.Database;
-import org.steamflake.metamodel.elements.IElement;
-import org.steamflake.metamodel.elements.IElementLookUp;
-import org.steamflake.metamodel.elements.IEntity;
-import org.steamflake.metamodel.elements.Ref;
-import org.steamflake.metamodel.registry.IElementRegistry;
-import org.steamflake.metamodel.structure.entities.IRootNamespace;
-import org.steamflake.metamodelimpl.registry.AbstractElementLookUp;
+import org.steamflake.metamodel.api.elements.IElement;
+import org.steamflake.metamodel.api.elements.IElementLookUp;
+import org.steamflake.metamodel.api.elements.IEntity;
+import org.steamflake.metamodel.api.elements.Ref;
+import org.steamflake.metamodel.api.registry.IElementRegistry;
+import org.steamflake.metamodel.api.structure.entities.IRootNamespace;
+import org.steamflake.metamodel.impl.registry.AbstractElementLookUp;
 import org.steamflake.persistence.dao.NamespaceDao;
 import org.steamflake.persistence.dao.RootNamespaceDao;
 

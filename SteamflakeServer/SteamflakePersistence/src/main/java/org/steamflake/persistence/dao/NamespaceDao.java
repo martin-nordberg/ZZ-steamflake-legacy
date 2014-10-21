@@ -3,11 +3,10 @@ package org.steamflake.persistence.dao;
 import fi.evident.dalesbred.Database;
 import fi.evident.dalesbred.instantiation.Instantiator;
 import fi.evident.dalesbred.instantiation.InstantiatorArguments;
-import org.steamflake.metamodel.elements.Ref;
-import org.steamflake.metamodel.elements.RefSource;
-import org.steamflake.metamodel.registry.IElementRegistry;
-import org.steamflake.metamodel.structure.entities.INamespace;
-import org.steamflake.metamodelimpl.structure.entities.Namespace;
+import org.steamflake.metamodel.api.elements.Ref;
+import org.steamflake.metamodel.api.registry.IElementRegistry;
+import org.steamflake.metamodel.api.structure.entities.INamespace;
+import org.steamflake.metamodel.impl.structure.entities.Namespace;
 
 import java.util.List;
 import java.util.UUID;
@@ -88,12 +87,10 @@ public class NamespaceDao {
 
             final UUID id = UUID.fromString( (String) fields.getValues().get( 0 ) );
 
-            RefSource<INamespace> refSource = this.registry.getRefSource( INamespace.class );
-
             // First see if it's already loaded.
-            Ref<INamespace> result = refSource.lookUpElementByUuid( id );
+            Ref<INamespace> result = this.registry.lookUpElementByUuid( INamespace.class, id );
             if ( result.isLoaded() ) {
-                return result.get();
+                return result.get( INamespace.class );
             }
 
             // Get the attributes from the database result.
@@ -101,7 +98,7 @@ public class NamespaceDao {
             final String summary = (String) fields.getValues().get( 2 );
 
             // Create the namespace.
-            Namespace namespace = new Namespace( result.orById( refSource, id ), name, summary );
+            Namespace namespace = new Namespace( result.orById( id ), name, summary );
 
             // Register it for future look ups.
             this.registry.registerElement( namespace.getSelf() );

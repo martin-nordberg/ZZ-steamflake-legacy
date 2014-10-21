@@ -7,13 +7,13 @@ import spock.lang.Specification
  */
 class ConfigurationSpec extends Specification {
 
-    def "Sample properties can be read" () {
+    def "Sample properties can be read"() {
 
         given:
-        def config = new Configuration( ConfigurationSpec.class )
+        def config = new Configuration(ConfigurationSpec.class)
 
         when:
-        def result = config.readString( key )
+        def result = config.readString(key)
 
         then:
         result == expectedResult
