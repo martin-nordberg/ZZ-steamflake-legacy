@@ -11,6 +11,8 @@ import org.steamflake.metamodel.impl.registry.AbstractElementLookUp;
 import org.steamflake.persistence.dao.NamespaceDao;
 import org.steamflake.persistence.dao.RootNamespaceDao;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.UUID;
 
 /**
@@ -20,14 +22,47 @@ public final class DatabaseElementRegistry
     extends AbstractElementLookUp
     implements IElementLookUp {
 
+    class DatabaseConnection
+        implements Closeable {
+
+        @Override
+        public void close() throws IOException {
+            DatabaseElementRegistry.this.database.set( null );
+        }
+
+    }
+
     /**
      * Constructs a new database-backed element look up facility.
-     * TBD: The registry should persist, but the database comes and goes.
      */
-    public DatabaseElementRegistry( IElementRegistry registry, Database database ) {
-        this.database = database;
+    public DatabaseElementRegistry( IElementRegistry registry ) {
+        this.database = new ThreadLocal<>();
         this.registry = registry;
         this.rootNamespaceId = null;
+    }
+
+    /**
+     * Connects this registry to the given database. Returns a connection to be closed when completed.
+     * @param database the database to conect to.
+     * @return the connection to be closed when operation complete.
+     */
+    public final Closeable connect( Database database ) {
+
+        if ( this.isConnected() ) {
+            throw new IllegalStateException( "Already connected to database." );
+        }
+
+        this.database.set( database );
+
+        return new DatabaseConnection();
+
+    }
+
+    /**
+     * @return whether this registry is connected to a database (in the current thread).
+     */
+    public final boolean isConnected() {
+        return this.database.get() != null;
     }
 
     @SuppressWarnings("unchecked")
@@ -65,8 +100,13 @@ public final class DatabaseElementRegistry
             }
         }
 
+        // Must be connected to a database for the look up.
+        if ( !this.isConnected() ) {
+            throw new IllegalStateException( "Not connected to a database." );
+        }
+
         // Find the root namespace in the database.
-        RootNamespaceDao dao = new RootNamespaceDao( this.database, this.registry );
+        RootNamespaceDao dao = new RootNamespaceDao( this.database.get(), this.registry );
         IRootNamespace rootNamespace = dao.findRootNamespace();
 
         if ( rootNamespace == null ) {
@@ -93,8 +133,13 @@ public final class DatabaseElementRegistry
         // First try a look up in the associated registry.
         return this.registry.lookUpElementByUuid( elementType, id ).orIfMissing( () -> {
 
+            // Must be connected to a database for the look up.
+            if ( !this.isConnected() ) {
+                throw new IllegalStateException( "Not connected to a database." );
+            }
+
             // If missing, find the namespace in the database.
-            NamespaceDao dao = new NamespaceDao( this.database, this.registry );
+            NamespaceDao dao = new NamespaceDao( this.database.get(), this.registry );
             IEntity namespace = dao.findNamespaceByUuid( id );
 
             if ( namespace == null ) {
@@ -107,7 +152,7 @@ public final class DatabaseElementRegistry
 
     }
 
-    private final Database database;
+    private final ThreadLocal<Database> database;
 
     private final IElementRegistry registry;
 

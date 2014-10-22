@@ -11,7 +11,14 @@ import javax.sql.DataSource;
 /**
  * Static utility class to update the database schema.
  */
-public class DatabaseMigration {
+public final class DatabaseMigration {
+
+    /**
+     * Static utility class not intended for instantiation.
+     */
+    private DatabaseMigration() {
+        throw new UnsupportedOperationException( "Static utility class." );
+    }
 
     /**
      * Updates the database schema to the latest version.

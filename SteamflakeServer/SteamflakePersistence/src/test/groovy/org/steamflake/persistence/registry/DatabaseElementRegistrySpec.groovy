@@ -9,45 +9,46 @@ import org.steamflake.utilities.revisions.StmTransactionContext
 import spock.lang.Specification
 
 /**
- * Created by mnordberg on 9/8/14.
+ * Tests for a database element registry.
  */
 class DatabaseElementRegistrySpec extends Specification {
 
-    static H2DataSource dataSource
-    Database database
-    DatabaseElementRegistry registry
-    StmTransaction transaction
+    static H2DataSource dataSource;
+    Closeable connection;
+    DatabaseElementRegistry registry;
+    StmTransaction transaction;
 
     def setupSpec() {
         dataSource = new H2DataSource();
     }
 
     def setup() {
-        database = new Database(dataSource);
-        registry = new DatabaseElementRegistry(new InMemoryElementRegistry(), database);
+        registry = new DatabaseElementRegistry( new InMemoryElementRegistry() );
+        connection = registry.connect( new Database( dataSource ) );
         transaction = StmTransactionContext.beginTransaction();
     }
 
     def "The root namespace can be looked up"() {
 
         when: "the root namespace is looked up"
-        def rootNamespace = registry.lookUpRootNamespace().get(IRootNamespace.class)
+        def rootNamespace = registry.lookUpRootNamespace().get( IRootNamespace.class );
 
         and: "the root namespace is looked up again"
-        def rootNamespace2 = registry.lookUpRootNamespace().get(IRootNamespace.class)
+        def rootNamespace2 = registry.lookUpRootNamespace().get( IRootNamespace.class );
 
         then: "it has usable attributes"
-        rootNamespace.id != null
-        rootNamespace.name == '$'
-        rootNamespace.summary != null
+        rootNamespace.id != null;
+        rootNamespace.name == '$';
+        rootNamespace.summary != null;
 
         and: "it is the same (cached) object"
-        rootNamespace2.is(rootNamespace)
+        rootNamespace2.is( rootNamespace );
 
     }
 
     def cleanup() {
-        StmTransactionContext.commitTransaction(transaction);
+        StmTransactionContext.commitTransaction( transaction );
+        connection.close();
     }
 
     def cleanupSpec() {

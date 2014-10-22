@@ -10,6 +10,10 @@ import org.flywaydb.core.internal.util.logging.Log;
 public class FlywayLog4j2Adapter
     implements Log {
 
+    /**
+     * Constructs a new logging adapter for Flyway.
+     * @param clazz the class being logged for.
+     */
     public FlywayLog4j2Adapter( Class<?> clazz ) {
         this.logger = LogManager.getLogger( clazz );
     }
@@ -39,5 +43,7 @@ public class FlywayLog4j2Adapter
         this.logger.warn( message );
     }
 
+    /** The encapsulated Log4J2 logger. */
     private final Logger logger;
+
 }

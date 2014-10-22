@@ -26,10 +26,10 @@ class CreateNamespaceActionSpec extends Specification {
         given: "a parent namespace"
         def registry = new NullElementRegistry();
 
-        IRootNamespace root = new RootNamespace(Ref.byId(registry, Uuids.makeUuid()), "Root namespace");
+        IRootNamespace root = new RootNamespace( Ref.byId( registry, Uuids.makeUuid() ), "Root namespace" );
 
         when: "the action is created"
-        IAction action = new CreateNamespaceAction(Ref.byId(registry, Uuids.makeUuid()), root, Uuids.makeUuid(), "sub1", "sub namespace");
+        IAction action = new CreateNamespaceAction( Ref.byId( registry, Uuids.makeUuid() ), root, Uuids.makeUuid(), "sub1", "sub namespace" );
 
         then: "the new namespace has given attributes"
         action.newNamespace.name == "sub1";
@@ -40,21 +40,21 @@ class CreateNamespaceActionSpec extends Specification {
 
         and: "the action can be reversed"
         action.canReverse();
-        IAction revAction = action.doMakeReversingAction(Uuids.makeUuid());
+        IAction revAction = action.doMakeReversingAction( Uuids.makeUuid() );
 
         and: "the namespace is then destroyed"
         action.newNamespace.destroyed;
         // TODO: namespace is no longer a child
 
         and: "the destruction can be undone"
-        revAction.makeReversingAction(Uuids.makeUuid());
+        revAction.makeReversingAction( Uuids.makeUuid() );
         !action.newNamespace.destroyed;
         // TODO: namespace is a child again
 
     }
 
     def cleanup() {
-        StmTransactionContext.commitTransaction(transaction);
+        StmTransactionContext.commitTransaction( transaction );
     }
 
 }

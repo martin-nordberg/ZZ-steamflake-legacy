@@ -280,16 +280,10 @@ public final class Ref<Element extends IElement> {
     }
 
     /**
-     * Placeholder reference type for a missing value.
-     */
-    @SuppressWarnings("unchecked")
-    private static final IElementLookUp ABSENT = new NullElementRegistry();
-
-    /**
      * Constant representing a missing value, generally from a failed look up.
      */
     @SuppressWarnings("unchecked")
-    private static final Ref MISSING = new Ref( ABSENT, null, null );
+    private static final Ref MISSING = new Ref( new NullElementRegistry(), null, null );
 
     /**
      * The referenced element itself.

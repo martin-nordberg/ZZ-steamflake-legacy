@@ -30,9 +30,9 @@ class NamespaceDaoSpec extends Specification {
 
     def setup() {
         def cache = new InMemoryElementRegistry()
-        database = new Database(dataSource);
-        rootDao = new RootNamespaceDao(database, cache);
-        dao = new NamespaceDao(database, cache);
+        database = new Database( dataSource );
+        rootDao = new RootNamespaceDao( database, cache );
+        dao = new NamespaceDao( database, cache );
         transaction = StmTransactionContext.beginTransaction();
         root = rootDao.findRootNamespace()
     }
@@ -41,22 +41,22 @@ class NamespaceDaoSpec extends Specification {
 
         given: "a namespace to be saved"
         def id = Uuids.makeUuid();
-        INamespace namespace = root.makeNamespace(id, "example", "a testing sample namespace")
+        INamespace namespace = root.makeNamespace( id, "example", "a testing sample namespace" )
 
         when: "the namespace is created"
-        dao.createNamespace(namespace)
+        dao.createNamespace( namespace )
 
         and: "retrieved by UUID"
-        def namespace2 = dao.findNamespaceByUuid(id)
+        def namespace2 = dao.findNamespaceByUuid( id )
 
         then: "it is the same (cached) object as the original"
-        namespace2.is(namespace)
+        namespace2.is( namespace )
 
         and: "it can be deleted"
-        dao.deleteNamespace(id)
+        dao.deleteNamespace( id )
 
         and: "then disappears from view"
-        dao.findNamespaceByUuid(id) == null
+        dao.findNamespaceByUuid( id ) == null
 
     }
 
@@ -65,10 +65,10 @@ class NamespaceDaoSpec extends Specification {
 
         when: "the namespaces are created"
         IAbstractNamespace namespace = root
-        for (int i = 0; i < 100000; i += 1) {
+        for ( int i = 0; i < 100000; i += 1 ) {
             def id = Uuids.makeUuid();
-            namespace = namespace.makeNamespace(id, "example" + i, "testing sample namespace " + i)
-            dao.createNamespace(namespace)
+            namespace = namespace.makeNamespace( id, "example" + i, "testing sample namespace " + i )
+            dao.createNamespace( namespace )
         }
 
         then: "they can be retrieved"
@@ -77,7 +77,7 @@ class NamespaceDaoSpec extends Specification {
     }
 
     def cleanup() {
-        StmTransactionContext.commitTransaction(transaction);
+        StmTransactionContext.commitTransaction( transaction );
     }
 
     def cleanupSpec() {

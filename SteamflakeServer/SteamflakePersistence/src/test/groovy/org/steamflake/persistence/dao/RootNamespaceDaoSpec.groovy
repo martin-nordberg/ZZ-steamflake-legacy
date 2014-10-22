@@ -23,8 +23,8 @@ class RootNamespaceDaoSpec extends Specification {
 
     def setup() {
         def cache = new InMemoryElementRegistry()
-        database = new Database(dataSource);
-        dao = new RootNamespaceDao(database, cache);
+        database = new Database( dataSource );
+        dao = new RootNamespaceDao( database, cache );
         transaction = StmTransactionContext.beginTransaction();
     }
 
@@ -41,7 +41,7 @@ class RootNamespaceDaoSpec extends Specification {
     }
 
     def cleanup() {
-        StmTransactionContext.commitTransaction(transaction);
+        StmTransactionContext.commitTransaction( transaction );
     }
 
     def cleanupSpec() {
