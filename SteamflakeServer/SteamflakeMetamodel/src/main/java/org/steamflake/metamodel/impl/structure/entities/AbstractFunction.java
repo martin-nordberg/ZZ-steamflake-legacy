@@ -10,8 +10,8 @@ public abstract class AbstractFunction<ISelf extends IFunction>
     extends AbstractFunctionSignature<ISelf>
     implements IFunction<ISelf> {
 
-    protected AbstractFunction( java.lang.Class<ISelf> selfType, Ref<ISelf> self, String name, String summary ) {
-        super( selfType, self, name, summary );
+    protected AbstractFunction( Ref<ISelf> self, String name, String summary ) {
+        super( self, name, summary );
     }
 
 }

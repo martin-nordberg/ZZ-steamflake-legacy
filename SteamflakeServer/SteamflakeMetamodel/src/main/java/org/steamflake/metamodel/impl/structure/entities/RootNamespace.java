@@ -22,7 +22,7 @@ public final class RootNamespace
      * @param summary a short summary of the namespace.
      */
     public RootNamespace( Ref<IRootNamespace> self, String summary ) {
-        this.self = self.set( IRootNamespace.class, this );
+        this.self = self.set( this );
         this.summary = new V<>( summary );
     }
 
@@ -58,7 +58,7 @@ public final class RootNamespace
 
     @Override
     public final INamespace makeNamespace( UUID id, String name, String summary ) {
-        return new Namespace( this.getSelf().makeRefById( id ), name, summary );
+        return new Namespace( this.getSelf().makeRefById( id, INamespace.class ), name, summary );
     }
 
     @Override

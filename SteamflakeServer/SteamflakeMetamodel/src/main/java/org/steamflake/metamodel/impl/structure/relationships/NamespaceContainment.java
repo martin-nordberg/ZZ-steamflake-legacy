@@ -13,8 +13,8 @@ public class NamespaceContainment
     extends AbstractRelationship<INamespaceContainment, IAbstractNamespace, INamespace>
     implements INamespaceContainment {
 
-    protected NamespaceContainment( Ref<INamespaceContainment> self, IAbstractNamespace containingNamespace, INamespace containedNamespace ) {
-        super( INamespaceContainment.class, self, containingNamespace, containedNamespace );
+    public NamespaceContainment( Ref<INamespaceContainment> self, Ref<IAbstractNamespace> containingNamespace, Ref<INamespace> containedNamespace ) {
+        super( self, containingNamespace, containedNamespace );
     }
 
 }

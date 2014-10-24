@@ -20,7 +20,7 @@ public final class Package
      * @param summary a summary of the package.
      */
     public Package( Ref<IPackage> self, String name, String summary ) {
-        super( IPackage.class, self, name, summary );
+        super( self, name, summary );
     }
 
     @Override

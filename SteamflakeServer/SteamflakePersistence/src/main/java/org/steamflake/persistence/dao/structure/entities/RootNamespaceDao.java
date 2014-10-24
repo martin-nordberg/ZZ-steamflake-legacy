@@ -1,4 +1,4 @@
-package org.steamflake.persistence.dao;
+package org.steamflake.persistence.dao.structure.entities;
 
 import fi.evident.dalesbred.Database;
 import fi.evident.dalesbred.instantiation.Instantiator;
@@ -66,14 +66,14 @@ public class RootNamespaceDao {
             // First see if it's already loaded.
             Ref<IRootNamespace> result = this.registry.lookUpElementByUuid( IRootNamespace.class, id );
             if ( result.isLoaded() ) {
-                return result.get( IRootNamespace.class );
+                return result.get();
             }
 
             // Get the attributes from the database result.
             final String summary = (String) fields.getValues().get( 1 );
 
             // Create the root namespace.
-            RootNamespace rootNamespace = new RootNamespace( result.orById( id ), summary );
+            RootNamespace rootNamespace = new RootNamespace( result.orById( id, IRootNamespace.class ), summary );
 
             // Register it for future look ups.
             this.registry.registerElement( rootNamespace.getSelf() );

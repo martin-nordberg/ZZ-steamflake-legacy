@@ -26,10 +26,11 @@ class CreateNamespaceActionSpec extends Specification {
         given: "a parent namespace"
         def registry = new NullElementRegistry();
 
-        IRootNamespace root = new RootNamespace( Ref.byId( registry, Uuids.makeUuid() ), "Root namespace" );
+        IRootNamespace root = new RootNamespace( Ref.byId( registry, Uuids.makeUuid(), IRootNamespace.class ), "Root namespace" );
 
         when: "the action is created"
-        IAction action = new CreateNamespaceAction( Ref.byId( registry, Uuids.makeUuid() ), root, Uuids.makeUuid(), "sub1", "sub namespace" );
+        IAction action = new CreateNamespaceAction( Ref.byId( registry, Uuids.makeUuid(), CreateNamespaceAction.class ), root, Uuids.
+                makeUuid(), "sub1", "sub namespace" );
 
         then: "the new namespace has given attributes"
         action.newNamespace.name == "sub1";

@@ -18,7 +18,7 @@ public final class Class
      * @param summary a summary of the class.
      */
     public Class( Ref<IClass> self, String name, String summary ) {
-        super( IClass.class, self, name, summary );
+        super( self, name, summary );
     }
 
 }

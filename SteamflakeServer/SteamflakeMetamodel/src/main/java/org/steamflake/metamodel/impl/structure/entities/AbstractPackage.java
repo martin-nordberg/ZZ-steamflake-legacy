@@ -16,8 +16,8 @@ public class AbstractPackage<ISelf extends IAbstractPackage>
     implements IAbstractPackage<ISelf> {
 
 
-    protected AbstractPackage( java.lang.Class<ISelf> selfType, Ref<ISelf> self, String name, String summary ) {
-        super( selfType, self, name, summary );
+    protected AbstractPackage( Ref<ISelf> self, String name, String summary ) {
+        super( self, name, summary );
     }
 
     @Override
@@ -27,7 +27,7 @@ public class AbstractPackage<ISelf extends IAbstractPackage>
 
     @Override
     public final IPackage makePackage( UUID id, String name, String summary ) {
-        return new Package( this.getSelf().makeRefById( id ), name, summary );
+        return new Package( this.getSelf().makeRefById( id, IPackage.class ), name, summary );
     }
 
 

@@ -13,13 +13,13 @@ public abstract class AbstractComponent<ISelf extends IComponent>
     extends AbstractFunction<ISelf>
     implements IComponent<ISelf> {
 
-    protected AbstractComponent( java.lang.Class<ISelf> selfType, Ref<ISelf> self, String name, String summary ) {
-        super( selfType, self, summary, name );
+    protected AbstractComponent( Ref<ISelf> self, String name, String summary ) {
+        super( self, summary, name );
     }
 
     @Override
     public final IClass makeClass( UUID id, String name, String summary ) {
-        return new Class( this.getSelf().makeRefById( id ), name, summary );
+        return new Class( this.getSelf().makeRefById( id, IClass.class ), name, summary );
     }
 
 }

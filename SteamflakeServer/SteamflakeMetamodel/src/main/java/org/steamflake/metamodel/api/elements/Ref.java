@@ -14,7 +14,7 @@ import java.util.function.Supplier;
  *
  * @param <Element> the type of element referenced.
  */
-public final class Ref<Element extends IElement> {
+public class Ref<Element extends IElement> {
 
     /**
      * Constructs a new reference to an element with given ID.
@@ -23,11 +23,12 @@ public final class Ref<Element extends IElement> {
      * @param id      the unique ID of the element.
      * @param element the element itself.
      */
-    private Ref( IElementLookUp store, UUID id, Element element ) {
+    private Ref( IElementLookUp store, UUID id, Element element, Class<Element> elementType ) {
         Objects.requireNonNull( store );
         this.store = store;
         this.id = id;
         this.element = new AtomicReference<>( element );
+        this.elementType = elementType;
     }
 
     /**
@@ -38,9 +39,10 @@ public final class Ref<Element extends IElement> {
      * @param <Element> the type of element referenced.
      * @return the new reference.
      */
-    public static <Element extends IElement> Ref<Element> byId( IElementLookUp store, UUID id ) {
+    public static <Element extends IElement> Ref<Element> byId( IElementLookUp store, UUID id, Class<Element> elementType ) {
         Objects.requireNonNull( id );
-        return new Ref<>( store, id, null );
+        return new Ref<Element>( store, id, null, elementType ) {
+        };
     }
 
     /**
@@ -85,12 +87,12 @@ public final class Ref<Element extends IElement> {
      *
      * @return the referenced element.
      */
-    public final Element get( Class<Element> elementType ) {
+    public final Element get() {
 
         Objects.requireNonNull( this.id );
 
         if ( this.element.get() == null ) {
-            this.element.set( this.store.lookUpElementByUuid( elementType, this.id ).get( elementType ) );
+            this.element.set( this.store.lookUpElementByUuid( this.elementType, this.id ).get() );
         }
 
         Objects.requireNonNull( this.element.get() );
@@ -198,8 +200,8 @@ public final class Ref<Element extends IElement> {
      * @param <OtherElement> the type of the referenced element.
      * @return the new reference by ID using the same look up source as this reference.
      */
-    public final <OtherElement extends IElement> Ref<OtherElement> makeRefById( UUID id ) {
-        return Ref.byId( this.store, id );
+    public final <OtherElement extends IElement> Ref<OtherElement> makeRefById( UUID id, Class<OtherElement> elementType ) {
+        return Ref.byId( this.store, id, elementType );
     }
 
     /**
@@ -208,10 +210,10 @@ public final class Ref<Element extends IElement> {
      * @param id the unique ID expected for the reference.
      * @return this reference or if missing, a new one with given ID.
      */
-    public final Ref<Element> orById( UUID id ) {
+    public final Ref<Element> orById( UUID id, Class<Element> elementType ) {
 
         if ( this.id == null ) {
-            return Ref.byId( this.store, id );
+            return Ref.byId( this.store, id, elementType );
         }
 
         return this;
@@ -253,16 +255,15 @@ public final class Ref<Element extends IElement> {
     /**
      * Sets the referenced element.
      *
-     * @param elementType the type of the element referenced.
-     * @param element     the element to be referenced by this object.
+     * @param element the element to be referenced by this object.
      * @return this reference object with the element set.
      */
-    public Ref<Element> set( Class<Element> elementType, Element element ) {
+    public Ref<Element> set( Element element ) {
 
         Objects.requireNonNull( element );
 
         if ( !this.element.compareAndSet( null, element ) ) {
-            if ( !this.get( elementType ).equals( element ) ) {
+            if ( !this.get().equals( element ) ) {
                 throw new IllegalStateException( "Cannot change reference once set." );
             }
         }
@@ -283,12 +284,17 @@ public final class Ref<Element extends IElement> {
      * Constant representing a missing value, generally from a failed look up.
      */
     @SuppressWarnings("unchecked")
-    private static final Ref MISSING = new Ref( new NullElementRegistry(), null, null );
+    private static final Ref MISSING = new Ref( new NullElementRegistry(), null, null, Object.class );
 
     /**
      * The referenced element itself.
      */
     private AtomicReference<Element> element;
+
+    /**
+     * The class object for the element referenced.
+     */
+    private final Class<Element> elementType;
 
     /**
      * The unique ID of the referenced element.

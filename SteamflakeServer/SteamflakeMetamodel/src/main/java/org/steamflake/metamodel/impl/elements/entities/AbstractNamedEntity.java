@@ -11,8 +11,8 @@ public abstract class AbstractNamedEntity<ISelf extends INamedEntity>
     extends AbstractEntity<ISelf>
     implements INamedEntity<ISelf> {
 
-    protected AbstractNamedEntity( Class<ISelf> selfType, Ref<ISelf> self, String name, String summary ) {
-        super( selfType, self, summary );
+    protected AbstractNamedEntity( Ref<ISelf> self, String name, String summary ) {
+        super( self, summary );
         this.name = new V<>( name );
     }
 

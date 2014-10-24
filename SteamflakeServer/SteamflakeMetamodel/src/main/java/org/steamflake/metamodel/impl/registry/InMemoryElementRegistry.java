@@ -39,9 +39,9 @@ public final class InMemoryElementRegistry
 
         if ( result != null ) {
             if ( result.isLoaded() ) {
-                if ( !elementType.isAssignableFrom( result.get( elementType ).getClass() ) ) {
+                if ( !elementType.isAssignableFrom( result.get().getClass() ) ) {
                     throw new ClassCastException( "Attempted to retrieve element with wrong type. Queried: " +
-                        elementType.getName() + " vs. Actual: " + result.get( elementType ).getClass() );
+                        elementType.getName() + " vs. Actual: " + result.get().getClass() );
                 }
             }
             return result;

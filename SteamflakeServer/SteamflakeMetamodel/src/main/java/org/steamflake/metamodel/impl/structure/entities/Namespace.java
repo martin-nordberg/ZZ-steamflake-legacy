@@ -25,7 +25,7 @@ public final class Namespace
      * @param summary a short summary of the namespace.
      */
     public Namespace( Ref<INamespace> self, String name, String summary ) {
-        super( INamespace.class, self, name, summary );
+        super( self, name, summary );
     }
 
     @Override
@@ -40,7 +40,7 @@ public final class Namespace
 
     @Override
     public final IModule makeModule( UUID id, String name, String summary, String version ) {
-        return new Module( this.getSelf().makeRefById( id ), name, summary, version );
+        return new Module( this.getSelf().makeRefById( id, IModule.class ), name, summary, version );
     }
 
     @Override

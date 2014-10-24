@@ -24,7 +24,7 @@ public final class Module
      * @param version the version number of the module.
      */
     public Module( Ref<IModule> self, String name, String summary, String version ) {
-        super( IModule.class, self, name, summary );
+        super( self, name, summary );
         this.version = new V<>( version );
     }
 

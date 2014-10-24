@@ -21,7 +21,7 @@ public final class Parameter
      * @param sequence the sequence number of the parameter.
      */
     public Parameter( Ref<IParameter> self, String name, String summary, int sequence ) {
-        super( IParameter.class, self, name, summary );
+        super( self, name, summary );
         this.sequence = new V<>( sequence );
     }
 

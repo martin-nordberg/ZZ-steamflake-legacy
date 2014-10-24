@@ -18,8 +18,8 @@ public abstract class AbstractNamespace<ISelf extends IAbstractNamespace>
     extends AbstractNamedEntity<ISelf>
     implements IAbstractNamespace<ISelf> {
 
-    protected AbstractNamespace( java.lang.Class<ISelf> selfType, Ref<ISelf> self, String name, String summary ) {
-        super( selfType, self, name, summary );
+    protected AbstractNamespace( Ref<ISelf> self, String name, String summary ) {
+        super( self, name, summary );
         this.namespaceContainmentRelationships = new VSet<>();
     }
 
@@ -30,7 +30,7 @@ public abstract class AbstractNamespace<ISelf extends IAbstractNamespace>
 
     @Override
     public final INamespace makeNamespace( UUID id, String name, String summary ) {
-        return new Namespace( this.getSelf().makeRefById( id ), name, summary );
+        return new Namespace( this.getSelf().makeRefById( id, INamespace.class ), name, summary );
     }
 
     private final VSet<NamespaceContainment> namespaceContainmentRelationships;

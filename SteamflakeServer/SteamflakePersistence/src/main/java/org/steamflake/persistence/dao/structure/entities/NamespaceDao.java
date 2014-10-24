@@ -1,4 +1,4 @@
-package org.steamflake.persistence.dao;
+package org.steamflake.persistence.dao.structure.entities;
 
 import fi.evident.dalesbred.Database;
 import fi.evident.dalesbred.instantiation.Instantiator;
@@ -90,7 +90,7 @@ public class NamespaceDao {
             // First see if it's already loaded.
             Ref<INamespace> result = this.registry.lookUpElementByUuid( INamespace.class, id );
             if ( result.isLoaded() ) {
-                return result.get( INamespace.class );
+                return result.get();
             }
 
             // Get the attributes from the database result.
@@ -98,7 +98,7 @@ public class NamespaceDao {
             final String summary = (String) fields.getValues().get( 2 );
 
             // Create the namespace.
-            Namespace namespace = new Namespace( result.orById( id ), name, summary );
+            Namespace namespace = new Namespace( result.orById( id, INamespace.class ), name, summary );
 
             // Register it for future look ups.
             this.registry.registerElement( namespace.getSelf() );

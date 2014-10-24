@@ -8,8 +8,8 @@ import org.steamflake.metamodel.api.elements.Ref;
 import org.steamflake.metamodel.api.registry.IElementRegistry;
 import org.steamflake.metamodel.api.structure.entities.IRootNamespace;
 import org.steamflake.metamodel.impl.registry.AbstractElementLookUp;
-import org.steamflake.persistence.dao.NamespaceDao;
-import org.steamflake.persistence.dao.RootNamespaceDao;
+import org.steamflake.persistence.dao.structure.entities.NamespaceDao;
+import org.steamflake.persistence.dao.structure.entities.RootNamespaceDao;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -22,16 +22,6 @@ public final class DatabaseElementRegistry
     extends AbstractElementLookUp
     implements IElementLookUp {
 
-    class DatabaseConnection
-        implements Closeable {
-
-        @Override
-        public void close() throws IOException {
-            DatabaseElementRegistry.this.database.set( null );
-        }
-
-    }
-
     /**
      * Constructs a new database-backed element look up facility.
      */
@@ -43,6 +33,7 @@ public final class DatabaseElementRegistry
 
     /**
      * Connects this registry to the given database. Returns a connection to be closed when completed.
+     *
      * @param database the database to conect to.
      * @return the connection to be closed when operation complete.
      */
@@ -149,6 +140,16 @@ public final class DatabaseElementRegistry
             return (Ref<Element>) namespace.getSelf();
 
         } );
+
+    }
+
+    class DatabaseConnection
+        implements Closeable {
+
+        @Override
+        public void close() throws IOException {
+            DatabaseElementRegistry.this.database.set( null );
+        }
 
     }
 

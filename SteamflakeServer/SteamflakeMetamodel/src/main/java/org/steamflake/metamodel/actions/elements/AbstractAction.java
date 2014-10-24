@@ -18,8 +18,8 @@ public abstract class AbstractAction<ISelf extends IAction>
      *
      * @param self the registered reference to the new action.
      */
-    protected AbstractAction( Class<ISelf> selfType, Ref<ISelf> self ) {
-        super( selfType, self );
+    protected AbstractAction( Ref<ISelf> self ) {
+        super( self );
     }
 
     @Override

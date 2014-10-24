@@ -21,7 +21,7 @@ public final class RenameAction
      */
     public RenameAction( Ref<RenameAction> self, INamedEntity namedEntity, String newName ) {
 
-        super( RenameAction.class, self );
+        super( self );
 
         Objects.requireNonNull( namedEntity );
         Objects.requireNonNull( newName );
@@ -46,7 +46,7 @@ public final class RenameAction
 
     @Override
     protected final IAction<RenameAction> doMakeReversingAction( UUID id ) {
-        return new RenameAction( this.getSelf().makeRefById( id ), this.namedEntity, this.oldName );
+        return new RenameAction( this.getSelf().makeRefById( id, RenameAction.class ), this.namedEntity, this.oldName );
     }
 
     private final INamedEntity namedEntity;

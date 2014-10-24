@@ -14,13 +14,13 @@ public abstract class AbstractFunctionSignature<ISelf extends IFunctionSignature
     extends AbstractNamedEntity<ISelf>
     implements IFunctionSignature<ISelf> {
 
-    protected AbstractFunctionSignature( java.lang.Class<ISelf> selfType, Ref<ISelf> self, String name, String summary ) {
-        super( selfType, self, name, summary );
+    protected AbstractFunctionSignature( Ref<ISelf> self, String name, String summary ) {
+        super( self, name, summary );
     }
 
     @Override
     public final IParameter makeParameter( UUID id, String name, String summary, int sequence ) {
-        return new Parameter( this.getSelf().makeRefById( id ), name, summary, sequence );
+        return new Parameter( this.getSelf().makeRefById( id, IParameter.class ), name, summary, sequence );
     }
 
 }

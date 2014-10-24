@@ -13,9 +13,9 @@ public abstract class AbstractRelationship<ISelf extends IRelationship, IFrom ex
     extends AbstractElement<ISelf>
     implements IRelationship<ISelf, IFrom, ITo> {
 
-    protected AbstractRelationship( Class<ISelf> selfType, Ref<ISelf> self, IFrom from, ITo to ) {
+    protected AbstractRelationship( Ref<ISelf> self, Ref<IFrom> from, Ref<ITo> to ) {
 
-        super( selfType, self );
+        super( self );
 
         this.from = from;
         this.to = to;
@@ -27,12 +27,12 @@ public abstract class AbstractRelationship<ISelf extends IRelationship, IFrom ex
 
     @Override
     public IFrom getFrom() {
-        return this.from;
+        return this.from.get();
     }
 
     @Override
     public ITo getTo() {
-        return this.to;
+        return this.to.get();
     }
 
     @Override
@@ -61,8 +61,8 @@ public abstract class AbstractRelationship<ISelf extends IRelationship, IFrom ex
      */
     private final V<Boolean> destroyed;
 
-    private final IFrom from;
+    private final Ref<IFrom> from;
 
-    private final ITo to;
+    private final Ref<ITo> to;
 
 }

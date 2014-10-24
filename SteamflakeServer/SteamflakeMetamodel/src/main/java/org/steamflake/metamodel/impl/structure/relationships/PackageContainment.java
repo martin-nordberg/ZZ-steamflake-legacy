@@ -14,8 +14,8 @@ public class PackageContainment
     extends AbstractRelationship<IPackageContainment, IAbstractPackage, IPackage>
     implements IPackageContainment {
 
-    protected PackageContainment( Ref<IPackageContainment> self, IAbstractPackage containingPackage, IPackage containedPackage, boolean isExported ) {
-        super( IPackageContainment.class, self, containingPackage, containedPackage );
+    protected PackageContainment( Ref<IPackageContainment> self, Ref<IAbstractPackage> containingPackage, Ref<IPackage> containedPackage, boolean isExported ) {
+        super( self, containingPackage, containedPackage );
         this.isExported = new V<>( isExported );
     }
 

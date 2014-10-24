@@ -20,7 +20,7 @@ public final class DestroyAction
      * @param element the model element to be destroyed.
      */
     public DestroyAction( Ref<DestroyAction> self, IElement element ) {
-        super( DestroyAction.class, self );
+        super( self );
 
         this.element = element;
 
@@ -46,7 +46,7 @@ public final class DestroyAction
 
     @Override
     protected final IAction doMakeReversingAction( UUID id ) {
-        return new UndestroyAction( this.getSelf().makeRefById( id ), this.element );
+        return new UndestroyAction( this.getSelf().makeRefById( id, UndestroyAction.class ), this.element );
     }
 
     private final IElement element;

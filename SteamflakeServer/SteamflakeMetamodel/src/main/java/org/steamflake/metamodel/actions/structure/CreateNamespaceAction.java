@@ -24,7 +24,7 @@ public final class CreateNamespaceAction
      * @param summary a short summary for the new namesapce
      */
     public CreateNamespaceAction( Ref<CreateNamespaceAction> self, IAbstractNamespace parentNamespace, UUID id, String name, String summary ) {
-        super( CreateNamespaceAction.class, self );
+        super( self );
         this.newNamespace = parentNamespace.makeNamespace( id, name, summary );
     }
 
@@ -35,7 +35,7 @@ public final class CreateNamespaceAction
 
     @Override
     public final IAction doMakeReversingAction( UUID id ) {
-        return new DestroyAction( this.getSelf().makeRefById( id ), this.newNamespace );
+        return new DestroyAction( this.getSelf().makeRefById( id, DestroyAction.class ), this.newNamespace );
     }
 
     @Override

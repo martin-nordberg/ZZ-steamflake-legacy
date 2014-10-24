@@ -14,13 +14,12 @@ public abstract class AbstractElement<ISelf extends IElement>
     /**
      * Constructs a new element.
      *
-     * @param selfType the type of this element.
      * @param self     the shared reference to this object from the element registry.
      */
     @SuppressWarnings("unchecked")
-    protected AbstractElement( Class<ISelf> selfType, Ref<ISelf> self ) {
+    protected AbstractElement( Ref<ISelf> self ) {
 
-        this.self = self.set( selfType, (ISelf) this );
+        this.self = self.set( (ISelf) this );
 
     }
 

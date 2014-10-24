@@ -2,6 +2,7 @@ package org.steamflake.persistence.dao
 
 import fi.evident.dalesbred.Database
 import org.steamflake.metamodel.impl.registry.InMemoryElementRegistry
+import org.steamflake.persistence.dao.structure.entities.RootNamespaceDao
 import org.steamflake.persistence.h2database.H2DataSource
 import org.steamflake.utilities.revisions.StmTransaction
 import org.steamflake.utilities.revisions.StmTransactionContext

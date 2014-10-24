@@ -19,8 +19,8 @@ public abstract class AbstractEntity<ISelf extends IEntity>
      * @param summary a short summary of the entity.
      */
     @SuppressWarnings("unchecked")
-    protected AbstractEntity( Class<ISelf> selfType, Ref<ISelf> self, String summary ) {
-        super( selfType, self );
+    protected AbstractEntity( Ref<ISelf> self, String summary ) {
+        super( self );
 
         this.summary = new V<>( summary );
 
