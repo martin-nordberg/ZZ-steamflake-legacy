@@ -29,17 +29,15 @@ public class NamespaceContainmentDao {
 
     }
 
-    public void createNamespace( INamespace namespace ) {
+    public void createNamespaceContainment( INamespaceContainment namespaceContainment ) {
 
-        // TODO
         this.database.withVoidTransaction( tx -> {
-            this.database.update( "INSERT INTO ENTITY (ID, TYPE) VALUES (?, 'Namespace')", namespace.getId() );
-            this.database.update( "INSERT INTO NAMED_ENTITY (ID) VALUES (?)", namespace.getId() );
-            this.database.update( "INSERT INTO ABSTRACT_NAMESPACE (ID) VALUES (?)", namespace.getId() );
-            this.database.update( "INSERT INTO NAMESPACE (ID, NAME, SUMMARY) VALUES (?, ?, ?)", namespace.getId(), namespace.getName(), namespace.getSummary() );
+            this.database.update( "INSERT INTO RELATIONSHIP (ID, TYPE) VALUES (?, 'Namespace')", namespaceContainment.getId() );
+            this.database.update( "INSERT INTO NAMESPACE_CONTAINMENT (ID, CONTAINING_NAMESPACE_ID, CONTAINED_NAMESPACE_ID) VALUES (?, ?, ?)",
+                namespaceContainment.getId(), namespaceContainment.getContainingNamespace().getId(), namespaceContainment.getContainedNamespace().getId() );
         } );
 
-        this.registry.registerElement( namespace.getSelf() );
+        this.registry.registerElement( namespaceContainment.getSelf() );
 
     }
 
@@ -51,15 +49,21 @@ public class NamespaceContainmentDao {
 
     }
 
-    public INamespaceContainment findNamespaceContainmentByUuid( UUID namespaceContainmentId ) {
+    public List<? extends INamespaceContainment> findNamespaceContainmentsByContainedNamespace( UUID containedNamespaceId ) {
 
-        return this.database.findUniqueOrNull( INamespaceContainment.class, "SELECT TO_CHAR(ID), TO_CHAR(CONTAINING_NAMESPACE_ID), TO_CHAR(CONTAINED_NAMESPACE_ID) FROM NAMESPACE_CONTAINMENT WHERE ID = ?", namespaceContainmentId );
+        return this.database.findAll( INamespaceContainment.class, "SELECT TO_CHAR(ID), TO_CHAR(CONTAINING_NAMESPACE_ID), TO_CHAR(CONTAINED_NAMESPACE_ID) FROM V_NAMESPACE_CONTAINMENT WHERE CONTAINED_NAMESPACE_ID = ?", containedNamespaceId );
 
     }
 
     public List<? extends INamespaceContainment> findNamespaceContainmentsByContainingNamespace( UUID containingNamespaceId ) {
 
-        return this.database.findAll( INamespaceContainment.class, "SELECT TO_CHAR(ID), TO_CHAR(CONTAINING_NAMESPACE_ID), TO_CHAR(CONTAINED_NAMESPACE_ID) FROM NAMESPACE_CONTAINMENT WHERE CONTAINING_NAMESPACE_ID = ?", containingNamespaceId );
+        return this.database.findAll( INamespaceContainment.class, "SELECT TO_CHAR(ID), TO_CHAR(CONTAINING_NAMESPACE_ID), TO_CHAR(CONTAINED_NAMESPACE_ID) FROM V_NAMESPACE_CONTAINMENT WHERE CONTAINING_NAMESPACE_ID = ?", containingNamespaceId );
+
+    }
+
+    public INamespaceContainment findNamespaceContainmentByUuid( UUID namespaceContainmentId ) {
+
+        return this.database.findUniqueOrNull( INamespaceContainment.class, "SELECT TO_CHAR(ID), TO_CHAR(CONTAINING_NAMESPACE_ID), TO_CHAR(CONTAINED_NAMESPACE_ID) FROM V_NAMESPACE_CONTAINMENT WHERE ID = ?", namespaceContainmentId );
 
     }
 

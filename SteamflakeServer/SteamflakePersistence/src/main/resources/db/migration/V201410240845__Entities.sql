@@ -1,6 +1,6 @@
 
 -----------------------
--- Abstract entities --
+-- Abstract Entities --
 -----------------------
 
 -- Table
@@ -15,7 +15,7 @@ ALTER TABLE ENTITY ADD CONSTRAINT PK_ENTITY
 
 
 --------------------
--- Named entities --
+-- Named Entities --
 --------------------
 
 -- Table
@@ -33,7 +33,7 @@ ALTER TABLE NAMED_ENTITY ADD CONSTRAINT PFK_NAMED_ENTITY__ENTITY
 
 
 -------------------------
--- Abstract namespaces --
+-- Abstract Namespaces --
 -------------------------
 
 -- Table
@@ -83,7 +83,7 @@ SELECT ID,
 
 
 --------------------
--- Root namespace --
+-- Root Namespace --
 --------------------
 
 -- Table

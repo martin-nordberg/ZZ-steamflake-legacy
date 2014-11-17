@@ -1,6 +1,6 @@
 
 ----------------------------
--- Abstract relationships --
+-- Abstract Relationships --
 ----------------------------
 
 -- Table
@@ -14,15 +14,16 @@ ALTER TABLE RELATIONSHIP ADD CONSTRAINT PK_RELATIONSHIP
     PRIMARY KEY (ID);
 
 
----------------------------
--- Namespace Containment --
----------------------------
+----------------------------
+-- Namespace Containments --
+----------------------------
 
 -- Table
 CREATE TABLE NAMESPACE_CONTAINMENT (
     ID UUID NOT NULL,
     CONTAINING_NAMESPACE_ID UUID NOT NULL,
-    CONTAINED_NAMESPACE_ID UUID NOT NULL
+    CONTAINED_NAMESPACE_ID UUID NOT NULL,
+    DESTROYED BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 -- Primary key
@@ -42,3 +43,11 @@ ALTER TABLE NAMESPACE_CONTAINMENT ADD CONSTRAINT FK_NAMESPACE_CONTAINMENT__CONTA
 -- Unique containing namespace per contained namespace
 ALTER TABLE NAMESPACE_CONTAINMENT ADD CONSTRAINT UQ_NAMESPACE_CONTAINMENT__CONTAINED_NAMESPACE
     UNIQUE (CONTAINED_NAMESPACE_ID);
+
+-- View
+CREATE VIEW V_NAMESPACE_CONTAINMENT AS
+SELECT ID,
+       CONTAINING_NAMESPACE_ID,
+       CONTAINED_NAMESPACE_ID
+  FROM NAMESPACE_CONTAINMENT
+ WHERE DESTROYED = FALSE;
